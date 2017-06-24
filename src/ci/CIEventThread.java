@@ -18,6 +18,7 @@ CrInstrument instrument;
   public void run(){
       while(true){
         while(waitData.size()>0 || waitStatus.size()>0){
+
           if(waitData.size()>0){
             CIDataClass dataClass=(CIDataClass)waitData.get(0);
             String dataHex=dataClass.data,dataStr=instrument.wn.getStringData(dataHex,-1,-1,-1);
@@ -27,6 +28,7 @@ CrInstrument instrument;
               String evt[]=ylib.csvlinetoarray((String)it.next());
               int cCnt=Integer.parseInt(evt[1]);
               int aCnt=Integer.parseInt(evt[2]);
+              if(cCnt>0 && aCnt>0){
               boolean conditionOK=true;
               TreeMap actionCodeTM=new TreeMap();
               String dataX="";
@@ -34,7 +36,8 @@ CrInstrument instrument;
                 String cId=evt[3+i];
                 if(instrument.conditionTM.get(cId)!=null){
                   String cond[]=ylib.csvlinetoarray((String)instrument.conditionTM.get(cId));
-                  if(cond[0].equalsIgnoreCase((String)instrument.ports.get(dataClass.dataSrc))){
+
+                  if(cond[1].equalsIgnoreCase((String)instrument.ports.get(dataClass.dataSrc))){
                      if(cond.length>11 && cond[2].trim().equalsIgnoreCase("Data Condition") && cond[11].length()>0){
 
                        if(cond[3].trim().equalsIgnoreCase("Byte data")){
@@ -112,23 +115,30 @@ CrInstrument instrument;
                                else conditionOK=false;
                               }
                      } else if(cond[2].trim().equalsIgnoreCase("Data checked by Java class")) {
-                  if(((CIChkDataClass)instrument.jClasses.get(cond[13]))==null){
-                    if(!instrument.loadClass(cond[13],3)) {instrument.sysLog("java check data class "+cond[13]+" not exist or not implements CIChkDataClass interface."); return;}
+                         if(((CIChkDataClass)instrument.jClasses.get(cond[13]))==null){
+                           if(!instrument.loadClass(cond[13],3)) {instrument.sysLog("java check data class "+cond[13]+" not exist or not implements CIChkDataClass interface."); return;}
+                         }
+                         if(((CIChkDataClass)instrument.jClasses.get(cond[13]))!=null){
+                           conditionOK=((CIChkDataClass)instrument.jClasses.get(cond[13])).chkData(dataHex);
+                       }
+                      }
+                      else if(cond[2].trim().equalsIgnoreCase("Any data")) {
+                          if(dataHex.length()<1) conditionOK=false;
+                      } else conditionOK=false;
+
                   }
-                  if(((CIChkDataClass)instrument.jClasses.get(cond[13]))!=null){
-                    conditionOK=((CIChkDataClass)instrument.jClasses.get(cond[13])).chkData(dataHex);
-                  }
-                     }
-                      else if(cond[2].trim().equalsIgnoreCase("Any data")) {}
-                  }
+                  else conditionOK=false;
                 }
+                else conditionOK=false;
               }
               if(conditionOK && evt.length>= (3+cCnt+aCnt)){
                 for(int i=0;i<aCnt;i++){
                   String aId=evt[3+cCnt+i];
                   if(aId.length()>0) actionCodeTM.put(aId, aId);
                 }
+
                 instrument.actionThread.setAction(actionCodeTM, dataClass);
+              }
               }
             }
             waitData.remove(0);

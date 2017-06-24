@@ -270,6 +270,7 @@ CrInstrument instrument;
             }
 
             else if(act[2].trim().equalsIgnoreCase("Send email message")){
+              if(instrument.emailMsg.toString().length()>0){
               if(instrument.chkEmailTime()){
               instrument.waitThread.setWork(1, instrument.emailMsg.toString());
               } else {
@@ -277,8 +278,12 @@ CrInstrument instrument;
               }
               instrument.emailMsg.delete(0,instrument.emailMsg.length());
               instrument.firstEmailMsg = true;
+              } else {
+                  instrument.waitThread.setWork(1, "Email empty data, using action function.");
+              }
             }
             else if(act[2].trim().equalsIgnoreCase("Send SMS message to cell phone")){
+              if(instrument.smsMsg.toString().length()>0){
               if(instrument.chkSmsTime()){
               instrument.waitThread.setWork(2, instrument.smsMsg.toString());
               } else {
@@ -286,9 +291,15 @@ CrInstrument instrument;
               }
               instrument.smsMsg.delete(0,instrument.smsMsg.length());
               instrument.firstSmsMsg = true;
+              } else {
+                  instrument.waitThread.setWork(2, "SMS empty data, using action function.");
+              }
             }
             else if(act[2].trim().equalsIgnoreCase("Send command")){
               instrument.miscThread.setData(5,act[0],actionDataClass.dataClass.data);
+            }
+            else if(act[2].trim().equalsIgnoreCase("Stop continue send command")){
+              instrument.miscThread.setData(12,act[0],actionDataClass.dataClass.data);
             }
             else if(act[2].trim().equalsIgnoreCase("Connect port")){
               instrument.miscThread.setData(10,act[0],actionDataClass.dataClass.data);
@@ -316,6 +327,7 @@ CrInstrument instrument;
             }
             }
             if(newActionTM.size()>0){
+
               CIActionDataClass dataClass=new CIActionDataClass(newActionTM,actionDataClass.dataClass);
               waitV.add(dataClass);
             }

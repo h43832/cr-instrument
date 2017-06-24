@@ -31,8 +31,9 @@ public class CIAbout extends javax.swing.JDialog {
         getContentPane().setBackground(Color.white);
 
         jLabel4.setText(bundle2.getString("CrInstrument.xy.msg101")+instrument.version);
-        jTextArea1.setText("(c) Copyright cr-Instrument contributors and others 2016-2017.  All rights reserved. cr-Instrument and cr-Instrument logo " +
-          "are trademarks of the Cloud-Rain Co., Ltd., http://www.cloud-rain.com/. The cr-Instrument logo cannot be altered " +
+
+        jTextArea1.setText("(c) Copyright Cloud-Rain Co., Ltd.,http://www.cloud-rain.com/,  2016-2017.  All rights reserved. cr-Instrument and cr-Instrument logo " +
+          "are trademarks of the Cloud-Rain. The cr-Instrument logo cannot be altered " +
           "without Cloud-Rain's permission. Oracle and Java are trademarks or registered trademarks of Oracle and/or its " +
           "affiliates. Other names may be trademarks of their respective owners.\n\n" +
           "This product includes software developed by other open source projects including " +

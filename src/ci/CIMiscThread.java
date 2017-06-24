@@ -56,6 +56,14 @@ CrInstrument instrument;
                    else if(miscCode==11){
                    }
                    else if(miscCode==12){
+                     if(instrument.connected){
+                       String act[]=ylib.csvlinetoarray((String)instrument.actionTM.get(dataClass.dataSrc));
+                       String id=instrument.getItemId(instrument.getDataSrcFromStation(act[1]));
+                       String cmd="performcommand wsn.WSN stopcontinue "+instrument.getDataSrcFromStation(act[1])+" all null"; 
+                       instrument.wn.w.sendToOne(cmd,id);
+                     } else {
+                          instrument.sysLog("Yet not connected! can't send command.");
+                       }
                    }
                    else if(miscCode==13){
                    }
@@ -81,27 +89,29 @@ CrInstrument instrument;
     }
   } else cmd=actInfo[11];
 
+  cmd=instrument.wn.w.e642(cmd);
   if(cmd.trim().length()<1) {
       instrument.sysLog("No commad or data to be send");
       return;
   }
   if(instrument.connected){
       byte [] b=null;
-      int sendType=1;
-      long interval=10L * 1000L;
+
       if(actInfo[14].equalsIgnoreCase("Y")) {
-          sendType=2;
-          if(instrument.wn.isNumeric(actInfo[15]) && Double.parseDouble(actInfo[15])>0) interval=(long)(Double.parseDouble(actInfo[15])*1000.0);
+
+          if(instrument.wn.isNumeric(actInfo[15]) && Double.parseDouble(actInfo[15])>0) {
+              if(Double.parseDouble(actInfo[15])<0.5) actInfo[15]="0.5";
+          }
           else {
-            instrument.sysLog("No time interval for \"continue send\".");
+            instrument.sysLog("Warning: No time interval for \"continue send\".");
               return;
           }
-          if(interval<100L) interval=100L;
+
       }
        String id=instrument.getItemId(instrument.getDataSrcFromStation(actInfo[1]));
 
-          cmd="performcommand wsn.WSN cmd "+instrument.getDataSrcFromStation(actInfo[1])+" 1 "+actInfo[10].equals("1")+" "+
-                  (actInfo.length>12 && actInfo[12]!=null && actInfo[12].equalsIgnoreCase("Y"))+" "+actInfo[14].equalsIgnoreCase("Y")+" "+interval+" "+cmd+" "+instrument.wn.w.e642((actInfo.length>13? actInfo[13]:""))+" 0 0 0 0 0"; 
+          cmd="performcommand wsn.WSN cmd "+instrument.getDataSrcFromStation(actInfo[1])+" all "+actInfo[10].equalsIgnoreCase("Byte data")+" "+
+                  (actInfo.length>12 && actInfo[12]!=null && actInfo[12].equalsIgnoreCase("Y"))+" "+actInfo[14].equalsIgnoreCase("Y")+" "+actInfo[15]+" "+cmd+" "+instrument.wn.w.e642((actInfo.length>13? actInfo[13]:""))+" 0 0 0 0 0"; 
           instrument.wn.w.sendToOne(cmd,id);
 
   } else {

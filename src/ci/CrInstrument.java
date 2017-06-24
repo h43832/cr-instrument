@@ -37,9 +37,9 @@ import javax.swing.text.StyleConstants;
  * @author Administrator
  */
 public class CrInstrument extends WSNApplication implements Runnable {
-  public static String version = "2.17.0013";
+  public static String version = "2.17.0020";
   public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-  String versionTime = "20170618-150100 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
+  String versionTime = "20170623-080100 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
           stationFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_stations.txt",
           sensorFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_sensors.txt",currentViewDSrc="",
           statusFile = System.getProperty("user.home") + File.separator + "ci_status.txt", 
@@ -54,6 +54,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
   String restartStr="";
 
   JLabel button01;
+  CIEditFrame editFrame;
   StringBuffer emailMsg = new StringBuffer(), smsMsg = new StringBuffer();
 
                  boolean firstEmailMsg = true, firstSmsMsg = true;
@@ -237,6 +238,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     jTable2.setDefaultRenderer(Object.class, new MyTableCellRenderer());
     lightPanel2.setColor(Color.gray, Color.gray);
     setSerialPorts();
+    setUpSerialPortColumnFromSerialTM(jTable5,jTable5.getColumnModel().getColumn(0));
     readPorts();
     readSensors();
     showThread=new CIShowDataThread(this);
@@ -345,6 +347,23 @@ public class CrInstrument extends WSNApplication implements Runnable {
       tc = tcm.getColumn(15);
       tc.setHeaderValue( bundle2.getString("CrInstrument.xy.msg24"));
       th.repaint();
+      th = jTable5.getTableHeader();
+      tcm = th.getColumnModel();
+      tc = tcm.getColumn(0);
+      tc.setHeaderValue( bundle2.getString("CrInstrument.xy.msg135"));
+      tc = tcm.getColumn(1);
+      tc.setHeaderValue( bundle2.getString("CrInstrument.xy.msg136"));
+      th.repaint();
+      th = jTable6.getTableHeader();
+      tcm = th.getColumnModel();
+      tc = tcm.getColumn(0);
+      tc.setHeaderValue( bundle2.getString("CrInstrument.xy.msg137"));
+      tc = tcm.getColumn(1);
+      tc.setHeaderValue( bundle2.getString("CrInstrument.xy.msg138"));
+      th.repaint();
+
+      CIDT.EnumOS os=CIDT.getOs();
+      if(!os.isWindows()) jMenuItem9.setVisible(false);
 
     fileUpLoadMenuItem.setVisible(false);
     if(!(System.getProperty("user.language").equalsIgnoreCase("zh") && System.getProperty("user.country").equalsIgnoreCase("TW"))) jMenuItem20.setVisible(false);
@@ -354,7 +373,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     jPanel23.setVisible(false);
     jPanel25.setVisible(false);
     FTPPanel.setVisible(false);
-    btnEditSrc.setVisible(false);
+
     jLabel58.setVisible(false);
     jLabel76.setVisible(false);
     btnZoomIn.setVisible(false);
@@ -363,6 +382,76 @@ public class CrInstrument extends WSNApplication implements Runnable {
 
     validate();
     sysLog("System start at " + format4.format(new Date(startTime)) + " (version=" + version + ", version time=" + versionTime + ",ci-demo="+props.getProperty("ci-demo")+", run_my_ap_only="+wn.getPropsString("run_my_ap_only")+")");
+  }
+  public void setUpSerialPortColumnFromStationTM(JTable table,TableColumn serialColumn){
+    JComboBox comboBox = new JComboBox();
+    comboBox.setEditable(true);
+    comboBox.addItem("");
+      Iterator it = stations.keySet().iterator();
+      for (; it.hasNext();) {
+        String key = (String) it.next();
+        String port = (String) stations.get(key);
+        if (port.toLowerCase().indexOf("com") == 0) {
+          comboBox.addItem(port);
+        }
+      }
+      serialColumn.setCellEditor(new DefaultCellEditor(comboBox));
+
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+        renderer.setToolTipText("Click for serial port list");
+        serialColumn.setCellRenderer(renderer);
+  }
+  public void setUpSerialPortColumnFromSerialTM(JTable table,TableColumn serialColumn) {
+
+    JComboBox comboBox = new JComboBox();
+    comboBox.setEditable(true);
+    comboBox.addItem("");
+
+    String portArr[] = WSNSerial.getPorts();
+    for (int i = 0; i < portArr.length; i++) {
+      String port = portArr[i];
+      comboBox.addItem(port);
+    }        
+    serialColumn.setCellEditor(new DefaultCellEditor(comboBox));
+
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+        renderer.setToolTipText("Click for serial port list");
+        serialColumn.setCellRenderer(renderer);
+  }
+    public void setUpSocketPortColumnFromStationTM(JTable table,TableColumn socketColumn){
+      JComboBox comboBox = new JComboBox();
+    comboBox.setEditable(true);
+      comboBox.addItem("");
+      Iterator it = stations.keySet().iterator();
+      for (; it.hasNext();) {
+        String key = (String) it.next();
+        String port = (String) stations.get(key);
+        if (port.toLowerCase().indexOf("com") != 0) {
+          comboBox.addItem(port);
+        }
+            socketColumn.setCellEditor(new DefaultCellEditor(comboBox));
+
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+        renderer.setToolTipText("Click for socketerial port list");
+        socketColumn.setCellRenderer(renderer);
+      }
+  }
+  public void setUpSocketPortColumn(JTable table,TableColumn socketColumn) {
+
+    JComboBox comboBox = new JComboBox();
+    comboBox.setEditable(true);
+    comboBox.addItem("");
+
+    String portArr[] = WSNSerial.getPorts();
+    for (int i = 0; i < portArr.length; i++) {
+      String port = portArr[i];
+      comboBox.addItem(port);
+    }        
+    socketColumn.setCellEditor(new DefaultCellEditor(comboBox));
+
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+        renderer.setToolTipText("Click for socketerial port list");
+        socketColumn.setCellRenderer(renderer);
   }
 
   public void informVersion(String apId, int status, String version) {
@@ -380,6 +469,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     if (wn.w.getValueString(props.getProperty("event-file")).length() > 0) {
       eventFile = wn.w.getValueString(props.getProperty("event-file"));
       eventFile = eventFile.replace('\\', File.separatorChar);
+      eventFile=eventFile.replace('/', File.separatorChar);
       if (new File(eventFile).exists()) {
        try {
 
@@ -417,6 +507,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     if (wn.w.getValueString(props.getProperty("chart-file")).length() > 0) {
       chartFile = wn.w.getValueString(props.getProperty("chart-file"));
       chartFile = chartFile.replace('\\', File.separatorChar);
+      chartFile=chartFile.replace('/',File.pathSeparatorChar);
       if (new File(chartFile).exists()) {
         try {
 
@@ -453,6 +544,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     if (wn.w.getValueString(props.getProperty("default-ui-file")).length() > 0) {
       String defaultUIFile = wn.w.getValueString(props.getProperty("default-ui-file"));
       defaultUIFile = defaultUIFile.replace('\\', File.separatorChar);
+      defaultUIFile=defaultUIFile.replace('/', File.separatorChar);
       if (new File(defaultUIFile).exists()) {
         try {
 
@@ -489,6 +581,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     if (wn.w.getValueString(props.getProperty("ui-file")).length() > 0) {
       uiFile = wn.w.getValueString(props.getProperty("ui-file"));
       uiFile = uiFile.replace('\\', File.separatorChar);
+      uiFile=uiFile.replace('/', File.separatorChar);
       if (new File(uiFile).exists()) {
         try {
 
@@ -526,6 +619,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     if (wn.w.getValueString(props.getProperty("curve-file")).length() > 0) {
       curveFile = wn.w.getValueString(props.getProperty("curve-file"));
       curveFile = curveFile.replace('\\', File.separatorChar);
+      curveFile=curveFile.replace('/',File.separatorChar);
       if (new File(curveFile).exists()) {
         try {
 
@@ -562,6 +656,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     if (wn.w.getValueString(props.getProperty("condition-file")).length() > 0) {
       conditionFile = wn.w.getValueString(props.getProperty("condition-file"));
       conditionFile = conditionFile.replace('\\', File.separatorChar);
+      conditionFile=conditionFile.replace('/', File.separatorChar);
       if (new File(conditionFile).exists()) {
         try {
 
@@ -600,6 +695,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     if (wn.w.getValueString(props.getProperty("action-file")).length() > 0) {
       actionFile = wn.w.getValueString(props.getProperty("action-file"));
       actionFile = actionFile.replace('\\', File.separatorChar);
+      actionFile=actionFile.replace('/', File.separatorChar);
       if (new File(actionFile).exists()) {
         try {
 
@@ -636,6 +732,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     if (wn.w.getValueString(props.getProperty("sms-sp-file")).length() > 0) {
       smsSpFile = wn.w.getValueString(props.getProperty("sms-sp-file"));
       smsSpFile = smsSpFile.replace('\\', File.separatorChar);
+      smsSpFile=smsSpFile.replace('/', File.separatorChar);
       if (new File(smsSpFile).exists()) {
         try {
 
@@ -672,6 +769,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     if (wn.w.getValueString(props.getProperty("email-sp-file")).length() > 0) {
       emailSpFile = wn.w.getValueString(props.getProperty("email-sp-file"));
       emailSpFile = emailSpFile.replace('\\', File.separatorChar);
+      emailSpFile=emailSpFile.replace('/',File.separatorChar);
       if (new File(emailSpFile).exists()) {
         try {
 
@@ -1447,6 +1545,8 @@ public Status getStatus(String curveId){
  public void readPorts() {
     if (wn.w.getValueString(props.getProperty("station-file")).length() > 0) {
       stationFile = wn.w.getValueString(props.getProperty("station-file"));
+      stationFile=ylib.replace(stationFile, "\\", File.separator);
+      stationFile=ylib.replace(stationFile, "/", File.separator);
       if(new File(stationFile).exists()){
       try {
 
@@ -1574,6 +1674,8 @@ public Status getStatus(String curveId){
       }
       jComboBox14.setSelectedIndex(0);
       jComboBox19.setSelectedIndex(0);
+      setUpSerialPortColumnFromStationTM(jTable5, jTable5.getColumnModel().getColumn(0));
+      setUpSocketPortColumnFromStationTM(jTable6, jTable6.getColumnModel().getColumn(0));
       } else sysLog("station file "+stationFile+" not found.");
     } else sysLog("station file name not set.");
   }
@@ -2534,6 +2636,7 @@ String getFileHead(String station){
     if (wn.w.getValueString(props.getProperty("sensor-file")).length() > 0) {
       sensorFile = wn.w.getValueString(props.getProperty("sensor-file"));
       sensorFile = sensorFile.replace('\\', File.separatorChar);
+      sensorFile=sensorFile.replace('/',File.separatorChar);
       if(new File(sensorFile).exists()){
     try {
 
@@ -2690,7 +2793,7 @@ String getFileHead(String station){
 
   public void onExit(int type) {
 
-    eventThread.setStatus(wn.w.getGNS(1),"",51);
+    if(wn!=null) eventThread.setStatus(wn.w.getGNS(1),"",51);
     updateProps_else();
     saveProps();
 
@@ -3276,7 +3379,12 @@ String getFileHead(String station){
               String mailTo[] = ylib.csvlinetoarray(getPropsString("email-to"));
               boolean chkMail = true;
               for (int i = 0; i < mailTo.length; i++) {
-                if (!isValidEmailAddress(mailTo[i])) {
+                if(mailTo[i].trim().length()<1){
+                  if(type==1) sysLog("Email failed, wrong email format: empty email.");
+                  else JOptionPane.showMessageDialog(this,"Email failed, wrong email format: empty email.");
+                  chkMail = false;
+                  break;
+                } else if (!isValidEmailAddress(mailTo[i])) {
                   if(type==1) sysLog("Email failed, wrong email format:" + mailTo[i]);
                   else JOptionPane.showMessageDialog(this,"Email failed, wrong email format:" + mailTo[i]);
                   chkMail = false;
@@ -3737,6 +3845,7 @@ String getFileHead(String station){
     if (wn.getPropsString("ci_props_file").length() > 0) {
       propFile = wn.getPropsString("ci_props_file");
       propFile = propFile.replace('\\', File.separatorChar);
+      propFile=propFile.replace('/',File.separatorChar);
       if (new File(propFile).exists()) {
         InputStream is = null;
         try {
@@ -3828,6 +3937,7 @@ String getFileHead(String station){
     if (wn.w.getValueString(props.getProperty("status-file")).length() > 0) {
       statusFile = wn.w.getValueString(props.getProperty("status-file"));
       statusFile = statusFile.replace('\\', File.separatorChar);
+      statusFile=statusFile.replace('/', File.separatorChar);
     File f = new File(statusFile);
     if (f.exists()) {
       InputStream is = null;
@@ -4898,45 +5008,18 @@ public void doLayout(){
         jButton1 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jPanel9 = new javax.swing.JPanel();
-        jPanel31 = new javax.swing.JPanel();
-        jLabel65 = new javax.swing.JLabel();
-        jComboBox23 = new javax.swing.JComboBox();
-        jLabel66 = new javax.swing.JLabel();
-        jTextField24 = new javax.swing.JTextField();
-        jPanel32 = new javax.swing.JPanel();
-        jLabel67 = new javax.swing.JLabel();
-        jComboBox24 = new javax.swing.JComboBox();
-        jLabel68 = new javax.swing.JLabel();
-        jTextField25 = new javax.swing.JTextField();
-        jPanel33 = new javax.swing.JPanel();
-        jLabel69 = new javax.swing.JLabel();
-        jComboBox25 = new javax.swing.JComboBox();
-        jLabel70 = new javax.swing.JLabel();
-        jTextField26 = new javax.swing.JTextField();
-        jPanel48 = new javax.swing.JPanel();
-        jLabel37 = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
+        jScrollPane20 = new javax.swing.JScrollPane();
+        jTable6 = new javax.swing.JTable();
+        jButton27 = new javax.swing.JButton();
+        jButton43 = new javax.swing.JButton();
         jPanel11 = new javax.swing.JPanel();
-        jPanel28 = new javax.swing.JPanel();
-        jLabel11 = new javax.swing.JLabel();
-        jComboBox15 = new javax.swing.JComboBox();
-        jLabel59 = new javax.swing.JLabel();
-        jTextField11 = new javax.swing.JTextField();
-        jPanel29 = new javax.swing.JPanel();
-        jLabel60 = new javax.swing.JLabel();
-        jComboBox21 = new javax.swing.JComboBox();
-        jLabel61 = new javax.swing.JLabel();
-        jTextField22 = new javax.swing.JTextField();
-        jPanel30 = new javax.swing.JPanel();
-        jLabel62 = new javax.swing.JLabel();
-        jComboBox22 = new javax.swing.JComboBox();
-        jLabel63 = new javax.swing.JLabel();
-        jTextField23 = new javax.swing.JTextField();
-        jPanel47 = new javax.swing.JPanel();
-        jLabel36 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
+        jScrollPane19 = new javax.swing.JScrollPane();
+        jTable5 = new javax.swing.JTable();
+        jButton19 = new javax.swing.JButton();
+        jButton26 = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
         jPanel15 = new javax.swing.JPanel();
         jPanel16 = new javax.swing.JPanel();
@@ -4970,6 +5053,36 @@ public void doLayout(){
         jTable3 = new javax.swing.JTable();
         jButton21 = new javax.swing.JButton();
         jButton22 = new javax.swing.JButton();
+        jPanel29 = new javax.swing.JPanel();
+        jLabel60 = new javax.swing.JLabel();
+        jComboBox21 = new javax.swing.JComboBox();
+        jLabel61 = new javax.swing.JLabel();
+        jTextField22 = new javax.swing.JTextField();
+        jPanel30 = new javax.swing.JPanel();
+        jLabel62 = new javax.swing.JLabel();
+        jComboBox22 = new javax.swing.JComboBox();
+        jLabel63 = new javax.swing.JLabel();
+        jTextField23 = new javax.swing.JTextField();
+        jPanel28 = new javax.swing.JPanel();
+        jLabel11 = new javax.swing.JLabel();
+        jComboBox15 = new javax.swing.JComboBox();
+        jLabel59 = new javax.swing.JLabel();
+        jTextField11 = new javax.swing.JTextField();
+        jPanel31 = new javax.swing.JPanel();
+        jLabel65 = new javax.swing.JLabel();
+        jComboBox23 = new javax.swing.JComboBox();
+        jLabel66 = new javax.swing.JLabel();
+        jTextField24 = new javax.swing.JTextField();
+        jPanel32 = new javax.swing.JPanel();
+        jLabel67 = new javax.swing.JLabel();
+        jComboBox24 = new javax.swing.JComboBox();
+        jLabel68 = new javax.swing.JLabel();
+        jTextField25 = new javax.swing.JTextField();
+        jPanel33 = new javax.swing.JPanel();
+        jLabel69 = new javax.swing.JLabel();
+        jComboBox25 = new javax.swing.JComboBox();
+        jLabel70 = new javax.swing.JLabel();
+        jTextField26 = new javax.swing.JTextField();
         jPanel20 = new javax.swing.JPanel();
         jPanel24 = new javax.swing.JPanel();
         jPanel25 = new javax.swing.JPanel();
@@ -5046,13 +5159,13 @@ public void doLayout(){
         jPanel57 = new javax.swing.JPanel();
         jLabel15 = new javax.swing.JLabel();
         jTextField6 = new javax.swing.JTextField();
-        jButton19 = new javax.swing.JButton();
+        btnTestEMail = new javax.swing.JButton();
         jPanel58 = new javax.swing.JPanel();
         jLabel16 = new javax.swing.JLabel();
         jPasswordField7 = new javax.swing.JPasswordField();
         jLabel25 = new javax.swing.JLabel();
         jPanel8 = new javax.swing.JPanel();
-        jButton5 = new javax.swing.JButton();
+        btnTestSMS = new javax.swing.JButton();
         jPanel56 = new javax.swing.JPanel();
         jLabel6 = new javax.swing.JLabel();
         jTextField2 = new javax.swing.JTextField();
@@ -5306,6 +5419,15 @@ public void doLayout(){
         jPanel84 = new javax.swing.JPanel();
         jLabel155 = new javax.swing.JLabel();
         jTextField53 = new javax.swing.JTextField();
+        jPanel122 = new javax.swing.JPanel();
+        jLabel142 = new javax.swing.JLabel();
+        jComboBox44 = new javax.swing.JComboBox();
+        jPanel132 = new javax.swing.JPanel();
+        jLabel159 = new javax.swing.JLabel();
+        jComboBox45 = new javax.swing.JComboBox();
+        jPanel136 = new javax.swing.JPanel();
+        jLabel163 = new javax.swing.JLabel();
+        jComboBox49 = new javax.swing.JComboBox();
         jPanel85 = new javax.swing.JPanel();
         jPanel89 = new javax.swing.JPanel();
         jComboBox30 = new javax.swing.JComboBox();
@@ -5320,19 +5442,10 @@ public void doLayout(){
         jPanel129 = new javax.swing.JPanel();
         jCheckBox29 = new javax.swing.JCheckBox();
         jTextField64 = new javax.swing.JTextField();
-        jPanel122 = new javax.swing.JPanel();
-        jLabel142 = new javax.swing.JLabel();
-        jComboBox44 = new javax.swing.JComboBox();
         jPanel126 = new javax.swing.JPanel();
         jPanel127 = new javax.swing.JPanel();
         jLabel158 = new javax.swing.JLabel();
         jTextField62 = new javax.swing.JTextField();
-        jPanel132 = new javax.swing.JPanel();
-        jLabel159 = new javax.swing.JLabel();
-        jComboBox45 = new javax.swing.JComboBox();
-        jPanel136 = new javax.swing.JPanel();
-        jLabel163 = new javax.swing.JLabel();
-        jComboBox49 = new javax.swing.JComboBox();
         jPanel26 = new javax.swing.JPanel();
         jPanel139 = new javax.swing.JPanel();
         jLabel22 = new javax.swing.JLabel();
@@ -5412,7 +5525,6 @@ public void doLayout(){
         jLabel117 = new javax.swing.JLabel();
         jTextField34 = new javax.swing.JTextField();
         jCheckBox12 = new javax.swing.JCheckBox();
-        jCheckBox13 = new javax.swing.JCheckBox();
         jPanel97 = new javax.swing.JPanel();
         jLabel118 = new javax.swing.JLabel();
         jRadioButton2 = new javax.swing.JRadioButton();
@@ -5429,7 +5541,6 @@ public void doLayout(){
         jLabel123 = new javax.swing.JLabel();
         jRadioButton4 = new javax.swing.JRadioButton();
         jRadioButton5 = new javax.swing.JRadioButton();
-        jCheckBox14 = new javax.swing.JCheckBox();
         jPanel99 = new javax.swing.JPanel();
         jLabel124 = new javax.swing.JLabel();
         jCheckBox15 = new javax.swing.JCheckBox();
@@ -5441,8 +5552,6 @@ public void doLayout(){
         jLabel129 = new javax.swing.JLabel();
         jCheckBox21 = new javax.swing.JCheckBox();
         jCheckBox22 = new javax.swing.JCheckBox();
-        jCheckBox23 = new javax.swing.JCheckBox();
-        jTextField43 = new javax.swing.JTextField();
         jPanel103 = new javax.swing.JPanel();
         jLabel131 = new javax.swing.JLabel();
         jLabel132 = new javax.swing.JLabel();
@@ -5468,6 +5577,13 @@ public void doLayout(){
         jCheckBox26 = new javax.swing.JCheckBox();
         jTextField52 = new javax.swing.JTextField();
         jPanel142 = new javax.swing.JPanel();
+        jPanel112 = new javax.swing.JPanel();
+        jCheckBox23 = new javax.swing.JCheckBox();
+        jTextField43 = new javax.swing.JTextField();
+        jPanel148 = new javax.swing.JPanel();
+        jCheckBox13 = new javax.swing.JCheckBox();
+        jPanel149 = new javax.swing.JPanel();
+        jCheckBox14 = new javax.swing.JCheckBox();
         jPanel51 = new javax.swing.JPanel();
         jPanel92 = new javax.swing.JPanel();
         jLabel169 = new javax.swing.JLabel();
@@ -6706,7 +6822,7 @@ public void doLayout(){
                 {null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Station", "Device name", "Model", "SN", "Data name", "Decimal number", "Unit", "Master ID", "Device ID", "Place", "Dummy ID", "Is dummy", "上警戒值", "下警戒值", "上行動值", "下行動值"
+                "Station", "Device name", "Model", "SN", "Data name", "Decimal number", "Unit", "Master ID", "Device ID", "Place", "Dummy Code", "Is dummy", "上警戒值", "下警戒值", "上行動值", "下行動值"
             }
         ));
         jTable1.setGridColor(new java.awt.Color(153, 153, 153));
@@ -6743,7 +6859,7 @@ public void doLayout(){
             }
         });
         jPanel4.add(btnEditSrc);
-        btnEditSrc.setBounds(410, 360, 270, 60);
+        btnEditSrc.setBounds(180, 360, 290, 60);
 
         jButton1.setFont(jButton1.getFont());
         jButton1.setText(bundle.getString("CrInstrument.jButton1.text")); 
@@ -6763,7 +6879,7 @@ public void doLayout(){
             }
         });
         jPanel4.add(jButton4);
-        jButton4.setBounds(220, 290, 170, 23);
+        jButton4.setBounds(220, 290, 230, 23);
 
         jButton6.setFont(jButton6.getFont());
         jButton6.setText(bundle.getString("CrInstrument.jButton6.text")); 
@@ -6773,7 +6889,12 @@ public void doLayout(){
             }
         });
         jPanel4.add(jButton6);
-        jButton6.setBounds(410, 290, 120, 23);
+        jButton6.setBounds(480, 290, 120, 23);
+
+        jButton5.setFont(jButton5.getFont().deriveFont(jButton5.getFont().getSize()+12f));
+        jButton5.setText(bundle.getString("CrInstrument.jButton5.text")); 
+        jPanel4.add(jButton5);
+        jButton5.setBounds(500, 360, 220, 60);
 
         jTabbedPane2.addTab(bundle.getString("CrInstrument.jPanel4.TabConstraints.tabTitle"), jPanel4); 
 
@@ -6786,161 +6907,82 @@ public void doLayout(){
         jPanel9.setFont(jPanel9.getFont());
         jPanel9.setLayout(null);
 
-        jPanel31.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel31.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+        jTable6.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "Port Name", "Station Name"
+            }
+        ));
+        jScrollPane20.setViewportView(jTable6);
 
-        jLabel65.setText(bundle.getString("CrInstrument.jLabel65.text")); 
-        jPanel31.add(jLabel65);
+        jPanel9.add(jScrollPane20);
+        jScrollPane20.setBounds(20, 30, 290, 100);
 
-        jComboBox23.setEditable(true);
-        jComboBox23.setPreferredSize(new java.awt.Dimension(80, 25));
-        jPanel31.add(jComboBox23);
+        jButton27.setText(bundle.getString("CrInstrument.jButton27.text")); 
+        jButton27.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton27ActionPerformed(evt);
+            }
+        });
+        jPanel9.add(jButton27);
+        jButton27.setBounds(40, 140, 90, 23);
 
-        jLabel66.setText(bundle.getString("CrInstrument.jLabel66.text")); 
-        jPanel31.add(jLabel66);
-
-        jTextField24.setPreferredSize(new java.awt.Dimension(120, 25));
-        jPanel31.add(jTextField24);
-
-        jPanel9.add(jPanel31);
-        jPanel31.setBounds(10, 40, 270, 35);
-
-        jPanel32.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel32.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel67.setText(bundle.getString("CrInstrument.jLabel67.text")); 
-        jPanel32.add(jLabel67);
-
-        jComboBox24.setEditable(true);
-        jComboBox24.setPreferredSize(new java.awt.Dimension(80, 25));
-        jPanel32.add(jComboBox24);
-
-        jLabel68.setText(bundle.getString("CrInstrument.jLabel68.text")); 
-        jPanel32.add(jLabel68);
-
-        jTextField25.setPreferredSize(new java.awt.Dimension(120, 25));
-        jPanel32.add(jTextField25);
-
-        jPanel9.add(jPanel32);
-        jPanel32.setBounds(10, 80, 270, 35);
-
-        jPanel33.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel33.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel69.setText(bundle.getString("CrInstrument.jLabel69.text")); 
-        jPanel33.add(jLabel69);
-
-        jComboBox25.setEditable(true);
-        jComboBox25.setPreferredSize(new java.awt.Dimension(80, 25));
-        jPanel33.add(jComboBox25);
-
-        jLabel70.setText(bundle.getString("CrInstrument.jLabel70.text")); 
-        jPanel33.add(jLabel70);
-
-        jTextField26.setPreferredSize(new java.awt.Dimension(120, 25));
-        jPanel33.add(jTextField26);
-
-        jPanel9.add(jPanel33);
-        jPanel33.setBounds(10, 120, 270, 40);
-
-        jPanel48.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel48.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel37.setFont(jLabel37.getFont());
-        jLabel37.setText(bundle.getString("CrInstrument.jLabel37.text")); 
-        jLabel37.setToolTipText(bundle.getString("CrInstrument.jLabel37.toolTipText")); 
-        jPanel48.add(jLabel37);
-
-        jLabel9.setFont(jLabel9.getFont());
-        jLabel9.setText(bundle.getString("CrInstrument.jLabel9.text")); 
-        jLabel9.setToolTipText(bundle.getString("CrInstrument.jLabel9.toolTipText")); 
-        jPanel48.add(jLabel9);
-
-        jPanel9.add(jPanel48);
-        jPanel48.setBounds(40, 20, 200, 20);
+        jButton43.setText(bundle.getString("CrInstrument.jButton43.text")); 
+        jButton43.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton43ActionPerformed(evt);
+            }
+        });
+        jPanel9.add(jButton43);
+        jButton43.setBounds(150, 140, 130, 23);
 
         jPanel5.add(jPanel9);
-        jPanel9.setBounds(400, 30, 290, 170);
+        jPanel9.setBounds(390, 30, 330, 180);
 
         jPanel11.setBackground(new java.awt.Color(255, 255, 255));
         jPanel11.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel11.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 153, 153))); 
         jPanel11.setFont(jPanel11.getFont());
         jPanel11.setLayout(null);
 
-        jPanel28.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel28.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+        jTable5.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "Port Name", "Station Name"
+            }
+        ));
+        jScrollPane19.setViewportView(jTable5);
 
-        jLabel11.setText(bundle.getString("CrInstrument.jLabel11.text")); 
-        jPanel28.add(jLabel11);
+        jPanel11.add(jScrollPane19);
+        jScrollPane19.setBounds(20, 30, 320, 100);
 
-        jComboBox15.setEditable(true);
-        jComboBox15.setPreferredSize(new java.awt.Dimension(80, 25));
-        jPanel28.add(jComboBox15);
+        jButton19.setText(bundle.getString("CrInstrument.jButton19.text")); 
+        jButton19.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton19ActionPerformed(evt);
+            }
+        });
+        jPanel11.add(jButton19);
+        jButton19.setBounds(50, 140, 100, 23);
 
-        jLabel59.setText(bundle.getString("CrInstrument.jLabel59.text")); 
-        jPanel28.add(jLabel59);
-
-        jTextField11.setPreferredSize(new java.awt.Dimension(120, 25));
-        jPanel28.add(jTextField11);
-
-        jPanel11.add(jPanel28);
-        jPanel28.setBounds(10, 120, 270, 35);
-
-        jPanel29.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel29.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel60.setText(bundle.getString("CrInstrument.jLabel60.text")); 
-        jPanel29.add(jLabel60);
-
-        jComboBox21.setEditable(true);
-        jComboBox21.setPreferredSize(new java.awt.Dimension(80, 25));
-        jPanel29.add(jComboBox21);
-
-        jLabel61.setText(bundle.getString("CrInstrument.jLabel61.text")); 
-        jPanel29.add(jLabel61);
-
-        jTextField22.setPreferredSize(new java.awt.Dimension(120, 25));
-        jPanel29.add(jTextField22);
-
-        jPanel11.add(jPanel29);
-        jPanel29.setBounds(10, 40, 270, 40);
-
-        jPanel30.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel30.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel62.setText(bundle.getString("CrInstrument.jLabel62.text")); 
-        jPanel30.add(jLabel62);
-
-        jComboBox22.setEditable(true);
-        jComboBox22.setPreferredSize(new java.awt.Dimension(80, 25));
-        jPanel30.add(jComboBox22);
-
-        jLabel63.setText(bundle.getString("CrInstrument.jLabel63.text")); 
-        jPanel30.add(jLabel63);
-
-        jTextField23.setPreferredSize(new java.awt.Dimension(120, 25));
-        jPanel30.add(jTextField23);
-
-        jPanel11.add(jPanel30);
-        jPanel30.setBounds(10, 80, 270, 35);
-
-        jPanel47.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel47.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel36.setText(bundle.getString("CrInstrument.jLabel36.text")); 
-        jLabel36.setToolTipText(bundle.getString("CrInstrument.jLabel36.toolTipText")); 
-        jPanel47.add(jLabel36);
-
-        jLabel8.setFont(jLabel8.getFont());
-        jLabel8.setText(bundle.getString("CrInstrument.jLabel8.text")); 
-        jLabel8.setToolTipText(bundle.getString("CrInstrument.jLabel8.toolTipText")); 
-        jPanel47.add(jLabel8);
-
-        jPanel11.add(jPanel47);
-        jPanel47.setBounds(40, 20, 200, 20);
+        jButton26.setText(bundle.getString("CrInstrument.jButton26.text")); 
+        jButton26.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton26ActionPerformed(evt);
+            }
+        });
+        jPanel11.add(jButton26);
+        jButton26.setBounds(170, 140, 130, 23);
 
         jPanel5.add(jPanel11);
-        jPanel11.setBounds(18, 28, 330, 170);
+        jPanel11.setBounds(18, 28, 360, 180);
 
         jButton7.setFont(jButton7.getFont().deriveFont(jButton7.getFont().getSize()+12f));
         jButton7.setText(bundle.getString("CrInstrument.jButton7.text")); 
@@ -6950,7 +6992,7 @@ public void doLayout(){
             }
         });
         jPanel5.add(jButton7);
-        jButton7.setBounds(740, 30, 210, 50);
+        jButton7.setBounds(740, 30, 240, 50);
 
         jPanel15.setBackground(new java.awt.Color(255, 255, 255));
         jPanel15.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel15.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 153, 153))); 
@@ -7006,7 +7048,7 @@ public void doLayout(){
         jPanel17.setBounds(10, 50, 310, 40);
 
         jPanel5.add(jPanel15);
-        jPanel15.setBounds(20, 370, 330, 110);
+        jPanel15.setBounds(20, 370, 380, 110);
 
         jPanel10.setBackground(new java.awt.Color(255, 255, 255));
         jPanel10.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel10.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 153, 153))); 
@@ -7031,7 +7073,7 @@ public void doLayout(){
         jPanel34.add(jCheckBox2);
 
         jPanel10.add(jPanel34);
-        jPanel34.setBounds(10, 20, 290, 30);
+        jPanel34.setBounds(10, 20, 350, 30);
 
         jPanel38.setBackground(new java.awt.Color(255, 255, 255));
         jPanel38.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -7051,10 +7093,10 @@ public void doLayout(){
         jPanel38.add(jCheckBox18);
 
         jPanel10.add(jPanel38);
-        jPanel38.setBounds(10, 60, 290, 30);
+        jPanel38.setBounds(10, 60, 350, 30);
 
         jPanel5.add(jPanel10);
-        jPanel10.setBounds(20, 230, 330, 110);
+        jPanel10.setBounds(20, 230, 380, 110);
 
         jPanel22.setBackground(new java.awt.Color(255, 255, 255));
         jPanel22.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel22.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 153, 153))); 
@@ -7095,10 +7137,10 @@ public void doLayout(){
             }
         });
         jPanel22.add(jButton20);
-        jButton20.setBounds(150, 110, 80, 23);
+        jButton20.setBounds(150, 110, 110, 23);
 
         jPanel5.add(jPanel22);
-        jPanel22.setBounds(400, 230, 300, 140);
+        jPanel22.setBounds(420, 230, 300, 140);
 
         jPanel21.setBackground(new java.awt.Color(255, 255, 255));
         jPanel21.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel21.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 153, 153))); 
@@ -7139,10 +7181,124 @@ public void doLayout(){
             }
         });
         jPanel21.add(jButton22);
-        jButton22.setBounds(150, 110, 70, 23);
+        jButton22.setBounds(150, 110, 110, 23);
 
         jPanel5.add(jPanel21);
-        jPanel21.setBounds(400, 390, 300, 140);
+        jPanel21.setBounds(420, 390, 300, 140);
+
+        jPanel29.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel29.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel60.setText(bundle.getString("CrInstrument.jLabel60.text")); 
+        jPanel29.add(jLabel60);
+
+        jComboBox21.setEditable(true);
+        jComboBox21.setPreferredSize(new java.awt.Dimension(80, 25));
+        jPanel29.add(jComboBox21);
+
+        jLabel61.setText(bundle.getString("CrInstrument.jLabel61.text")); 
+        jPanel29.add(jLabel61);
+
+        jTextField22.setPreferredSize(new java.awt.Dimension(150, 25));
+        jPanel29.add(jTextField22);
+
+        jPanel5.add(jPanel29);
+        jPanel29.setBounds(680, 120, 330, 40);
+
+        jPanel30.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel30.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel62.setText(bundle.getString("CrInstrument.jLabel62.text")); 
+        jPanel30.add(jLabel62);
+
+        jComboBox22.setEditable(true);
+        jComboBox22.setPreferredSize(new java.awt.Dimension(80, 25));
+        jPanel30.add(jComboBox22);
+
+        jLabel63.setText(bundle.getString("CrInstrument.jLabel63.text")); 
+        jPanel30.add(jLabel63);
+
+        jTextField23.setPreferredSize(new java.awt.Dimension(150, 25));
+        jPanel30.add(jTextField23);
+
+        jPanel5.add(jPanel30);
+        jPanel30.setBounds(670, 160, 330, 35);
+
+        jPanel28.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel28.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel11.setText(bundle.getString("CrInstrument.jLabel11.text")); 
+        jPanel28.add(jLabel11);
+
+        jComboBox15.setEditable(true);
+        jComboBox15.setPreferredSize(new java.awt.Dimension(80, 25));
+        jPanel28.add(jComboBox15);
+
+        jLabel59.setText(bundle.getString("CrInstrument.jLabel59.text")); 
+        jPanel28.add(jLabel59);
+
+        jTextField11.setPreferredSize(new java.awt.Dimension(150, 25));
+        jPanel28.add(jTextField11);
+
+        jPanel5.add(jPanel28);
+        jPanel28.setBounds(670, 200, 330, 35);
+
+        jPanel31.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel31.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel65.setText(bundle.getString("CrInstrument.jLabel65.text")); 
+        jPanel31.add(jLabel65);
+
+        jComboBox23.setEditable(true);
+        jComboBox23.setPreferredSize(new java.awt.Dimension(80, 25));
+        jPanel31.add(jComboBox23);
+
+        jLabel66.setText(bundle.getString("CrInstrument.jLabel66.text")); 
+        jPanel31.add(jLabel66);
+
+        jTextField24.setPreferredSize(new java.awt.Dimension(150, 25));
+        jPanel31.add(jTextField24);
+
+        jPanel5.add(jPanel31);
+        jPanel31.setBounds(700, 250, 300, 35);
+
+        jPanel32.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel32.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel67.setText(bundle.getString("CrInstrument.jLabel67.text")); 
+        jPanel32.add(jLabel67);
+
+        jComboBox24.setEditable(true);
+        jComboBox24.setPreferredSize(new java.awt.Dimension(80, 25));
+        jPanel32.add(jComboBox24);
+
+        jLabel68.setText(bundle.getString("CrInstrument.jLabel68.text")); 
+        jPanel32.add(jLabel68);
+
+        jTextField25.setPreferredSize(new java.awt.Dimension(150, 25));
+        jPanel32.add(jTextField25);
+
+        jPanel5.add(jPanel32);
+        jPanel32.setBounds(690, 290, 300, 35);
+
+        jPanel33.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel33.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel69.setText(bundle.getString("CrInstrument.jLabel69.text")); 
+        jPanel33.add(jLabel69);
+
+        jComboBox25.setEditable(true);
+        jComboBox25.setPreferredSize(new java.awt.Dimension(80, 25));
+        jPanel33.add(jComboBox25);
+
+        jLabel70.setText(bundle.getString("CrInstrument.jLabel70.text")); 
+        jPanel33.add(jLabel70);
+
+        jTextField26.setPreferredSize(new java.awt.Dimension(150, 25));
+        jPanel33.add(jTextField26);
+
+        jPanel5.add(jPanel33);
+        jPanel33.setBounds(690, 330, 300, 40);
 
         jTabbedPane2.addTab(bundle.getString("CrInstrument.jPanel5.TabConstraints.tabTitle"), jPanel5); 
 
@@ -7184,7 +7340,7 @@ public void doLayout(){
         jPanel25.add(jLabel52);
 
         jPanel24.add(jPanel25);
-        jPanel25.setBounds(10, 310, 530, 40);
+        jPanel25.setBounds(10, 310, 630, 40);
 
         jPanel64.setBackground(new java.awt.Color(255, 255, 255));
         jPanel64.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -7207,7 +7363,7 @@ public void doLayout(){
         jPanel64.add(jButton3);
 
         jPanel24.add(jPanel64);
-        jPanel64.setBounds(10, 60, 530, 35);
+        jPanel64.setBounds(10, 60, 600, 35);
 
         jPanel65.setBackground(new java.awt.Color(255, 255, 255));
         jPanel65.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -7229,7 +7385,7 @@ public void doLayout(){
         jPanel65.add(jTextField7);
 
         jPanel24.add(jPanel65);
-        jPanel65.setBounds(10, 100, 530, 40);
+        jPanel65.setBounds(10, 100, 650, 40);
 
         jButton14.setFont(jButton14.getFont());
         jButton14.setText(bundle.getString("CrInstrument.jButton14.text")); 
@@ -7272,7 +7428,7 @@ public void doLayout(){
         jPanel35.add(jLabel71);
 
         jPanel24.add(jPanel35);
-        jPanel35.setBounds(50, 270, 480, 33);
+        jPanel35.setBounds(50, 270, 580, 33);
 
         jPanel66.setBackground(new java.awt.Color(255, 255, 255));
         jPanel66.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -7359,7 +7515,7 @@ public void doLayout(){
         jPanel108.setBounds(20, 350, 250, 40);
 
         jPanel20.add(jPanel24);
-        jPanel24.setBounds(30, 140, 560, 400);
+        jPanel24.setBounds(30, 140, 670, 400);
 
         jPanel27.setBackground(new java.awt.Color(255, 255, 255));
         jPanel27.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel27.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(102, 0, 153))); 
@@ -7410,7 +7566,7 @@ public void doLayout(){
         CBUseEngineerUnit.setBounds(330, 20, 210, 23);
 
         jPanel20.add(jPanel27);
-        jPanel27.setBounds(30, 20, 560, 110);
+        jPanel27.setBounds(30, 20, 550, 110);
 
         jButton17.setFont(jButton17.getFont().deriveFont(jButton17.getFont().getSize()+12f));
         jButton17.setText(bundle.getString("CrInstrument.jButton17.text")); 
@@ -7420,7 +7576,7 @@ public void doLayout(){
             }
         });
         jPanel20.add(jButton17);
-        jButton17.setBounds(720, 30, 230, 50);
+        jButton17.setBounds(720, 30, 250, 50);
 
         jTabbedPane2.addTab(bundle.getString("CrInstrument.jPanel20.TabConstraints.tabTitle"), jPanel20); 
 
@@ -7445,7 +7601,7 @@ public void doLayout(){
             }
         });
         jPanel44.add(btnLogoutAdmin);
-        btnLogoutAdmin.setBounds(800, 30, 190, 50);
+        btnLogoutAdmin.setBounds(740, 30, 250, 50);
 
         jPanel7.setBackground(new java.awt.Color(255, 255, 255));
         jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel7.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 0, 255))); 
@@ -7486,7 +7642,7 @@ public void doLayout(){
         jPanel54.add(jPasswordField3);
 
         jPanel7.add(jPanel54);
-        jPanel54.setBounds(10, 100, 240, 40);
+        jPanel54.setBounds(10, 100, 290, 40);
 
         jPanel55.setBackground(new java.awt.Color(255, 255, 255));
         jPanel55.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -7502,7 +7658,7 @@ public void doLayout(){
         jPanel55.setBounds(10, 60, 230, 35);
 
         jPanel44.add(jPanel7);
-        jPanel7.setBounds(30, 30, 260, 190);
+        jPanel7.setBounds(30, 30, 320, 190);
 
         jPanel6.setBackground(new java.awt.Color(255, 255, 255));
         jPanel6.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel6.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 0, 255))); 
@@ -7516,21 +7672,21 @@ public void doLayout(){
         jLabel15.setText(bundle.getString("CrInstrument.jLabel15.text")); 
         jPanel57.add(jLabel15);
 
-        jTextField6.setPreferredSize(new java.awt.Dimension(120, 25));
+        jTextField6.setPreferredSize(new java.awt.Dimension(230, 25));
         jPanel57.add(jTextField6);
 
         jPanel6.add(jPanel57);
-        jPanel57.setBounds(10, 20, 220, 35);
+        jPanel57.setBounds(10, 20, 310, 35);
 
-        jButton19.setFont(jButton19.getFont());
-        jButton19.setText(bundle.getString("CrInstrument.jButton19.text")); 
-        jButton19.addActionListener(new java.awt.event.ActionListener() {
+        btnTestEMail.setFont(btnTestEMail.getFont());
+        btnTestEMail.setText(bundle.getString("CrInstrument.btnTestEMail.text")); 
+        btnTestEMail.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton19ActionPerformed(evt);
+                btnTestEMailActionPerformed(evt);
             }
         });
-        jPanel6.add(jButton19);
-        jButton19.setBounds(60, 110, 120, 30);
+        jPanel6.add(btnTestEMail);
+        btnTestEMail.setBounds(60, 110, 120, 30);
 
         jPanel58.setBackground(new java.awt.Color(255, 255, 255));
         jPanel58.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -7548,22 +7704,22 @@ public void doLayout(){
         jLabel25.setBounds(20, 160, 200, 20);
 
         jPanel44.add(jPanel6);
-        jPanel6.setBounds(340, 40, 240, 210);
+        jPanel6.setBounds(370, 30, 340, 210);
 
         jPanel8.setBackground(new java.awt.Color(255, 255, 255));
         jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel8.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 0, 255))); 
         jPanel8.setFont(jPanel8.getFont());
         jPanel8.setLayout(null);
 
-        jButton5.setFont(jButton5.getFont());
-        jButton5.setText(bundle.getString("CrInstrument.jButton5.text")); 
-        jButton5.addActionListener(new java.awt.event.ActionListener() {
+        btnTestSMS.setFont(btnTestSMS.getFont());
+        btnTestSMS.setText(bundle.getString("CrInstrument.btnTestSMS.text")); 
+        btnTestSMS.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton5ActionPerformed(evt);
+                btnTestSMSActionPerformed(evt);
             }
         });
-        jPanel8.add(jButton5);
-        jButton5.setBounds(60, 110, 120, 30);
+        jPanel8.add(btnTestSMS);
+        btnTestSMS.setBounds(60, 110, 120, 30);
 
         jPanel56.setBackground(new java.awt.Color(255, 255, 255));
         jPanel56.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -7594,7 +7750,7 @@ public void doLayout(){
         jLabel19.setBounds(20, 160, 200, 20);
 
         jPanel44.add(jPanel8);
-        jPanel8.setBounds(340, 260, 240, 190);
+        jPanel8.setBounds(370, 260, 240, 190);
 
         FTPPanel.setBackground(new java.awt.Color(255, 255, 255));
         FTPPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.FTPPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 0, 204))); 
@@ -7625,7 +7781,7 @@ public void doLayout(){
         jCheckBox9.setFont(jCheckBox9.getFont());
         jCheckBox9.setText(bundle.getString("CrInstrument.jCheckBox9.text")); 
         FTPPanel.add(jCheckBox9);
-        jCheckBox9.setBounds(190, 60, 160, 23);
+        jCheckBox9.setBounds(180, 60, 170, 23);
 
         jPanel59.setBackground(new java.awt.Color(255, 255, 255));
         jPanel59.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -7665,7 +7821,7 @@ public void doLayout(){
         jPanel61.add(jPasswordField6);
 
         FTPPanel.add(jPanel61);
-        jPanel61.setBounds(10, 90, 210, 30);
+        jPanel61.setBounds(10, 90, 300, 40);
 
         jPanel62.setBackground(new java.awt.Color(255, 255, 255));
         jPanel62.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -7695,7 +7851,7 @@ public void doLayout(){
         jPanel63.setBounds(190, 20, 100, 30);
 
         jPanel44.add(FTPPanel);
-        FTPPanel.setBounds(620, 100, 370, 220);
+        FTPPanel.setBounds(620, 250, 370, 220);
 
         onlyReceiveCB.setBackground(new java.awt.Color(255, 255, 255));
         onlyReceiveCB.setFont(onlyReceiveCB.getFont());
@@ -7706,7 +7862,7 @@ public void doLayout(){
             }
         });
         jPanel44.add(onlyReceiveCB);
-        onlyReceiveCB.setBounds(30, 450, 300, 23);
+        onlyReceiveCB.setBounds(30, 450, 380, 23);
 
         jPanel13.setBackground(new java.awt.Color(255, 255, 255));
         jPanel13.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel13.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 0, 255))); 
@@ -7734,7 +7890,7 @@ public void doLayout(){
         jPanel67.add(jPasswordField8);
 
         jPanel13.add(jPanel67);
-        jPanel67.setBounds(10, 70, 240, 40);
+        jPanel67.setBounds(10, 70, 300, 40);
 
         jPanel68.setBackground(new java.awt.Color(255, 255, 255));
         jPanel68.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -7750,7 +7906,7 @@ public void doLayout(){
         jPanel68.setBounds(10, 30, 240, 35);
 
         jPanel44.add(jPanel13);
-        jPanel13.setBounds(30, 230, 260, 170);
+        jPanel13.setBounds(30, 230, 320, 170);
 
         jButton24.setFont(jButton24.getFont().deriveFont(jButton24.getFont().getSize()+12f));
         jButton24.setText(bundle.getString("CrInstrument.jButton24.text")); 
@@ -7760,7 +7916,7 @@ public void doLayout(){
             }
         });
         jPanel44.add(jButton24);
-        jButton24.setBounds(600, 30, 190, 50);
+        jButton24.setBounds(740, 100, 250, 50);
 
         jTabbedPane3.addTab(bundle.getString("CrInstrument.jPanel44.TabConstraints.tabTitle"), jPanel44); 
 
@@ -8348,7 +8504,7 @@ public void doLayout(){
             }
         });
         jPanel71.add(jButton33);
-        jButton33.setBounds(10, 490, 100, 23);
+        jButton33.setBounds(10, 490, 110, 23);
 
         jButton34.setFont(jButton34.getFont());
         jButton34.setText(bundle.getString("CrInstrument.jButton34.text")); 
@@ -8358,7 +8514,7 @@ public void doLayout(){
             }
         });
         jPanel71.add(jButton34);
-        jButton34.setBounds(10, 520, 100, 23);
+        jButton34.setBounds(10, 520, 110, 23);
 
         jButton9.setFont(jButton9.getFont());
         jButton9.setText(bundle.getString("CrInstrument.jButton9.text")); 
@@ -8368,7 +8524,7 @@ public void doLayout(){
             }
         });
         jPanel71.add(jButton9);
-        jButton9.setBounds(10, 430, 100, 23);
+        jButton9.setBounds(10, 430, 110, 23);
 
         jButton12.setFont(jButton12.getFont());
         jButton12.setText(bundle.getString("CrInstrument.jButton12.text")); 
@@ -8378,17 +8534,17 @@ public void doLayout(){
             }
         });
         jPanel71.add(jButton12);
-        jButton12.setBounds(10, 460, 100, 23);
+        jButton12.setBounds(10, 460, 110, 23);
 
         jLabel87.setFont(jLabel87.getFont());
         jLabel87.setText(bundle.getString("CrInstrument.jLabel87.text")); 
         jPanel71.add(jLabel87);
-        jLabel87.setBounds(111, 40, 70, 20);
+        jLabel87.setBounds(91, 40, 90, 20);
 
         jLabel88.setFont(jLabel88.getFont());
         jLabel88.setText(bundle.getString("CrInstrument.jLabel88.text")); 
         jPanel71.add(jLabel88);
-        jLabel88.setBounds(110, 240, 70, 20);
+        jLabel88.setBounds(100, 240, 80, 20);
 
         conditionList2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -8440,7 +8596,7 @@ public void doLayout(){
         jScrollPane8.setViewportView(actionList);
 
         jPanel70.add(jScrollPane8);
-        jScrollPane8.setBounds(10, 20, 70, 150);
+        jScrollPane8.setBounds(10, 60, 70, 130);
 
         jButton25.setFont(jButton25.getFont());
         jButton25.setText(bundle.getString("CrInstrument.jButton25.text")); 
@@ -8450,7 +8606,7 @@ public void doLayout(){
             }
         });
         jPanel70.add(jButton25);
-        jButton25.setBounds(230, 240, 120, 23);
+        jButton25.setBounds(220, 240, 130, 23);
 
         jButton18.setFont(jButton18.getFont());
         jButton18.setText(bundle.getString("CrInstrument.jButton18.text")); 
@@ -8460,7 +8616,7 @@ public void doLayout(){
             }
         });
         jPanel70.add(jButton18);
-        jButton18.setBounds(230, 210, 120, 23);
+        jButton18.setBounds(220, 210, 130, 23);
 
         updateActionBtn.setFont(updateActionBtn.getFont());
         updateActionBtn.setText(bundle.getString("CrInstrument.updateActionBtn.text")); 
@@ -8480,7 +8636,7 @@ public void doLayout(){
 
         jComboBox19.setEditable(true);
         jComboBox19.setFont(jComboBox19.getFont());
-        jComboBox19.setPreferredSize(new java.awt.Dimension(204, 25));
+        jComboBox19.setPreferredSize(new java.awt.Dimension(200, 25));
         jComboBox19.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBox19ItemStateChanged(evt);
@@ -8489,7 +8645,7 @@ public void doLayout(){
         jPanel76.add(jComboBox19);
 
         jPanel70.add(jPanel76);
-        jPanel76.setBounds(90, 20, 270, 30);
+        jPanel76.setBounds(90, 60, 270, 35);
 
         jPanel77.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8497,8 +8653,8 @@ public void doLayout(){
         jLabel83.setText(bundle.getString("CrInstrument.jLabel83.text")); 
         jPanel77.add(jLabel83);
 
-        jComboBox18.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Set device SN", "Set data value", "Send email message", "Send SMS message to cell phone", "Send command ", "Connect port", "Disconnect port", "Start monitor", "Stop monitor", "Open URL", "Exit application", "Restart application", "Java class" }));
-        jComboBox18.setPreferredSize(new java.awt.Dimension(178, 25));
+        jComboBox18.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Set device SN", "Set data value", "Send email message", "Send SMS message to cell phone", "Send command", "Stop continue send command", "Connect port", "Disconnect port", "Start monitor", "Stop monitor", "Open URL", "Exit application", "Restart application", "Java class" }));
+        jComboBox18.setPreferredSize(new java.awt.Dimension(250, 25));
         jComboBox18.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBox18ItemStateChanged(evt);
@@ -8507,7 +8663,7 @@ public void doLayout(){
         jPanel77.add(jComboBox18);
 
         jPanel70.add(jPanel77);
-        jPanel77.setBounds(90, 160, 260, 40);
+        jPanel77.setBounds(10, 20, 330, 35);
 
         jPanel79.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 255)), bundle.getString("CrInstrument.jPanel79.border.title"))); 
         jPanel79.setFont(jPanel79.getFont());
@@ -8571,7 +8727,7 @@ public void doLayout(){
         jPanel86.add(jTextField29);
 
         jPanel79.add(jPanel86);
-        jPanel86.setBounds(50, 170, 370, 30);
+        jPanel86.setBounds(30, 170, 390, 30);
 
         jPanel87.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8663,11 +8819,11 @@ public void doLayout(){
         jPanel128.add(jCheckBox28);
 
         jTextField63.setText(bundle.getString("CrInstrument.jTextField63.text")); 
-        jTextField63.setPreferredSize(new java.awt.Dimension(156, 25));
+        jTextField63.setPreferredSize(new java.awt.Dimension(126, 25));
         jPanel128.add(jTextField63);
 
         jPanel79.add(jPanel128);
-        jPanel128.setBounds(10, 140, 380, 30);
+        jPanel128.setBounds(10, 140, 400, 30);
 
         jPanel70.add(jPanel79);
         jPanel79.setBounds(360, 20, 430, 270);
@@ -8680,7 +8836,7 @@ public void doLayout(){
             }
         });
         jPanel70.add(jButton31);
-        jButton31.setBounds(10, 210, 100, 23);
+        jButton31.setBounds(10, 210, 110, 23);
 
         jButton32.setFont(jButton32.getFont());
         jButton32.setText(bundle.getString("CrInstrument.jButton32.text")); 
@@ -8690,7 +8846,7 @@ public void doLayout(){
             }
         });
         jPanel70.add(jButton32);
-        jButton32.setBounds(10, 240, 100, 23);
+        jButton32.setBounds(10, 240, 110, 23);
 
         jButton50.setFont(jButton50.getFont());
         jButton50.setText(bundle.getString("CrInstrument.jButton50.text")); 
@@ -8863,6 +9019,66 @@ public void doLayout(){
         jPanel78.add(jPanel84);
         jPanel84.setBounds(30, 60, 330, 30);
 
+        jPanel70.add(jPanel78);
+        jPanel78.setBounds(390, 30, 400, 260);
+
+        jPanel122.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel142.setFont(jLabel142.getFont());
+        jLabel142.setText(bundle.getString("CrInstrument.jLabel142.text")); 
+        jPanel122.add(jLabel142);
+
+        jComboBox44.setEditable(true);
+        jComboBox44.setFont(jComboBox44.getFont());
+        jComboBox44.setPreferredSize(new java.awt.Dimension(129, 25));
+        jComboBox44.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBox44ItemStateChanged(evt);
+            }
+        });
+        jPanel122.add(jComboBox44);
+
+        jPanel70.add(jPanel122);
+        jPanel122.setBounds(90, 135, 260, 35);
+
+        jPanel132.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel159.setFont(jLabel159.getFont());
+        jLabel159.setText(bundle.getString("CrInstrument.jLabel159.text")); 
+        jPanel132.add(jLabel159);
+
+        jComboBox45.setEditable(true);
+        jComboBox45.setFont(jComboBox45.getFont());
+        jComboBox45.setPreferredSize(new java.awt.Dimension(129, 25));
+        jComboBox45.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBox45ItemStateChanged(evt);
+            }
+        });
+        jPanel132.add(jComboBox45);
+
+        jPanel70.add(jPanel132);
+        jPanel132.setBounds(90, 170, 270, 35);
+
+        jPanel136.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel163.setFont(jLabel163.getFont());
+        jLabel163.setText(bundle.getString("CrInstrument.jLabel163.text")); 
+        jPanel136.add(jLabel163);
+
+        jComboBox49.setEditable(true);
+        jComboBox49.setFont(jComboBox49.getFont());
+        jComboBox49.setPreferredSize(new java.awt.Dimension(129, 25));
+        jComboBox49.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBox49ItemStateChanged(evt);
+            }
+        });
+        jPanel136.add(jComboBox49);
+
+        jPanel70.add(jPanel136);
+        jPanel136.setBounds(90, 100, 260, 35);
+
         jPanel85.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 255)), bundle.getString("CrInstrument.jPanel85.border.title"))); 
         jPanel85.setFont(jPanel85.getFont());
         jPanel85.setLayout(null);
@@ -8918,31 +9134,6 @@ public void doLayout(){
         jPanel85.add(jPanel129);
         jPanel129.setBounds(90, 70, 290, 40);
 
-        jPanel78.add(jPanel85);
-        jPanel85.setBounds(0, 30, 400, 200);
-
-        jPanel70.add(jPanel78);
-        jPanel78.setBounds(390, 30, 400, 260);
-
-        jPanel122.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel142.setFont(jLabel142.getFont());
-        jLabel142.setText(bundle.getString("CrInstrument.jLabel142.text")); 
-        jPanel122.add(jLabel142);
-
-        jComboBox44.setEditable(true);
-        jComboBox44.setFont(jComboBox44.getFont());
-        jComboBox44.setPreferredSize(new java.awt.Dimension(129, 25));
-        jComboBox44.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jComboBox44ItemStateChanged(evt);
-            }
-        });
-        jPanel122.add(jComboBox44);
-
-        jPanel70.add(jPanel122);
-        jPanel122.setBounds(90, 100, 290, 35);
-
         jPanel126.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(51, 0, 255)), bundle.getString("CrInstrument.jPanel126.border.title"))); 
         jPanel126.setFont(jPanel126.getFont());
         jPanel126.setLayout(null);
@@ -8960,46 +9151,8 @@ public void doLayout(){
         jPanel126.add(jPanel127);
         jPanel127.setBounds(10, 20, 370, 40);
 
-        jPanel70.add(jPanel126);
-        jPanel126.setBounds(390, 130, 400, 80);
-
-        jPanel132.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel159.setFont(jLabel159.getFont());
-        jLabel159.setText(bundle.getString("CrInstrument.jLabel159.text")); 
-        jPanel132.add(jLabel159);
-
-        jComboBox45.setEditable(true);
-        jComboBox45.setFont(jComboBox45.getFont());
-        jComboBox45.setPreferredSize(new java.awt.Dimension(129, 25));
-        jComboBox45.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jComboBox45ItemStateChanged(evt);
-            }
-        });
-        jPanel132.add(jComboBox45);
-
-        jPanel70.add(jPanel132);
-        jPanel132.setBounds(90, 130, 270, 30);
-
-        jPanel136.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel163.setFont(jLabel163.getFont());
-        jLabel163.setText(bundle.getString("CrInstrument.jLabel163.text")); 
-        jPanel136.add(jLabel163);
-
-        jComboBox49.setEditable(true);
-        jComboBox49.setFont(jComboBox49.getFont());
-        jComboBox49.setPreferredSize(new java.awt.Dimension(129, 25));
-        jComboBox49.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jComboBox49ItemStateChanged(evt);
-            }
-        });
-        jPanel136.add(jComboBox49);
-
-        jPanel70.add(jPanel136);
-        jPanel136.setBounds(90, 60, 260, 30);
+        jPanel85.add(jPanel126);
+        jPanel126.setBounds(0, 90, 400, 80);
 
         jPanel26.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 255)), bundle.getString("CrInstrument.jPanel26.border.title"))); 
         jPanel26.setLayout(null);
@@ -9016,8 +9169,11 @@ public void doLayout(){
         jPanel26.add(jPanel139);
         jPanel139.setBounds(10, 30, 380, 40);
 
-        jPanel70.add(jPanel26);
-        jPanel26.setBounds(390, 70, 400, 80);
+        jPanel85.add(jPanel26);
+        jPanel26.setBounds(0, 30, 400, 90);
+
+        jPanel70.add(jPanel85);
+        jPanel85.setBounds(370, 40, 410, 250);
 
         jPanel49.add(jPanel70);
         jPanel70.setBounds(210, 280, 800, 300);
@@ -9034,7 +9190,7 @@ public void doLayout(){
         jScrollPane7.setViewportView(conditionList);
 
         jPanel69.add(jScrollPane7);
-        jScrollPane7.setBounds(10, 20, 70, 130);
+        jScrollPane7.setBounds(10, 70, 70, 90);
 
         jButton11.setFont(jButton11.getFont());
         jButton11.setText(bundle.getString("CrInstrument.jButton11.text")); 
@@ -9044,7 +9200,7 @@ public void doLayout(){
             }
         });
         jPanel69.add(jButton11);
-        jButton11.setBounds(210, 160, 130, 23);
+        jButton11.setBounds(210, 180, 130, 23);
 
         jButton13.setFont(jButton13.getFont());
         jButton13.setText(bundle.getString("CrInstrument.jButton13.text")); 
@@ -9054,7 +9210,7 @@ public void doLayout(){
             }
         });
         jPanel69.add(jButton13);
-        jButton13.setBounds(210, 190, 130, 23);
+        jButton13.setBounds(210, 210, 130, 23);
 
         jLabel81.setBackground(new java.awt.Color(255, 255, 255));
         jLabel81.setText(bundle.getString("CrInstrument.jLabel81.text")); 
@@ -9070,7 +9226,7 @@ public void doLayout(){
             }
         });
         jPanel69.add(updateConditionBtn);
-        updateConditionBtn.setBounds(110, 190, 100, 23);
+        updateConditionBtn.setBounds(110, 210, 100, 23);
 
         jPanel72.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 255)), bundle.getString("CrInstrument.jPanel72.border.title"))); 
         jPanel72.setFont(jPanel72.getFont());
@@ -9107,7 +9263,7 @@ public void doLayout(){
         jPanel80.add(jTextField46);
 
         jPanel72.add(jPanel80);
-        jPanel80.setBounds(10, 20, 380, 30);
+        jPanel80.setBounds(10, 20, 410, 30);
 
         jPanel81.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9139,7 +9295,7 @@ public void doLayout(){
         jPanel81.add(jTextField12);
 
         jPanel72.add(jPanel81);
-        jPanel81.setBounds(50, 50, 340, 30);
+        jPanel81.setBounds(50, 50, 370, 30);
 
         jPanel82.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9204,7 +9360,7 @@ public void doLayout(){
 
         jComboBox14.setEditable(true);
         jComboBox14.setFont(jComboBox14.getFont());
-        jComboBox14.setPreferredSize(new java.awt.Dimension(204, 25));
+        jComboBox14.setPreferredSize(new java.awt.Dimension(200, 25));
         jComboBox14.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBox14ItemStateChanged(evt);
@@ -9213,7 +9369,7 @@ public void doLayout(){
         jPanel73.add(jComboBox14);
 
         jPanel69.add(jPanel73);
-        jPanel73.setBounds(90, 10, 270, 30);
+        jPanel73.setBounds(90, 50, 270, 30);
 
         jPanel74.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9222,6 +9378,7 @@ public void doLayout(){
         jPanel74.add(jLabel78);
 
         jComboBox16.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "After system startup", "Before connected", "After connected", "Before start monitor", "After start monitor", "Before stop monitor", "After stop monitor", "Before disconnected", "After disconnected", "Over upper take-action level", "Under lower take-action level", "Over upper alert level", "Under lower alert level", "Data condition", "Data checked by Java class", "Any data", "Click button 01", "Click button 02", "Click button 03", "Click button 04", "Click button 05", "Click button 06", "Click button 07", "Click button 08", "Click button 09", "Click button 10", "Click file menuitem 01", "Click file menuitem 02", "Click file menuitem 03", "Click file menuitem 04", "Click file menuitem 05", "Click help menuitem 01", "Click help menuitem 02", "Click help menuitem 03", "Click help menuitem 04", "Click help menuitem 05", "Click tool menuitem 01", "Click tool menuitem 02", "Click tool menuitem 03", "Click tool menuitem 04", "Click tool menuitem 05", "Before system terminated", " ", " ", " " }));
+        jComboBox16.setPreferredSize(new java.awt.Dimension(250, 21));
         jComboBox16.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBox16ItemStateChanged(evt);
@@ -9230,7 +9387,7 @@ public void doLayout(){
         jPanel74.add(jComboBox16);
 
         jPanel69.add(jPanel74);
-        jPanel74.setBounds(90, 130, 270, 30);
+        jPanel74.setBounds(10, 19, 350, 31);
 
         jButton29.setFont(jButton29.getFont());
         jButton29.setText(bundle.getString("CrInstrument.jButton29.text")); 
@@ -9240,7 +9397,7 @@ public void doLayout(){
             }
         });
         jPanel69.add(jButton29);
-        jButton29.setBounds(10, 160, 100, 23);
+        jButton29.setBounds(10, 180, 100, 23);
 
         jButton30.setFont(jButton30.getFont());
         jButton30.setText(bundle.getString("CrInstrument.jButton30.text")); 
@@ -9250,7 +9407,7 @@ public void doLayout(){
             }
         });
         jPanel69.add(jButton30);
-        jButton30.setBounds(10, 190, 100, 23);
+        jButton30.setBounds(10, 210, 100, 23);
 
         jButton51.setFont(jButton51.getFont());
         jButton51.setText(bundle.getString("CrInstrument.jButton51.text")); 
@@ -9260,7 +9417,7 @@ public void doLayout(){
             }
         });
         jPanel69.add(jButton51);
-        jButton51.setBounds(110, 160, 100, 23);
+        jButton51.setBounds(110, 180, 100, 23);
 
         jPanel124.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 255)), bundle.getString("CrInstrument.jPanel124.border.title"))); 
         jPanel124.setFont(jPanel124.getFont());
@@ -9299,7 +9456,7 @@ public void doLayout(){
         jPanel133.add(jComboBox46);
 
         jPanel69.add(jPanel133);
-        jPanel133.setBounds(90, 70, 270, 35);
+        jPanel133.setBounds(90, 110, 270, 35);
 
         jPanel134.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9313,7 +9470,7 @@ public void doLayout(){
         jPanel134.add(jComboBox47);
 
         jPanel69.add(jPanel134);
-        jPanel134.setBounds(90, 100, 270, 30);
+        jPanel134.setBounds(90, 145, 270, 30);
 
         jPanel135.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9332,10 +9489,10 @@ public void doLayout(){
         jPanel135.add(jComboBox48);
 
         jPanel69.add(jPanel135);
-        jPanel135.setBounds(90, 40, 270, 30);
+        jPanel135.setBounds(90, 80, 270, 30);
 
         jPanel49.add(jPanel69);
-        jPanel69.setBounds(210, 30, 800, 230);
+        jPanel69.setBounds(210, 30, 800, 240);
 
         jTabbedPane3.addTab(bundle.getString("CrInstrument.jPanel49.TabConstraints.tabTitle"), jPanel49); 
 
@@ -9404,7 +9561,7 @@ public void doLayout(){
         jPanel93.add(jComboBox42);
 
         jPanel50.add(jPanel93);
-        jPanel93.setBounds(110, 30, 720, 40);
+        jPanel93.setBounds(110, 30, 890, 40);
 
         jPanel96.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9431,10 +9588,6 @@ public void doLayout(){
         jCheckBox12.setFont(jCheckBox12.getFont());
         jCheckBox12.setText(bundle.getString("CrInstrument.jCheckBox12.text")); 
         jPanel96.add(jCheckBox12);
-
-        jCheckBox13.setFont(jCheckBox13.getFont());
-        jCheckBox13.setText(bundle.getString("CrInstrument.jCheckBox13.text")); 
-        jPanel96.add(jCheckBox13);
 
         jPanel50.add(jPanel96);
         jPanel96.setBounds(120, 110, 880, 40);
@@ -9488,7 +9641,7 @@ public void doLayout(){
         jPanel97.add(jLabel122);
 
         jPanel50.add(jPanel97);
-        jPanel97.setBounds(150, 150, 740, 30);
+        jPanel97.setBounds(150, 190, 840, 40);
 
         jPanel98.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9506,12 +9659,8 @@ public void doLayout(){
         jRadioButton5.setText(bundle.getString("CrInstrument.jRadioButton5.text")); 
         jPanel98.add(jRadioButton5);
 
-        jCheckBox14.setFont(jCheckBox14.getFont());
-        jCheckBox14.setText(bundle.getString("CrInstrument.jCheckBox14.text")); 
-        jPanel98.add(jCheckBox14);
-
         jPanel50.add(jPanel98);
-        jPanel98.setBounds(150, 190, 510, 40);
+        jPanel98.setBounds(150, 230, 510, 40);
 
         jPanel99.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9528,7 +9677,7 @@ public void doLayout(){
         jPanel99.add(jCheckBox16);
 
         jPanel50.add(jPanel99);
-        jPanel99.setBounds(120, 230, 580, 40);
+        jPanel99.setBounds(150, 310, 550, 40);
 
         jPanel100.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9541,7 +9690,7 @@ public void doLayout(){
         jPanel100.add(jCheckBox20);
 
         jPanel50.add(jPanel100);
-        jPanel100.setBounds(170, 280, 530, 33);
+        jPanel100.setBounds(170, 350, 530, 33);
 
         jPanel101.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9557,16 +9706,8 @@ public void doLayout(){
         jCheckBox22.setText(bundle.getString("CrInstrument.jCheckBox22.text")); 
         jPanel101.add(jCheckBox22);
 
-        jCheckBox23.setFont(jCheckBox23.getFont());
-        jCheckBox23.setText(bundle.getString("CrInstrument.jCheckBox23.text")); 
-        jPanel101.add(jCheckBox23);
-
-        jTextField43.setText(bundle.getString("CrInstrument.jTextField43.text")); 
-        jTextField43.setPreferredSize(new java.awt.Dimension(65, 25));
-        jPanel101.add(jTextField43);
-
         jPanel50.add(jPanel101);
-        jPanel101.setBounds(120, 330, 580, 40);
+        jPanel101.setBounds(30, 390, 670, 40);
 
         jPanel103.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9611,7 +9752,7 @@ public void doLayout(){
         jPanel103.add(jLabel136);
 
         jPanel50.add(jPanel103);
-        jPanel103.setBounds(120, 70, 680, 30);
+        jPanel103.setBounds(120, 70, 880, 30);
 
         jButton44.setFont(jButton44.getFont());
         jButton44.setText(bundle.getString("CrInstrument.jButton44.text")); 
@@ -9621,7 +9762,7 @@ public void doLayout(){
             }
         });
         jPanel50.add(jButton44);
-        jButton44.setBounds(20, 270, 100, 30);
+        jButton44.setBounds(20, 270, 120, 30);
 
         jButton45.setFont(jButton45.getFont());
         jButton45.setText(bundle.getString("CrInstrument.jButton45.text")); 
@@ -9631,7 +9772,7 @@ public void doLayout(){
             }
         });
         jPanel50.add(jButton45);
-        jButton45.setBounds(20, 300, 100, 30);
+        jButton45.setBounds(20, 300, 120, 30);
 
         jPanel106.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9660,7 +9801,7 @@ public void doLayout(){
         jPanel106.add(jButton42);
 
         jPanel50.add(jPanel106);
-        jPanel106.setBounds(120, 410, 580, 40);
+        jPanel106.setBounds(30, 530, 730, 40);
 
         jPanel111.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9677,12 +9818,43 @@ public void doLayout(){
         jPanel111.add(jTextField52);
 
         jPanel50.add(jPanel111);
-        jPanel111.setBounds(120, 370, 580, 35);
+        jPanel111.setBounds(30, 480, 670, 35);
 
         jPanel142.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 153, 255)));
         jPanel142.setLayout(new java.awt.BorderLayout());
         jPanel50.add(jPanel142);
-        jPanel142.setBounds(710, 190, 270, 280);
+        jPanel142.setBounds(710, 260, 270, 260);
+
+        jPanel112.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox23.setFont(jCheckBox23.getFont());
+        jCheckBox23.setText(bundle.getString("CrInstrument.jCheckBox23.text")); 
+        jPanel112.add(jCheckBox23);
+
+        jTextField43.setText(bundle.getString("CrInstrument.jTextField43.text")); 
+        jTextField43.setPreferredSize(new java.awt.Dimension(65, 25));
+        jPanel112.add(jTextField43);
+
+        jPanel50.add(jPanel112);
+        jPanel112.setBounds(90, 430, 580, 40);
+
+        jPanel148.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox13.setFont(jCheckBox13.getFont());
+        jCheckBox13.setText(bundle.getString("CrInstrument.jCheckBox13.text")); 
+        jPanel148.add(jCheckBox13);
+
+        jPanel50.add(jPanel148);
+        jPanel148.setBounds(230, 150, 550, 30);
+
+        jPanel149.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox14.setFont(jCheckBox14.getFont());
+        jCheckBox14.setText(bundle.getString("CrInstrument.jCheckBox14.text")); 
+        jPanel149.add(jCheckBox14);
+
+        jPanel50.add(jPanel149);
+        jPanel149.setBounds(290, 270, 390, 30);
 
         jTabbedPane3.addTab(bundle.getString("CrInstrument.jPanel50.TabConstraints.tabTitle"), jPanel50); 
 
@@ -9808,7 +9980,7 @@ public void doLayout(){
             }
         });
         jPanel51.add(jButton46);
-        jButton46.setBounds(10, 240, 100, 30);
+        jButton46.setBounds(10, 240, 120, 30);
 
         jButton47.setFont(jButton47.getFont());
         jButton47.setText(bundle.getString("CrInstrument.jButton47.text")); 
@@ -9818,7 +9990,7 @@ public void doLayout(){
             }
         });
         jPanel51.add(jButton47);
-        jButton47.setBounds(10, 270, 100, 30);
+        jButton47.setBounds(10, 270, 120, 30);
 
         jPanel105.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -10319,7 +10491,7 @@ public void doLayout(){
     }
   }
 
-  private void jButton19ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnTestEMailActionPerformed(java.awt.event.ActionEvent evt) {
     jLabel25.setText(bundle2.getString("CrInstrument.xy.msg66"));
     if (sendEmail(2,"test '"+getPropsString("email-sp")+"' email","test email")) {
       jLabel25.setText("");
@@ -10338,7 +10510,7 @@ public void doLayout(){
     }
   }
 
-  private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnTestSMSActionPerformed(java.awt.event.ActionEvent evt) {
     jLabel19.setText(bundle2.getString("CrInstrument.xy.msg81"));
     sendSms(2,"test '"+this.getPropsString("sms-sp")+"' sms");
     jLabel19.setText("");
@@ -10381,8 +10553,11 @@ public void doLayout(){
 
     coorDevices.clear();
     for (int row = 0; row < rowCount; row++) {
-      if (((String) jTable1.getModel().getValueAt(row, 0)).trim().length() > 0 && ((String) jTable1.getModel().getValueAt(row, 1)).trim().length() > 0
-              && ((String) jTable1.getModel().getValueAt(row, 2)).trim().length() > 0 && ((String) jTable1.getModel().getValueAt(row, 3)).trim().length() > 0) {
+      if (jTable1.getModel().getValueAt(row, 0)!=null && jTable1.getModel().getValueAt(row, 1)!=null
+              && jTable1.getModel().getValueAt(row, 2)!=null && jTable1.getModel().getValueAt(row, 3)!=null && jTable1.getModel().getValueAt(row, 4)!=null
+              && ((String) jTable1.getModel().getValueAt(row, 0)).trim().length() > 0 && ((String) jTable1.getModel().getValueAt(row, 1)).trim().length() > 0
+              && ((String) jTable1.getModel().getValueAt(row, 2)).trim().length() > 0 && ((String) jTable1.getModel().getValueAt(row, 3)).trim().length() > 0
+              && ((String) jTable1.getModel().getValueAt(row, 4)).trim().length() > 0) {
         String id21 = (String) rowToRandomID.get("" + row);
         String info[] = null;
         if (id21 != null) {
@@ -10390,10 +10565,13 @@ public void doLayout(){
         }
         if (id21 == null || info == null || info.length < 28) {
           info = new String[]{((String) jTable1.getModel().getValueAt(row, 0)).trim(), ((String) jTable1.getModel().getValueAt(row, 3)).trim(),
-            ((String) jTable1.getModel().getValueAt(row, 4)).trim(), ((String) jTable1.getModel().getValueAt(row, 5)).trim(),
-            ((String) jTable1.getModel().getValueAt(row, 6)).trim(), ((String) jTable1.getModel().getValueAt(row, 10)).trim(),
-            ((String) jTable1.getModel().getValueAt(row, 11)).trim(), ((String) jTable1.getModel().getValueAt(row, 12)).trim(),
-            ((String) jTable1.getModel().getValueAt(row, 13)).trim(), "",
+            ((String) jTable1.getModel().getValueAt(row, 4)).trim(),
+            (jTable1.getModel().getValueAt(row, 5)==null? "":((String) jTable1.getModel().getValueAt(row, 5)).trim()),
+            (jTable1.getModel().getValueAt(row, 6)==null? "":((String) jTable1.getModel().getValueAt(row, 6)).trim()), 
+            (jTable1.getModel().getValueAt(row, 10)==null? "":((String) jTable1.getModel().getValueAt(row, 10)).trim()),
+            (jTable1.getModel().getValueAt(row, 11)==null? "":((String) jTable1.getModel().getValueAt(row, 11)).trim()), 
+            (jTable1.getModel().getValueAt(row, 12)==null? "":((String) jTable1.getModel().getValueAt(row, 12)).trim()),
+            (jTable1.getModel().getValueAt(row, 13)==null? "":((String) jTable1.getModel().getValueAt(row, 13)).trim()), "",
             "0.0", "0.0",
             "0.0", "0.0",
             ((String) jTable1.getModel().getValueAt(row, 1)).trim(), ((String) jTable1.getModel().getValueAt(row, 2)).trim(),
@@ -10402,8 +10580,9 @@ public void doLayout(){
             "0.0", "" + Math.round(Math.random() * 100000000.0D),
             "0", "",
             "0", "1",
-            ((String) jTable1.getModel().getValueAt(row, 7)).trim(), ((String) jTable1.getModel().getValueAt(row, 8)).trim(),
-            ((String) jTable1.getModel().getValueAt(row, 9)).trim()};
+            (jTable1.getModel().getValueAt(row, 7)==null? "":((String) jTable1.getModel().getValueAt(row, 7)).trim()), 
+            (jTable1.getModel().getValueAt(row, 8)==null? "":((String) jTable1.getModel().getValueAt(row, 8)).trim()),
+            (jTable1.getModel().getValueAt(row, 9)==null? "":((String) jTable1.getModel().getValueAt(row, 9)).trim())};
           rowToRandomID.put("" + row, info[21]);
         }
         info[0] = (String) jTable1.getModel().getValueAt(row, 0);
@@ -10858,6 +11037,19 @@ void showConditionItem(String sel){
         jPanel124.setVisible(false);
       if(sel.equalsIgnoreCase("Data condition"))  jPanel72.setVisible(true);
       else if(sel.equalsIgnoreCase("Data checked by Java class")) jPanel124.setVisible(true);
+
+      jPanel73.setVisible(false);
+      jPanel133.setVisible(false);
+      jPanel134.setVisible(false);
+      jPanel135.setVisible(false);
+      if(sel.equalsIgnoreCase("Data condition") || sel.equalsIgnoreCase("Any data") || sel.equalsIgnoreCase("Data checked by Java class")
+               || sel.equalsIgnoreCase("Over upper take-action level") || sel.equalsIgnoreCase("Under lower take-action level") 
+              || sel.equalsIgnoreCase("Over upper alert level") || sel.equalsIgnoreCase("Under lower alert leve"))  {
+      jPanel73.setVisible(true);
+      jPanel133.setVisible(true);
+      jPanel134.setVisible(true);
+      jPanel135.setVisible(true);
+      }
 }
   private void jComboBox18ItemStateChanged(java.awt.event.ItemEvent evt) {
     if(evt.getStateChange()==evt.SELECTED){
@@ -10877,6 +11069,18 @@ void showActionItem(String sel){
       else if(sel.equalsIgnoreCase("Set device SN")) jPanel78.setVisible(true);
       else if(sel.equalsIgnoreCase("Java class")) jPanel126.setVisible(true);
       else if(sel.equalsIgnoreCase("Open URL")) jPanel26.setVisible(true);
+
+      jPanel76.setVisible(false);
+      jPanel136.setVisible(false);
+      jPanel122.setVisible(false);
+      jPanel132.setVisible(false);
+      if(sel.equalsIgnoreCase("Set data value") || sel.equalsIgnoreCase("Send command") || sel.equalsIgnoreCase("Set device SN"))  {
+      jPanel76.setVisible(true);
+      jPanel136.setVisible(true);
+      jPanel122.setVisible(true);
+      jPanel132.setVisible(true);
+      }
+
 }
   private void jButton13ActionPerformed(java.awt.event.ActionEvent evt) {
     if(conditionList.getSelectedIndex()>-1){
@@ -10936,7 +11140,10 @@ void showActionItem(String sel){
   }
 
   private void updateConditionBtnActionPerformed(java.awt.event.ActionEvent evt) {
-    if(conditionList.getSelectedIndex()>-1){
+    updateConditionItem();
+  }
+void updateConditionItem(){
+        if(conditionList.getSelectedIndex()>-1){
      String sel=(String)conditionList.getSelectedValue();
        String data[]=new String[condMaxArrCnt];
        for(int i=0;i<data.length;i++) data[i]="";
@@ -10971,14 +11178,18 @@ void showActionItem(String sel){
         conditionTM.put(sel, ylib.arrayToCsvLine(data));
         updateExecEnv();
     }
-  }
+}
+  
 
  void updateExecEnv(){
 
 }
 
   private void updateActionBtnActionPerformed(java.awt.event.ActionEvent evt) {
-    if(actionList.getSelectedIndex()>-1){
+    updateActionItem();
+  }
+void updateActionItem(){
+       if(actionList.getSelectedIndex()>-1){
      String sel=(String)actionList.getSelectedValue();
        String data[]=new String[actMaxArrCnt];
        for(int i=0;i<data.length;i++) data[i]="";
@@ -11062,7 +11273,8 @@ void showActionItem(String sel){
        actionTM.put(sel,ylib.arrayToCsvLine(data));
        chkAndAdjustEvents();
   }
-  }
+}
+  
 
   void chkAndAdjustEvents(){
     props.put("monitor-interval-h", "24");props.put("monitor-interval-m", "0");props.put("monitor-interval-s", "0");
@@ -11078,9 +11290,9 @@ void showActionItem(String sel){
         TreeMap actionCodeTM=new TreeMap();
         if(eventInfo.length>= (3+cCnt+aCnt)){
            for(int i=0;i<aCnt;i++){
-                  String aId=eventInfo[3+cCnt+i];
-                  String actionInfo[]=ylib.csvlinetoarray((String)actionTM.get(aId));
-                          if(actionInfo[2].equalsIgnoreCase("Send Command") && actionInfo[14].equalsIgnoreCase("Y") && isNumeric(actionInfo[15])){
+             String aId=eventInfo[3+cCnt+i];
+             String actionInfo[]=ylib.csvlinetoarray((String)actionTM.get(aId));
+             if(actionInfo.length > 15 && actionInfo[2].equalsIgnoreCase("Send Command") && actionInfo[14].equalsIgnoreCase("Y") && isNumeric(actionInfo[15])){
             int interval=Integer.parseInt(actionInfo[15]);
             if(interval>0){
                 if(!firstContCmd){
@@ -11106,9 +11318,10 @@ void showActionItem(String sel){
   }
 }
   private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
-    if(eventListModel.size()<1) newEvent();
+    if(eventListModel.size()<1) {newEvent(); eventList.setSelectedIndex(0);}
     if(eventList.getSelectedIndex()==-1) { JOptionPane.showMessageDialog(this, "Please select which event to add to."); return;}
     if(conditionList.getSelectedIndex()>-1){
+      updateConditionItem();
       String ev=(String)eventList.getSelectedValue();
       String cond=(String)conditionList.getSelectedValue();
       int cnt=conditionList2.getModel().getSize();
@@ -11129,9 +11342,10 @@ void showActionItem(String sel){
   }
 
   private void jButton18ActionPerformed(java.awt.event.ActionEvent evt) {
-    if(eventListModel.size()<1) newEvent();
+    if(eventListModel.size()<1) {newEvent(); eventList.setSelectedIndex(0);}
     if(eventList.getSelectedIndex()==-1) { JOptionPane.showMessageDialog(this, "Please select which event to add to."); return;}
     if(actionList.getSelectedIndex()>-1){
+      updateActionItem();
       String ev=(String)eventList.getSelectedValue();
       String act=(String)actionList.getSelectedValue();
       int cnt=actionList2.getModel().getSize();
@@ -11921,15 +12135,23 @@ void eventSwapItem(String item1,String item2){
   }
 
   private void btnEditSrcActionPerformed(java.awt.event.ActionEvent evt) {
-    if (!adminLogin && !userLogin) {
-      if (userDialog == null) {
-        userDialog = new UserDialog(this, true);
-      }
-      userDialog.setVisible(true);
-    }
-    if (adminLogin || userLogin) {
+  
 
+    if(!adminLogin && !userLogin){
+     if(userDialog==null) userDialog=new UserDialog(this,true);
+      userDialog.setVisible(true);
+   }
+  if(adminLogin || userLogin){
+    if(editFrame!=null && editFrame.isVisible()){
+        editFrame.requestFocusInWindow();
+        return;
     }
+  } else return;
+
+    if(editFrame==null) editFrame=new CIEditFrame(this);
+
+    editFrame.setContent();
+    editFrame.setVisible(true);
   }
 
   private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {
@@ -12129,6 +12351,8 @@ private void updateItem(){
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
        ((DefaultTableModel)jTable1.getModel()).addRow(new Object[jTable1.getModel().getColumnCount()]);
+       int rowN=jTable1.getRowCount()-1;
+       for(int i=0;i>jTable1.getModel().getColumnCount();i++) jTable1.getModel().setValueAt("", rowN, i);
     }
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {
@@ -12161,6 +12385,32 @@ private void updateItem(){
                 }
                 stopContinueSendBtn.setEnabled(false);
                 }
+    }
+
+    private void jButton19ActionPerformed(java.awt.event.ActionEvent evt) {
+    ((DefaultTableModel) jTable5.getModel()).addRow(new Object[jTable5.getModel().getColumnCount()]);
+    }
+
+    private void jButton27ActionPerformed(java.awt.event.ActionEvent evt) {
+    ((DefaultTableModel) jTable6.getModel()).addRow(new Object[jTable6.getModel().getColumnCount()]);
+    }
+
+    private void jButton26ActionPerformed(java.awt.event.ActionEvent evt) {
+    DefaultTableModel model = (DefaultTableModel) jTable5.getModel();
+    int[] rows = jTable5.getSelectedRows();
+
+    for (int i = rows.length - 1; i > -1; i--) {
+      model.removeRow(rows[i]);
+    }
+    }
+
+    private void jButton43ActionPerformed(java.awt.event.ActionEvent evt) {
+         DefaultTableModel model = (DefaultTableModel) jTable5.getModel();
+    int[] rows = jTable5.getSelectedRows();
+
+    for (int i = rows.length - 1; i > -1; i--) {
+      model.removeRow(rows[i]);
+    }
     }
 private void changeReceiveListItem(){
   String datasrc=(String)receiveList.getSelectedValue();
@@ -13073,6 +13323,8 @@ CrInstrument instrument;
     private javax.swing.JButton btnEditSrc;
     private javax.swing.JButton btnLogoutAdmin;
     public javax.swing.JButton btnStart;
+    private javax.swing.JButton btnTestEMail;
+    private javax.swing.JButton btnTestSMS;
     private javax.swing.JButton btnZoomIn;
     private javax.swing.JButton btnZoomOut;
     public javax.swing.JButton button02;
@@ -13143,6 +13395,8 @@ CrInstrument instrument;
     private javax.swing.JButton jButton23;
     private javax.swing.JButton jButton24;
     private javax.swing.JButton jButton25;
+    private javax.swing.JButton jButton26;
+    private javax.swing.JButton jButton27;
     private javax.swing.JButton jButton28;
     private javax.swing.JButton jButton29;
     private javax.swing.JButton jButton3;
@@ -13160,6 +13414,7 @@ CrInstrument instrument;
     private javax.swing.JButton jButton40;
     private javax.swing.JButton jButton41;
     private javax.swing.JButton jButton42;
+    private javax.swing.JButton jButton43;
     private javax.swing.JButton jButton44;
     private javax.swing.JButton jButton45;
     private javax.swing.JButton jButton46;
@@ -13516,8 +13771,6 @@ CrInstrument instrument;
     private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
-    private javax.swing.JLabel jLabel36;
-    private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
     private javax.swing.JLabel jLabel39;
     private javax.swing.JLabel jLabel4;
@@ -13563,7 +13816,6 @@ CrInstrument instrument;
     private javax.swing.JLabel jLabel77;
     private javax.swing.JLabel jLabel78;
     private javax.swing.JLabel jLabel79;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel80;
     private javax.swing.JLabel jLabel81;
     private javax.swing.JLabel jLabel82;
@@ -13574,7 +13826,6 @@ CrInstrument instrument;
     private javax.swing.JLabel jLabel87;
     private javax.swing.JLabel jLabel88;
     private javax.swing.JLabel jLabel89;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabel90;
     private javax.swing.JLabel jLabel91;
     private javax.swing.JLabel jLabel92;
@@ -13617,6 +13868,7 @@ CrInstrument instrument;
     private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel110;
     private javax.swing.JPanel jPanel111;
+    private javax.swing.JPanel jPanel112;
     private javax.swing.JPanel jPanel113;
     private javax.swing.JPanel jPanel114;
     private javax.swing.JPanel jPanel115;
@@ -13655,6 +13907,8 @@ CrInstrument instrument;
     private javax.swing.JPanel jPanel145;
     private javax.swing.JPanel jPanel146;
     private javax.swing.JPanel jPanel147;
+    private javax.swing.JPanel jPanel148;
+    private javax.swing.JPanel jPanel149;
     private javax.swing.JPanel jPanel15;
     private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel17;
@@ -13690,8 +13944,6 @@ CrInstrument instrument;
     private javax.swing.JPanel jPanel44;
     private javax.swing.JPanel jPanel45;
     private javax.swing.JPanel jPanel46;
-    private javax.swing.JPanel jPanel47;
-    private javax.swing.JPanel jPanel48;
     private javax.swing.JPanel jPanel49;
     public javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel50;
@@ -13776,7 +14028,9 @@ CrInstrument instrument;
     private javax.swing.JScrollPane jScrollPane16;
     private javax.swing.JScrollPane jScrollPane17;
     private javax.swing.JScrollPane jScrollPane18;
+    private javax.swing.JScrollPane jScrollPane19;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane20;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
@@ -13792,6 +14046,8 @@ CrInstrument instrument;
     private javax.swing.JTable jTable2;
     private javax.swing.JTable jTable3;
     private javax.swing.JTable jTable4;
+    private javax.swing.JTable jTable5;
+    private javax.swing.JTable jTable6;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField10;
     private javax.swing.JTextField jTextField11;
@@ -13884,7 +14140,7 @@ CrInstrument instrument;
     public javax.swing.JRadioButton showStrRB;
     public javax.swing.JCheckBox showSysMsgCB;
     public javax.swing.JCheckBox showTimeCB;
-    private javax.swing.JList stationList;
+    public javax.swing.JList stationList;
     private javax.swing.JButton stopContinueSendBtn;
     private javax.swing.JMenuItem toolMenuItem01;
     private javax.swing.JMenuItem toolMenuItem02;

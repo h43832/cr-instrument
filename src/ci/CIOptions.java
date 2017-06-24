@@ -27,8 +27,6 @@ public class CIOptions extends javax.swing.JDialog {
 
     setSize(w2, h2);
 
-    setTitle("cr-Instrument Options");
-
     setLocation((width - w2) / 2, (h - h2) / 2 - 10);
 
     setIconImage(instrument.iconImage);
@@ -58,10 +56,11 @@ public class CIOptions extends javax.swing.JDialog {
         jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("ci/Bundle"); 
+        setTitle(bundle.getString("CIOptions.title")); 
         getContentPane().setLayout(null);
 
         jCheckBox1.setFont(jCheckBox1.getFont());
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("ci/Bundle"); 
         jCheckBox1.setText(bundle.getString("CIOptions.jCheckBox1.text")); 
         jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
