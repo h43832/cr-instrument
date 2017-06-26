@@ -37,9 +37,9 @@ import javax.swing.text.StyleConstants;
  * @author Administrator
  */
 public class CrInstrument extends WSNApplication implements Runnable {
-  public static String version = "2.17.0020";
+  public static String version = "2.17.0021";
   public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-  String versionTime = "20170623-080100 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
+  String versionTime = "20170626-120000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
           stationFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_stations.txt",
           sensorFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_sensors.txt",currentViewDSrc="",
           statusFile = System.getProperty("user.home") + File.separator + "ci_status.txt", 
@@ -237,8 +237,9 @@ public class CrInstrument extends WSNApplication implements Runnable {
     jTable2.setShowVerticalLines(true);
     jTable2.setDefaultRenderer(Object.class, new MyTableCellRenderer());
     lightPanel2.setColor(Color.gray, Color.gray);
-    setSerialPorts();
+
     setUpSerialPortColumnFromSerialTM(jTable5,jTable5.getColumnModel().getColumn(0));
+
     readPorts();
     readSensors();
     showThread=new CIShowDataThread(this);
@@ -383,25 +384,82 @@ public class CrInstrument extends WSNApplication implements Runnable {
     validate();
     sysLog("System start at " + format4.format(new Date(startTime)) + " (version=" + version + ", version time=" + versionTime + ",ci-demo="+props.getProperty("ci-demo")+", run_my_ap_only="+wn.getPropsString("run_my_ap_only")+")");
   }
-  public void setUpSerialPortColumnFromStationTM(JTable table,TableColumn serialColumn){
-    JComboBox comboBox = new JComboBox();
-    comboBox.setEditable(true);
-    comboBox.addItem("");
-      Iterator it = stations.keySet().iterator();
+
+  void setUpSerialPort(){
+      int comCnt = 0;
+      Iterator it = stations.values().iterator();
+      for (; it.hasNext();) {
+        String port = (String) it.next();
+        if (port.toLowerCase().indexOf("com") != -1) {
+          comCnt++;
+        }
+      }
+
+      int rowCnt=jTable5.getRowCount();
+      if(rowCnt<comCnt+1){
+          for(int i=rowCnt;i<comCnt+1;i++) ((DefaultTableModel) jTable5.getModel()).addRow(new Object[jTable5.getModel().getColumnCount()]);
+      }
+      setUpSerialPortColumnFromStationTM();
+
+      it = stations.keySet().iterator();
+      int comInx = 0;
       for (; it.hasNext();) {
         String key = (String) it.next();
         String port = (String) stations.get(key);
-        if (port.toLowerCase().indexOf("com") == 0) {
-          comboBox.addItem(port);
+        if (port.toLowerCase().indexOf("com") != -1) {
+
+          if(jTable5.getRowCount()>comInx && jTable5.getValueAt(comInx, 0)!=null){
+          JComboBox comboBox=(JComboBox)jTable5.getValueAt(comInx, 0);
+           if (((DefaultComboBoxModel) comboBox.getModel()).getIndexOf(port) > -1) {
+                comboBox.setSelectedItem(port);
+           }  else {
+                if (comboBox.getModel().getSize() == 2 && comCnt == 1) {
+                  comboBox.setSelectedIndex(1);
+                } else {
+                  comboBox.setSelectedItem("");
+                }
+              }
+           jTable5.getModel().setValueAt(key, comInx, 1);
+
+      }
+    }
+   }
+  }
+
+  void setUpSerialPortColumnFromStationTM(){
+      Object obj=(jTable5.getRowCount()<1? null:jTable5.getModel().getValueAt(0,0));
+      int rowInx=0;
+
+       JComboBox combo=(JComboBox)jTable5.getCellEditor(0,0).getTableCellEditorComponent(jTable5, (String)obj, false, 0, 0);
+      int comCnt = 0;
+      Iterator it = stations.values().iterator();
+      for (; it.hasNext();) {
+        String port = (String) it.next();
+        if (port.toLowerCase().indexOf("com") != -1) {
+          comCnt++;
         }
       }
-      serialColumn.setCellEditor(new DefaultCellEditor(comboBox));
+      it = stations.keySet().iterator();
+      for (; it.hasNext();) {
+        String key = (String) it.next();
+        String port = (String) stations.get(key);
+        if (port.toLowerCase().indexOf("com") != -1) {
+          if (((DefaultComboBoxModel) combo.getModel()).getIndexOf(port) > -1) {
+                jTable5.getModel().setValueAt(port,rowInx,0);
+              } else {
+                if (combo.getModel().getSize() == 2 && comCnt == 1) {
+                  combo.setSelectedIndex(1);
+                } else {
+                  combo.setSelectedItem("");
+                }
+              }
+              jTable5.getModel().setValueAt(key, rowInx, 1);
+              rowInx++;
+        }
+      }
 
-        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
-        renderer.setToolTipText("Click for serial port list");
-        serialColumn.setCellRenderer(renderer);
   }
-  public void setUpSerialPortColumnFromSerialTM(JTable table,TableColumn serialColumn) {
+  void setUpSerialPortColumnFromSerialTM(JTable table,TableColumn serialColumn) {
 
     JComboBox comboBox = new JComboBox();
     comboBox.setEditable(true);
@@ -412,45 +470,65 @@ public class CrInstrument extends WSNApplication implements Runnable {
       String port = portArr[i];
       comboBox.addItem(port);
     }        
+    comboBox.setSelectedIndex(0);
     serialColumn.setCellEditor(new DefaultCellEditor(comboBox));
 
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
         renderer.setToolTipText("Click for serial port list");
         serialColumn.setCellRenderer(renderer);
   }
-    public void setUpSocketPortColumnFromStationTM(JTable table,TableColumn socketColumn){
-      JComboBox comboBox = new JComboBox();
+  
+
+  public void setUpSocketPortColumnFromStationTM(JTable table,TableColumn socketColumn){
+    int socketCnt=0;
+
+    JComboBox comboBox = new JComboBox();
     comboBox.setEditable(true);
-      comboBox.addItem("");
-      Iterator it = stations.keySet().iterator();
+    comboBox.addItem("");
+    Iterator it = stations.keySet().iterator();
       for (; it.hasNext();) {
         String key = (String) it.next();
         String port = (String) stations.get(key);
-        if (port.toLowerCase().indexOf("com") != 0) {
+        if (port.toLowerCase().indexOf("com") == -1) {
           comboBox.addItem(port);
+          socketCnt++;
         }
-            socketColumn.setCellEditor(new DefaultCellEditor(comboBox));
+      }
+
+    socketColumn.setCellEditor(new DefaultCellEditor(comboBox));
 
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
-        renderer.setToolTipText("Click for socketerial port list");
+        renderer.setToolTipText("Click for socket port list");
         socketColumn.setCellRenderer(renderer);
+
+      int rowCnt=jTable6.getRowCount();
+      if(rowCnt<socketCnt+1){
+          for(int i=rowCnt;i<socketCnt+1;i++) ((DefaultTableModel) jTable5.getModel()).addRow(new Object[jTable5.getModel().getColumnCount()]);
+      }
+
+      it = stations.keySet().iterator();
+      int socketInx=0;
+      for (; it.hasNext();) {
+        String key = (String) it.next();
+        String port = (String) stations.get(key);
+        if (port.toLowerCase().indexOf("com") == -1) {
+          jTable6.getModel().setValueAt(port, socketInx, 0);
+          jTable6.getModel().setValueAt(key, socketInx, 1);
+          socketInx++;
+        }
       }
   }
+
   public void setUpSocketPortColumn(JTable table,TableColumn socketColumn) {
 
     JComboBox comboBox = new JComboBox();
     comboBox.setEditable(true);
     comboBox.addItem("");
 
-    String portArr[] = WSNSerial.getPorts();
-    for (int i = 0; i < portArr.length; i++) {
-      String port = portArr[i];
-      comboBox.addItem(port);
-    }        
     socketColumn.setCellEditor(new DefaultCellEditor(comboBox));
 
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
-        renderer.setToolTipText("Click for socketerial port list");
+        renderer.setToolTipText("Click for socket port list");
         socketColumn.setCellRenderer(renderer);
   }
 
@@ -1469,23 +1547,6 @@ public Status getStatus(String curveId){
     return rtn;
   }
 
-  void setSerialPorts() {
-    jComboBox21.addItem("");
-    jComboBox22.addItem("");
-    jComboBox15.addItem("");
-
-    String portArr[] = WSNSerial.getPorts();
-    for (int i = 0; i < portArr.length; i++) {
-      String port = portArr[i];
-      jComboBox21.addItem(port);
-      jComboBox22.addItem(port);
-      jComboBox15.addItem(port);
-    }
-    jComboBox21.setSelectedItem("");
-    jComboBox22.setSelectedItem("");
-    jComboBox15.setSelectedItem("");
-  }
-
   boolean openPorts(int type) {
     int openN = 0;
     TreeMap stationsC = (TreeMap) stations.clone();
@@ -1506,10 +1567,16 @@ public Status getStatus(String curveId){
             openN++;
           }
         } else {
-          if (port.toUpperCase().indexOf("COM") == 0 && ((DefaultComboBoxModel) jComboBox21.getModel()).getIndexOf(port) > -1) {
-            String contCmd = "performcommand wsn.WSN openserialport " + port + " #brate# 8 n 1 null null null null null null null null 0 0 0 0 ? ? ? 0";
-            wn.w.sendToOne(contCmd, wn.w.getGNS(1));
-            openN++;
+          if (port.toUpperCase().indexOf("COM") == 0){
+            Object obj=(jTable5.getRowCount()<1? null:jTable5.getModel().getValueAt(0,0));
+            if(obj!=null){
+              JComboBox combo=(JComboBox)jTable5.getCellEditor(0,0).getTableCellEditorComponent(jTable5, (String)obj, false, 0, 0);
+              if(((DefaultComboBoxModel) combo.getModel()).getIndexOf(port) > -1){
+                String contCmd = "performcommand wsn.WSN openserialport " + port + " #brate# 8 n 1 null null null null null null null null 0 0 0 0 ? ? ? 0";
+                wn.w.sendToOne(contCmd, wn.w.getGNS(1));
+                openN++;
+              }
+           }
           } else {
             String contCmd = "performcommand wsn.WSN opensocketport " + port + " 5 60 null null null null null null null 0 0 0 0 ? ? ? 0";
             wn.w.sendToOne(contCmd, wn.w.getGNS(1));
@@ -1585,16 +1652,8 @@ public Status getStatus(String curveId){
         System.out.println("reading file (filename=" + stationFile + ") error, error message: " + e.getMessage() + "\n");
         e.printStackTrace();
       }
-      int comCnt = 0;
-      Iterator it = stations.values().iterator();
-      for (; it.hasNext();) {
-        String port = (String) it.next();
-        if (port.toLowerCase().indexOf("com") == 0) {
-          comCnt++;
-        }
-      }
 
-      it = stations.keySet().iterator();
+      Iterator it = stations.keySet().iterator();
       int socketInx = 0, comInx = 0;
       jComboBox14.addItem("");
       jComboBox19.addItem("");
@@ -1606,75 +1665,12 @@ public Status getStatus(String curveId){
         jComboBox14.addItem(key);
         jComboBox19.addItem(key);
         jComboBox40.addItem(key);
-        if (port.toLowerCase().indexOf("com") == 0) {
-
-          switch (comInx) {
-            case 0:
-              if (((DefaultComboBoxModel) jComboBox21.getModel()).getIndexOf(port) > -1) {
-                jComboBox21.setSelectedItem(port);
-              } else {
-                if (jComboBox21.getModel().getSize() == 2 && comCnt == 1) {
-                  jComboBox21.setSelectedIndex(1);
-                } else {
-                  jComboBox21.setSelectedItem("");
-                }
-              }
-              jTextField22.setText(key);
-              break;
-            case 1:
-              if (((DefaultComboBoxModel) jComboBox22.getModel()).getIndexOf(port) > -1) {
-                jComboBox22.setSelectedItem(port);
-              } else {
-                if (((String) jComboBox21.getSelectedItem()).length() > 0 && jComboBox22.getModel().getSize() == 3 && comCnt == 2) {
-                  int selInx = jComboBox21.getSelectedIndex();
-                  jComboBox22.setSelectedItem(3 - selInx);
-                } else {
-                  jComboBox22.setSelectedItem("");
-                }
-              }
-              jTextField23.setText(key);
-              break;
-            case 2:
-              if (((DefaultComboBoxModel) jComboBox15.getModel()).getIndexOf(port) > -1) {
-                jComboBox15.setSelectedItem(port);
-              } else {
-                if (((String) jComboBox21.getSelectedItem()).length() > 0 && ((String) jComboBox22.getSelectedItem()).length() > 0 && jComboBox15.getModel().getSize() == 4 && comCnt == 3) {
-                  int selInx = jComboBox21.getSelectedIndex();
-                  int selInx2 = jComboBox22.getSelectedIndex();
-                  jComboBox15.setSelectedItem(6 - selInx - selInx2);
-                } else {
-                  jComboBox15.setSelectedItem("");
-                }
-              }
-              jTextField11.setText(key);
-              break;
-          }
-          comInx++;
-        } else {
-          jComboBox23.addItem(port);
-          jComboBox24.addItem(port);
-          jComboBox25.addItem(port);
-          switch (socketInx) {
-            case 0:
-              jComboBox23.setSelectedItem(port);
-              jTextField24.setText(key);
-              break;
-            case 1:
-              jComboBox24.setSelectedItem(port);
-              jTextField25.setText(key);
-              break;
-            case 2:
-              jComboBox25.setSelectedItem(port);
-              jTextField26.setText(key);
-              break;
-          }
-          socketInx++;
-        }
 
       }
       jComboBox14.setSelectedIndex(0);
       jComboBox19.setSelectedIndex(0);
-      setUpSerialPortColumnFromStationTM(jTable5, jTable5.getColumnModel().getColumn(0));
+      jComboBox40.setSelectedIndex(0);
+      setUpSerialPortColumnFromStationTM();
       setUpSocketPortColumnFromStationTM(jTable6, jTable6.getColumnModel().getColumn(0));
       } else sysLog("station file "+stationFile+" not found.");
     } else sysLog("station file name not set.");
@@ -1701,29 +1697,42 @@ public Status getStatus(String curveId){
     }
   }
 
-  boolean updatePorts(int type) {
+  boolean updatePortsFromUI(int type) {
     stations.clear();
     ports.clear();
     String oldStation = currentStation;
     String selected = (String)stationList.getSelectedValue();
-    if (jTextField22.getText().trim().length() > 0) {
-      stations.put(jTextField22.getText().trim(), (jComboBox21.getSelectedItem() != null ? (String) jComboBox21.getSelectedItem() : ""));
+    int rowCnt=jTable5.getRowCount();
+    for(int i=0;i<rowCnt;i++){
+       if(jTable5.getModel().getValueAt(i,1)!=null){
+           String stationName=(String)jTable5.getModel().getValueAt(i,1);
+           stationName=stationName.trim();
+           if(stationName.length()>0){
+             String port="";
+             if(jTable5.getModel().getValueAt(i,0)!=null){
+                 port=(String)jTable5.getModel().getValueAt(i,0);
+                 port=port.trim();
+             }
+             stations.put(stationName,port);
+           }
+       }
     }
-    if (jTextField23.getText().trim().length() > 0) {
-      stations.put(jTextField23.getText().trim(), (jComboBox22.getSelectedItem() != null ? (String) jComboBox22.getSelectedItem() : ""));
+    rowCnt=jTable6.getRowCount();
+    for(int i=0;i<rowCnt;i++){
+       if(jTable6.getModel().getValueAt(i,1)!=null){
+           String stationName=(String)jTable6.getModel().getValueAt(i,1);
+           stationName=stationName.trim();
+           if(stationName.length()>0){
+             String port="";
+             if(jTable6.getModel().getValueAt(i,0)!=null){
+                 port=(String)jTable6.getModel().getValueAt(i,0);
+                 port=port.trim();
+             }
+             stations.put(stationName,port);
+           }
+       }
     }
-    if (jTextField11.getText().trim().length() > 0) {
-      stations.put(jTextField11.getText().trim(), (jComboBox15.getSelectedItem() != null ? (String) jComboBox15.getSelectedItem() : ""));
-    }
-    if (jTextField24.getText().trim().length() > 0) {
-      stations.put(jTextField24.getText().trim(), (jComboBox23.getSelectedItem() != null ? (String) jComboBox23.getSelectedItem() : ""));
-    }
-    if (jTextField25.getText().trim().length() > 0) {
-      stations.put(jTextField25.getText().trim(), (jComboBox24.getSelectedItem() != null ? (String) jComboBox24.getSelectedItem() : ""));
-    }
-    if (jTextField26.getText().trim().length() > 0) {
-      stations.put(jTextField26.getText().trim(), (jComboBox25.getSelectedItem() != null ? (String) jComboBox25.getSelectedItem() : ""));
-    }
+
     Iterator it = stations.keySet().iterator();
     for (; it.hasNext();) {
       String key = (String) it.next();
@@ -5053,36 +5062,6 @@ public void doLayout(){
         jTable3 = new javax.swing.JTable();
         jButton21 = new javax.swing.JButton();
         jButton22 = new javax.swing.JButton();
-        jPanel29 = new javax.swing.JPanel();
-        jLabel60 = new javax.swing.JLabel();
-        jComboBox21 = new javax.swing.JComboBox();
-        jLabel61 = new javax.swing.JLabel();
-        jTextField22 = new javax.swing.JTextField();
-        jPanel30 = new javax.swing.JPanel();
-        jLabel62 = new javax.swing.JLabel();
-        jComboBox22 = new javax.swing.JComboBox();
-        jLabel63 = new javax.swing.JLabel();
-        jTextField23 = new javax.swing.JTextField();
-        jPanel28 = new javax.swing.JPanel();
-        jLabel11 = new javax.swing.JLabel();
-        jComboBox15 = new javax.swing.JComboBox();
-        jLabel59 = new javax.swing.JLabel();
-        jTextField11 = new javax.swing.JTextField();
-        jPanel31 = new javax.swing.JPanel();
-        jLabel65 = new javax.swing.JLabel();
-        jComboBox23 = new javax.swing.JComboBox();
-        jLabel66 = new javax.swing.JLabel();
-        jTextField24 = new javax.swing.JTextField();
-        jPanel32 = new javax.swing.JPanel();
-        jLabel67 = new javax.swing.JLabel();
-        jComboBox24 = new javax.swing.JComboBox();
-        jLabel68 = new javax.swing.JLabel();
-        jTextField25 = new javax.swing.JTextField();
-        jPanel33 = new javax.swing.JPanel();
-        jLabel69 = new javax.swing.JLabel();
-        jComboBox25 = new javax.swing.JComboBox();
-        jLabel70 = new javax.swing.JLabel();
-        jTextField26 = new javax.swing.JTextField();
         jPanel20 = new javax.swing.JPanel();
         jPanel24 = new javax.swing.JPanel();
         jPanel25 = new javax.swing.JPanel();
@@ -7185,120 +7164,6 @@ public void doLayout(){
 
         jPanel5.add(jPanel21);
         jPanel21.setBounds(420, 390, 300, 140);
-
-        jPanel29.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel29.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel60.setText(bundle.getString("CrInstrument.jLabel60.text")); 
-        jPanel29.add(jLabel60);
-
-        jComboBox21.setEditable(true);
-        jComboBox21.setPreferredSize(new java.awt.Dimension(80, 25));
-        jPanel29.add(jComboBox21);
-
-        jLabel61.setText(bundle.getString("CrInstrument.jLabel61.text")); 
-        jPanel29.add(jLabel61);
-
-        jTextField22.setPreferredSize(new java.awt.Dimension(150, 25));
-        jPanel29.add(jTextField22);
-
-        jPanel5.add(jPanel29);
-        jPanel29.setBounds(680, 120, 330, 40);
-
-        jPanel30.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel30.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel62.setText(bundle.getString("CrInstrument.jLabel62.text")); 
-        jPanel30.add(jLabel62);
-
-        jComboBox22.setEditable(true);
-        jComboBox22.setPreferredSize(new java.awt.Dimension(80, 25));
-        jPanel30.add(jComboBox22);
-
-        jLabel63.setText(bundle.getString("CrInstrument.jLabel63.text")); 
-        jPanel30.add(jLabel63);
-
-        jTextField23.setPreferredSize(new java.awt.Dimension(150, 25));
-        jPanel30.add(jTextField23);
-
-        jPanel5.add(jPanel30);
-        jPanel30.setBounds(670, 160, 330, 35);
-
-        jPanel28.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel28.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel11.setText(bundle.getString("CrInstrument.jLabel11.text")); 
-        jPanel28.add(jLabel11);
-
-        jComboBox15.setEditable(true);
-        jComboBox15.setPreferredSize(new java.awt.Dimension(80, 25));
-        jPanel28.add(jComboBox15);
-
-        jLabel59.setText(bundle.getString("CrInstrument.jLabel59.text")); 
-        jPanel28.add(jLabel59);
-
-        jTextField11.setPreferredSize(new java.awt.Dimension(150, 25));
-        jPanel28.add(jTextField11);
-
-        jPanel5.add(jPanel28);
-        jPanel28.setBounds(670, 200, 330, 35);
-
-        jPanel31.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel31.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel65.setText(bundle.getString("CrInstrument.jLabel65.text")); 
-        jPanel31.add(jLabel65);
-
-        jComboBox23.setEditable(true);
-        jComboBox23.setPreferredSize(new java.awt.Dimension(80, 25));
-        jPanel31.add(jComboBox23);
-
-        jLabel66.setText(bundle.getString("CrInstrument.jLabel66.text")); 
-        jPanel31.add(jLabel66);
-
-        jTextField24.setPreferredSize(new java.awt.Dimension(150, 25));
-        jPanel31.add(jTextField24);
-
-        jPanel5.add(jPanel31);
-        jPanel31.setBounds(700, 250, 300, 35);
-
-        jPanel32.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel32.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel67.setText(bundle.getString("CrInstrument.jLabel67.text")); 
-        jPanel32.add(jLabel67);
-
-        jComboBox24.setEditable(true);
-        jComboBox24.setPreferredSize(new java.awt.Dimension(80, 25));
-        jPanel32.add(jComboBox24);
-
-        jLabel68.setText(bundle.getString("CrInstrument.jLabel68.text")); 
-        jPanel32.add(jLabel68);
-
-        jTextField25.setPreferredSize(new java.awt.Dimension(150, 25));
-        jPanel32.add(jTextField25);
-
-        jPanel5.add(jPanel32);
-        jPanel32.setBounds(690, 290, 300, 35);
-
-        jPanel33.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel33.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel69.setText(bundle.getString("CrInstrument.jLabel69.text")); 
-        jPanel33.add(jLabel69);
-
-        jComboBox25.setEditable(true);
-        jComboBox25.setPreferredSize(new java.awt.Dimension(80, 25));
-        jPanel33.add(jComboBox25);
-
-        jLabel70.setText(bundle.getString("CrInstrument.jLabel70.text")); 
-        jPanel33.add(jLabel70);
-
-        jTextField26.setPreferredSize(new java.awt.Dimension(150, 25));
-        jPanel33.add(jTextField26);
-
-        jPanel5.add(jPanel33);
-        jPanel33.setBounds(690, 330, 300, 40);
 
         jTabbedPane2.addTab(bundle.getString("CrInstrument.jPanel5.TabConstraints.tabTitle"), jPanel5); 
 
@@ -10359,7 +10224,7 @@ public void doLayout(){
     }
 
     void pressStartBtn(int type){
-        if (!updatePorts(type)) {
+        if (!updatePortsFromUI(type)) {
         if(type==1) JOptionPane.showMessageDialog(this, bundle2.getString("CrInstrument.xy.msg59"));
         else sysLog(bundle2.getString("CrInstrument.xy.msg60"));
         return;
@@ -10461,7 +10326,7 @@ public void doLayout(){
       userDialog.setVisible(true);
     }
     if (adminLogin || userLogin) {
-      updatePorts(1);
+      updatePortsFromUI(1);
       saveStations();
       updateProps_miscellaneous();
 
@@ -10668,7 +10533,7 @@ public void doLayout(){
     if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
       sysLog("press connect, connected=" + connected);
     }
-    if (!updatePorts(1)) {
+    if (!updatePortsFromUI(1)) {
       return;
     }
     if (!openPorts(1)) {
@@ -12405,8 +12270,8 @@ private void updateItem(){
     }
 
     private void jButton43ActionPerformed(java.awt.event.ActionEvent evt) {
-         DefaultTableModel model = (DefaultTableModel) jTable5.getModel();
-    int[] rows = jTable5.getSelectedRows();
+         DefaultTableModel model = (DefaultTableModel) jTable6.getModel();
+    int[] rows = jTable6.getSelectedRows();
 
     for (int i = rows.length - 1; i > -1; i--) {
       model.removeRow(rows[i]);
@@ -13482,18 +13347,12 @@ CrInstrument instrument;
     private javax.swing.JComboBox jComboBox12;
     private javax.swing.JComboBox jComboBox13;
     private javax.swing.JComboBox jComboBox14;
-    private javax.swing.JComboBox jComboBox15;
     private javax.swing.JComboBox jComboBox16;
     private javax.swing.JComboBox jComboBox17;
     private javax.swing.JComboBox jComboBox18;
     private javax.swing.JComboBox jComboBox19;
     private javax.swing.JComboBox jComboBox2;
     private javax.swing.JComboBox jComboBox20;
-    private javax.swing.JComboBox jComboBox21;
-    private javax.swing.JComboBox jComboBox22;
-    private javax.swing.JComboBox jComboBox23;
-    private javax.swing.JComboBox jComboBox24;
-    private javax.swing.JComboBox jComboBox25;
     private javax.swing.JComboBox jComboBox26;
     private javax.swing.JComboBox jComboBox27;
     private javax.swing.JComboBox jComboBox28;
@@ -13543,7 +13402,6 @@ CrInstrument instrument;
     private javax.swing.JLabel jLabel107;
     private javax.swing.JLabel jLabel108;
     private javax.swing.JLabel jLabel109;
-    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel110;
     private javax.swing.JLabel jLabel111;
     private javax.swing.JLabel jLabel112;
@@ -13794,19 +13652,8 @@ CrInstrument instrument;
     private javax.swing.JLabel jLabel56;
     private javax.swing.JLabel jLabel57;
     private javax.swing.JLabel jLabel58;
-    private javax.swing.JLabel jLabel59;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel60;
-    private javax.swing.JLabel jLabel61;
-    private javax.swing.JLabel jLabel62;
-    private javax.swing.JLabel jLabel63;
-    private javax.swing.JLabel jLabel65;
-    private javax.swing.JLabel jLabel66;
-    private javax.swing.JLabel jLabel67;
-    private javax.swing.JLabel jLabel68;
-    private javax.swing.JLabel jLabel69;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel70;
     private javax.swing.JLabel jLabel71;
     private javax.swing.JLabel jLabel72;
     private javax.swing.JLabel jLabel73;
@@ -13923,13 +13770,7 @@ CrInstrument instrument;
     private javax.swing.JPanel jPanel25;
     private javax.swing.JPanel jPanel26;
     private javax.swing.JPanel jPanel27;
-    private javax.swing.JPanel jPanel28;
-    private javax.swing.JPanel jPanel29;
     public javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel30;
-    private javax.swing.JPanel jPanel31;
-    private javax.swing.JPanel jPanel32;
-    private javax.swing.JPanel jPanel33;
     private javax.swing.JPanel jPanel34;
     private javax.swing.JPanel jPanel35;
     private javax.swing.JPanel jPanel36;
@@ -14050,7 +13891,6 @@ CrInstrument instrument;
     private javax.swing.JTable jTable6;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField10;
-    private javax.swing.JTextField jTextField11;
     private javax.swing.JTextField jTextField12;
     private javax.swing.JTextField jTextField13;
     private javax.swing.JTextField jTextField14;
@@ -14062,11 +13902,6 @@ CrInstrument instrument;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField20;
     private javax.swing.JTextField jTextField21;
-    private javax.swing.JTextField jTextField22;
-    private javax.swing.JTextField jTextField23;
-    private javax.swing.JTextField jTextField24;
-    private javax.swing.JTextField jTextField25;
-    private javax.swing.JTextField jTextField26;
     private javax.swing.JTextField jTextField27;
     private javax.swing.JTextField jTextField28;
     private javax.swing.JTextField jTextField29;
