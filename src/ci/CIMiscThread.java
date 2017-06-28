@@ -2,6 +2,7 @@
 package ci;
 
 import java.util.Iterator;
+import java.util.ResourceBundle;
 import java.util.TreeMap;
 import java.util.Vector;
 import y.ylib.ylib;
@@ -10,6 +11,7 @@ public class CIMiscThread extends Thread{
 CrInstrument instrument;
   Vector waitV=new Vector();
   boolean isSleep=false;
+  public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
   long waitTime=1000L*60L*60L*24L,waitTime2=1L;
     public CIMiscThread(CrInstrument instrument){
     this.instrument=instrument;
@@ -40,10 +42,10 @@ CrInstrument instrument;
                      sendCmd(act);
                    }
                    else if(miscCode==6){
-                     if (instrument.btnStart.getText().trim().equals("Start Record"))  instrument.pressStartBtn(2);
+                     if (instrument.btnStart.getText().trim().equals(bundle2.getString("CrInstrument.xy.msg3")))  instrument.pressStartBtn(2);
                    }
                    else if(miscCode==7){
-                     if (!instrument.btnStart.getText().trim().equals("Start Record"))instrument.pressStartBtn(2);
+                     if (instrument.btnStart.getText().trim().equals(bundle2.getString("CrInstrument.xy.msg4")))instrument.pressStartBtn(2);
                    }
                    else if(miscCode==8){
 

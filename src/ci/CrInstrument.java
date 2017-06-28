@@ -37,9 +37,9 @@ import javax.swing.text.StyleConstants;
  * @author Administrator
  */
 public class CrInstrument extends WSNApplication implements Runnable {
-  public static String version = "2.17.0021";
+  public static String version = "2.17.0022";
   public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-  String versionTime = "20170626-120000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
+  String versionTime = "20170629-080000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
           stationFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_stations.txt",
           sensorFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_sensors.txt",currentViewDSrc="",
           statusFile = System.getProperty("user.home") + File.separator + "ci_status.txt", 
@@ -50,7 +50,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
           curveFile ="apps" + File.separator + "cr-wsn" + File.separator + "ci_curve.txt", logFileHead = "sys_log",allItemsName="¥þ³¡",
           uiFile ="apps" + File.separator + "cr-wsn" + File.separator + "ci_ui.txt", 
           conditionFile="",actionFile="",currentChartPara="",dataDir="ci-data",usedDataDir="",logDir="ci-log",
-          smsSpFile="",emailSpFile="";
+          smsSpFile="",emailSpFile="",currentEvent="",currentCondition2="",currentAction2="",currentCondition1="",currentAction1="";
   String restartStr="";
 
   JLabel button01;
@@ -104,7 +104,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
           smsSpTM=new TreeMap(),emailSpTM=new TreeMap();
   TreeMap deviceToKeys = new TreeMap(), keyToDevices = new TreeMap(),
           portToCoors = new TreeMap(), coorToPorts = new TreeMap(),
-          coorDevices = new TreeMap(),
+          deviceKeyDevices = new TreeMap(),
           prefixTM = new TreeMap(), previousTM1 = new TreeMap(), previousTM2 = new TreeMap(), previousTM3 = new TreeMap(),
           currentCalculatedRN = new TreeMap(), deviceToCoor = new TreeMap(),currentDatumTM=new TreeMap(),
           currentConfigTM=new TreeMap(),currentStatusTM=new TreeMap(),allConfigTM=new TreeMap(),allStatusTM=new TreeMap();
@@ -1477,7 +1477,7 @@ public Config getConfig(String curveId){
       int cntA=(WSN.isNumeric(evt[2])? Integer.parseInt(evt[2]):0);
       for(int i=0;i<cntA;i++){
         String act[]=ylib.csvlinetoarray((String)actionTM.get(evt[3+cntD+i]));
-        if(act[1].equalsIgnoreCase(tmp[0]) && act[39].equalsIgnoreCase(tmp[1]) && act[16].equalsIgnoreCase(tmp[2]) && act[17].equalsIgnoreCase(tmp[4]) && act[2].equalsIgnoreCase("Set data value")){
+        if(act!=null && act.length>17 && act[1].equalsIgnoreCase(tmp[0]) && act[39].equalsIgnoreCase(tmp[1]) && act[16].equalsIgnoreCase(tmp[2]) && act[17].equalsIgnoreCase(tmp[4]) && act[2].equalsIgnoreCase("Set data value")){
             confA[1]=(act[25].equalsIgnoreCase("Y")? wn.w.addOneVar(confA[1],13):confA[1]);
             confA[1]=(act[23].equalsIgnoreCase("Y")? wn.w.addOneVar(confA[1],57):confA[1]);
             confA[13]=act[24];
@@ -3029,8 +3029,8 @@ String getFileHead(String station){
       String coorAddr = (String) portToCoors.get(port);
       String deviceAddr = "";
       if (found) {
-        if (coorAddr != null && coorDevices.get(coorAddr) != null) {
-          TreeMap tm = (TreeMap) coorDevices.get(coorAddr);
+        if (coorAddr != null && deviceKeyDevices.get(coorAddr) != null) {
+          TreeMap tm = (TreeMap) deviceKeyDevices.get(coorAddr);
 
           if (tm.get(info[1]) != null) {
             deviceAddr = (String) tm.get(info[1]);
@@ -3047,36 +3047,38 @@ String getFileHead(String station){
   }
   
 
-  public String[] getNext_c(String currentStation, String currentId, int moduletype) {
+  
+
+  public String[] getNext_c(String currentDeviceKey, String currentSN, int moduletype) {
     if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
-      sysLog("getNext_c(" + currentStation + "," + currentId + "," + moduletype + "), sensors.size=" + sensors.size() + ",stations.size=" + stations.size() + ",portToCoors.size=" + portToCoors.size() + ",coorDevices.size=" + coorDevices.size());
+      sysLog("getNext_c(" + currentDeviceKey + "," + currentSN + "," + moduletype + "), sensors.size=" + sensors.size() + ",stations.size=" + stations.size() + ",portToCoors.size=" + portToCoors.size() + ",coorDevices.size=" + deviceKeyDevices.size());
     }
     boolean found = false;
-    if (currentStation.length() < 1) {
+    if (currentDeviceKey.length() < 1) {
       found = true;
     }
     TreeMap sensorsC = (TreeMap) sensors.clone();
     Iterator it = sensorsC.keySet().iterator();
     for (; it.hasNext();) {
       String key = (String) it.next();
-      String info[] = ylib.csvlinetoarray((String) sensors.get(key));
+      String info[] = ylib.csvlinetoarray((String) sensorsC.get(key));
       String port = (String) stations.get(info[0]);
       if (port != null) {
 
         String coorAddr = (portToCoors.get(port) == null ? null : (String) portToCoors.get(port));
         String deviceAddr = "";
 
-        if (currentStation.equals(info[0]) && currentId.equals(info[1])) {
+        if (currentDeviceKey.equals(info[0]+","+info[1]+","+info[2]) && currentSN.equals(info[3])) {
           found = true;
         }        
         if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
-          sysLog("key=" + key + ",info.length=" + info.length + ",info[0]=" + info[0] + ",info[1]=" + info[1] + ",info[22]=" + (info.length > 22 ? info[22] : "")
+          sysLog("key=" + key + ",info.length=" + info.length + ",info[0]=" + info[0] + ",info[1]=" + info[1]+ ",info[2]=" + info[2]+ ",info[3]=" + info[3] + ",info[22]=" + (info.length > 22 ? info[22] : "")
                   + ",info[23]=" + (info.length > 23 ? info[23] : "") + ",info[24]=" + (info.length > 24 ? info[24] : "") + ",info[25]=" + (info.length > 25 ? info[25] : "") + ",port=" + port + ",found=" + found
-                  + ",coorAddr=" + coorAddr + ((coorAddr != null && coorDevices != null) ? ",coorDevices.get(\"" + coorAddr + "\")!=null)? " + (coorDevices.get(coorAddr) != null) : ""));
+                  + ",coorAddr=" + coorAddr + ((coorAddr != null && deviceKeyDevices != null) ? ",coorDevices.get(\"" + coorAddr + "\")!=null)? " + (deviceKeyDevices.get(coorAddr) != null) : ""));
         }
-        if (found && coorAddr != null && coorDevices.get(coorAddr) != null) {
-          if (currentStation.equals("") || (!(currentStation.equals(info[0]) && currentId.equals(info[1])))) {
-            TreeMap tm = (TreeMap) coorDevices.get(coorAddr);
+        if (found && coorAddr != null && deviceKeyDevices.get(coorAddr) != null) {
+          if (currentDeviceKey.equals("") || (!(currentDeviceKey.equals(info[0]) && currentSN.equals(info[1])))) {
+            TreeMap tm = (TreeMap) deviceKeyDevices.get(coorAddr);
             if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
               sysLog("coorAddr=" + coorAddr + ",deviceAddr=tm.get(\"" + info[1] + "\")=" + (String) tm.get(info[1]));
             }
@@ -3098,7 +3100,7 @@ String getFileHead(String station){
 
   public String[] getToId_c(String deviceAddr, int moduletype) {
     if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
-      sysLog("getToId_c(" + deviceAddr + "," + moduletype + "), sensors.size=" + sensors.size() + ",stations.size=" + stations.size() + ",portToCoors.size=" + portToCoors.size() + ",coorDevices.size=" + coorDevices.size());
+      sysLog("getToId_c(" + deviceAddr + "," + moduletype + "), sensors.size=" + sensors.size() + ",stations.size=" + stations.size() + ",portToCoors.size=" + portToCoors.size() + ",coorDevices.size=" + deviceKeyDevices.size());
     }      
     TreeMap sensorsC = (TreeMap) sensors.clone();
     Iterator it = sensorsC.keySet().iterator();
@@ -3113,10 +3115,10 @@ String getFileHead(String station){
         if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
           sysLog("key=" + key + ",info.length=" + info.length + ",info[0]=" + info[0] + ",info[1]=" + info[1] + ",info[22]=" + (info.length > 22 ? info[22] : "")
                   + ",info[23]=" + (info.length > 23 ? info[23] : "") + ",info[24]=" + (info.length > 24 ? info[24] : "") + ",info[25]=" + (info.length > 25 ? info[25] : "") + ",port=" + port
-                  + ",coorAddr=" + coorAddr + ((coorAddr != null && coorDevices != null) ? ",coorDevices.get(\"" + coorAddr + "\")!=null)? " + (coorDevices.get(coorAddr) != null) : ""));
+                  + ",coorAddr=" + coorAddr + ((coorAddr != null && deviceKeyDevices != null) ? ",coorDevices.get(\"" + coorAddr + "\")!=null)? " + (deviceKeyDevices.get(coorAddr) != null) : ""));
         }
-        if (coorAddr != null && coorDevices.get(coorAddr) != null) {
-          TreeMap tm = (TreeMap) coorDevices.get(coorAddr);
+        if (coorAddr != null && deviceKeyDevices.get(coorAddr) != null) {
+          TreeMap tm = (TreeMap) deviceKeyDevices.get(coorAddr);
           if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
             sysLog("coorAddr=" + coorAddr + ",deviceAddr=tm.get(\"" + info[1] + "\")=" + (String) tm.get(info[1]));
           }
@@ -4286,16 +4288,16 @@ public void setStatus(String nodeId,String dataSrc[],int statusCode){
   }
 
   void insertToCoorDevices(String coorAddr, String info[]) {
-    TreeMap tm = (TreeMap) coorDevices.get(coorAddr);
+    TreeMap tm = (TreeMap) deviceKeyDevices.get(coorAddr);
     if (tm == null) {
       tm = new TreeMap();
     }
     tm.put(info[1], info[23]);
-    coorDevices.put(coorAddr, tm);
+    deviceKeyDevices.put(coorAddr, tm);
   }
 
   String insertToCoorDevices_old(String coorAddr, String deviceAddr) {
-    TreeMap tm = (TreeMap) coorDevices.get(coorAddr);
+    TreeMap tm = (TreeMap) deviceKeyDevices.get(coorAddr);
     if (tm == null) {
       tm = new TreeMap();
     }
@@ -4325,7 +4327,7 @@ public void setStatus(String nodeId,String dataSrc[],int statusCode){
       }
       tm.put(id, deviceAddr);
     }
-    coorDevices.put(coorAddr, tm);
+    deviceKeyDevices.put(coorAddr, tm);
     return id;
   }
 
@@ -4695,10 +4697,10 @@ public void doLayout(){
     }
     String coor = "", stationName = "", id = "";
     boolean found = false;
-    Iterator it = coorDevices.keySet().iterator();
+    Iterator it = deviceKeyDevices.keySet().iterator();
     for (; it.hasNext();) {
       String tmpCoor = (String) it.next();
-      TreeMap tm = (TreeMap) coorDevices.get(tmpCoor);
+      TreeMap tm = (TreeMap) deviceKeyDevices.get(tmpCoor);
       Iterator it2 = tm.keySet().iterator();
       for (; it2.hasNext();) {
         String tmpId = (String) it2.next();
@@ -4711,15 +4713,15 @@ public void doLayout(){
       }
     }
     if (found) {
-      TreeMap tm = (TreeMap) coorDevices.get(coor);
+      TreeMap tm = (TreeMap) deviceKeyDevices.get(coor);
       tm.remove(id);
       if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
         sysLog("remove " + deviceAddr + " from " + ports.get((String) coorToPorts.get(coor)) + "-" + id + ".");
       }
       if (tm.size() < 1) {
-        coorDevices.remove(coor);
+        deviceKeyDevices.remove(coor);
       } else {
-        coorDevices.put(coor, tm);
+        deviceKeyDevices.put(coor, tm);
       }
     }
   }
@@ -4822,7 +4824,6 @@ public void doLayout(){
         buttonGroup1 = new javax.swing.ButtonGroup();
         buttonGroup4 = new javax.swing.ButtonGroup();
         buttonGroup5 = new javax.swing.ButtonGroup();
-        buttonGroup6 = new javax.swing.ButtonGroup();
         buttonGroup7 = new javax.swing.ButtonGroup();
         buttonGroup8 = new javax.swing.ButtonGroup();
         buttonGroup9 = new javax.swing.ButtonGroup();
@@ -5298,24 +5299,24 @@ public void doLayout(){
         jPanel71 = new javax.swing.JPanel();
         jScrollPane6 = new javax.swing.JScrollPane();
         eventList = new javax.swing.JList(eventListModel);
-        jButton33 = new javax.swing.JButton();
-        jButton34 = new javax.swing.JButton();
-        jButton9 = new javax.swing.JButton();
-        jButton12 = new javax.swing.JButton();
+        btnMoveUpEvent = new javax.swing.JButton();
+        btnMoveDownEvent = new javax.swing.JButton();
+        btnNewEvent = new javax.swing.JButton();
+        btnRemoveEvent = new javax.swing.JButton();
         jLabel87 = new javax.swing.JLabel();
         jLabel88 = new javax.swing.JLabel();
         jScrollPane17 = new javax.swing.JScrollPane();
         conditionList2 = new javax.swing.JList(conditionListModel2);
         jScrollPane18 = new javax.swing.JScrollPane();
         actionList2 = new javax.swing.JList(actionListModel2);
-        jButton28 = new javax.swing.JButton();
-        jButton52 = new javax.swing.JButton();
+        btnRemoveCondition2 = new javax.swing.JButton();
+        btnRemoveAction2 = new javax.swing.JButton();
         jPanel70 = new javax.swing.JPanel();
         jScrollPane8 = new javax.swing.JScrollPane();
         actionList = new javax.swing.JList(actionListModel);
-        jButton25 = new javax.swing.JButton();
-        jButton18 = new javax.swing.JButton();
-        updateActionBtn = new javax.swing.JButton();
+        btnRemoveAction1 = new javax.swing.JButton();
+        btnAddAction1ToEvent = new javax.swing.JButton();
+        btnUpdateAction1 = new javax.swing.JButton();
         jPanel76 = new javax.swing.JPanel();
         jLabel86 = new javax.swing.JLabel();
         jComboBox19 = new javax.swing.JComboBox();
@@ -5359,12 +5360,10 @@ public void doLayout(){
         jLabel99 = new javax.swing.JLabel();
         jCheckBox28 = new javax.swing.JCheckBox();
         jTextField63 = new javax.swing.JTextField();
-        jButton31 = new javax.swing.JButton();
-        jButton32 = new javax.swing.JButton();
-        jButton50 = new javax.swing.JButton();
+        btnMoveUpAction1 = new javax.swing.JButton();
+        btnMoveDownAction1 = new javax.swing.JButton();
+        btnNewAction1 = new javax.swing.JButton();
         jPanel78 = new javax.swing.JPanel();
-        jRadioButton10 = new javax.swing.JRadioButton();
-        jRadioButton11 = new javax.swing.JRadioButton();
         jPanel94 = new javax.swing.JPanel();
         jLabel110 = new javax.swing.JLabel();
         jComboBox32 = new javax.swing.JComboBox();
@@ -5395,9 +5394,6 @@ public void doLayout(){
         jTextField71 = new javax.swing.JTextField();
         jLabel167 = new javax.swing.JLabel();
         jTextField72 = new javax.swing.JTextField();
-        jPanel84 = new javax.swing.JPanel();
-        jLabel155 = new javax.swing.JLabel();
-        jTextField53 = new javax.swing.JTextField();
         jPanel122 = new javax.swing.JPanel();
         jLabel142 = new javax.swing.JLabel();
         jComboBox44 = new javax.swing.JComboBox();
@@ -5432,10 +5428,10 @@ public void doLayout(){
         jPanel69 = new javax.swing.JPanel();
         jScrollPane7 = new javax.swing.JScrollPane();
         conditionList = new javax.swing.JList(conditionListModel);
-        jButton11 = new javax.swing.JButton();
-        jButton13 = new javax.swing.JButton();
+        btnCondition1AddToEvent = new javax.swing.JButton();
+        btnRemoveCondition1 = new javax.swing.JButton();
         jLabel81 = new javax.swing.JLabel();
-        updateConditionBtn = new javax.swing.JButton();
+        btnUpdateCondition1 = new javax.swing.JButton();
         jPanel72 = new javax.swing.JPanel();
         jPanel80 = new javax.swing.JPanel();
         jLabel90 = new javax.swing.JLabel();
@@ -5469,9 +5465,9 @@ public void doLayout(){
         jPanel74 = new javax.swing.JPanel();
         jLabel78 = new javax.swing.JLabel();
         jComboBox16 = new javax.swing.JComboBox();
-        jButton29 = new javax.swing.JButton();
-        jButton30 = new javax.swing.JButton();
-        jButton51 = new javax.swing.JButton();
+        btnMoveUpCondition1 = new javax.swing.JButton();
+        btnMoveDownCondition1 = new javax.swing.JButton();
+        btnNewCondition1 = new javax.swing.JButton();
         jPanel124 = new javax.swing.JPanel();
         jPanel125 = new javax.swing.JPanel();
         jLabel157 = new javax.swing.JLabel();
@@ -8361,45 +8357,45 @@ public void doLayout(){
         jPanel71.add(jScrollPane6);
         jScrollPane6.setBounds(10, 20, 70, 400);
 
-        jButton33.setFont(jButton33.getFont());
-        jButton33.setText(bundle.getString("CrInstrument.jButton33.text")); 
-        jButton33.addActionListener(new java.awt.event.ActionListener() {
+        btnMoveUpEvent.setFont(btnMoveUpEvent.getFont());
+        btnMoveUpEvent.setText(bundle.getString("CrInstrument.btnMoveUpEvent.text")); 
+        btnMoveUpEvent.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton33ActionPerformed(evt);
+                btnMoveUpEventActionPerformed(evt);
             }
         });
-        jPanel71.add(jButton33);
-        jButton33.setBounds(10, 490, 110, 23);
+        jPanel71.add(btnMoveUpEvent);
+        btnMoveUpEvent.setBounds(10, 490, 110, 23);
 
-        jButton34.setFont(jButton34.getFont());
-        jButton34.setText(bundle.getString("CrInstrument.jButton34.text")); 
-        jButton34.addActionListener(new java.awt.event.ActionListener() {
+        btnMoveDownEvent.setFont(btnMoveDownEvent.getFont());
+        btnMoveDownEvent.setText(bundle.getString("CrInstrument.btnMoveDownEvent.text")); 
+        btnMoveDownEvent.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton34ActionPerformed(evt);
+                btnMoveDownEventActionPerformed(evt);
             }
         });
-        jPanel71.add(jButton34);
-        jButton34.setBounds(10, 520, 110, 23);
+        jPanel71.add(btnMoveDownEvent);
+        btnMoveDownEvent.setBounds(10, 520, 110, 23);
 
-        jButton9.setFont(jButton9.getFont());
-        jButton9.setText(bundle.getString("CrInstrument.jButton9.text")); 
-        jButton9.addActionListener(new java.awt.event.ActionListener() {
+        btnNewEvent.setFont(btnNewEvent.getFont());
+        btnNewEvent.setText(bundle.getString("CrInstrument.btnNewEvent.text")); 
+        btnNewEvent.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton9ActionPerformed(evt);
+                btnNewEventActionPerformed(evt);
             }
         });
-        jPanel71.add(jButton9);
-        jButton9.setBounds(10, 430, 110, 23);
+        jPanel71.add(btnNewEvent);
+        btnNewEvent.setBounds(10, 430, 110, 23);
 
-        jButton12.setFont(jButton12.getFont());
-        jButton12.setText(bundle.getString("CrInstrument.jButton12.text")); 
-        jButton12.addActionListener(new java.awt.event.ActionListener() {
+        btnRemoveEvent.setFont(btnRemoveEvent.getFont());
+        btnRemoveEvent.setText(bundle.getString("CrInstrument.btnRemoveEvent.text")); 
+        btnRemoveEvent.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton12ActionPerformed(evt);
+                btnRemoveEventActionPerformed(evt);
             }
         });
-        jPanel71.add(jButton12);
-        jButton12.setBounds(10, 460, 110, 23);
+        jPanel71.add(btnRemoveEvent);
+        btnRemoveEvent.setBounds(10, 460, 110, 23);
 
         jLabel87.setFont(jLabel87.getFont());
         jLabel87.setText(bundle.getString("CrInstrument.jLabel87.text")); 
@@ -8421,30 +8417,35 @@ public void doLayout(){
         jPanel71.add(jScrollPane17);
         jScrollPane17.setBounds(110, 60, 60, 110);
 
+        actionList2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                actionList2MouseClicked(evt);
+            }
+        });
         jScrollPane18.setViewportView(actionList2);
 
         jPanel71.add(jScrollPane18);
         jScrollPane18.setBounds(110, 260, 60, 90);
 
-        jButton28.setFont(jButton28.getFont());
-        jButton28.setText(bundle.getString("CrInstrument.jButton28.text")); 
-        jButton28.addActionListener(new java.awt.event.ActionListener() {
+        btnRemoveCondition2.setFont(btnRemoveCondition2.getFont());
+        btnRemoveCondition2.setText(bundle.getString("CrInstrument.btnRemoveCondition2.text")); 
+        btnRemoveCondition2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton28ActionPerformed(evt);
+                btnRemoveCondition2ActionPerformed(evt);
             }
         });
-        jPanel71.add(jButton28);
-        jButton28.setBounds(89, 180, 90, 23);
+        jPanel71.add(btnRemoveCondition2);
+        btnRemoveCondition2.setBounds(89, 180, 90, 23);
 
-        jButton52.setFont(jButton52.getFont());
-        jButton52.setText(bundle.getString("CrInstrument.jButton52.text")); 
-        jButton52.addActionListener(new java.awt.event.ActionListener() {
+        btnRemoveAction2.setFont(btnRemoveAction2.getFont());
+        btnRemoveAction2.setText(bundle.getString("CrInstrument.btnRemoveAction2.text")); 
+        btnRemoveAction2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton52ActionPerformed(evt);
+                btnRemoveAction2ActionPerformed(evt);
             }
         });
-        jPanel71.add(jButton52);
-        jButton52.setBounds(89, 360, 90, 23);
+        jPanel71.add(btnRemoveAction2);
+        btnRemoveAction2.setBounds(89, 360, 90, 23);
 
         jPanel49.add(jPanel71);
         jPanel71.setBounds(20, 30, 190, 550);
@@ -8463,35 +8464,35 @@ public void doLayout(){
         jPanel70.add(jScrollPane8);
         jScrollPane8.setBounds(10, 60, 70, 130);
 
-        jButton25.setFont(jButton25.getFont());
-        jButton25.setText(bundle.getString("CrInstrument.jButton25.text")); 
-        jButton25.addActionListener(new java.awt.event.ActionListener() {
+        btnRemoveAction1.setFont(btnRemoveAction1.getFont());
+        btnRemoveAction1.setText(bundle.getString("CrInstrument.btnRemoveAction1.text")); 
+        btnRemoveAction1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton25ActionPerformed(evt);
+                btnRemoveAction1ActionPerformed(evt);
             }
         });
-        jPanel70.add(jButton25);
-        jButton25.setBounds(220, 240, 130, 23);
+        jPanel70.add(btnRemoveAction1);
+        btnRemoveAction1.setBounds(220, 240, 130, 23);
 
-        jButton18.setFont(jButton18.getFont());
-        jButton18.setText(bundle.getString("CrInstrument.jButton18.text")); 
-        jButton18.addActionListener(new java.awt.event.ActionListener() {
+        btnAddAction1ToEvent.setFont(btnAddAction1ToEvent.getFont());
+        btnAddAction1ToEvent.setText(bundle.getString("CrInstrument.btnAddAction1ToEvent.text")); 
+        btnAddAction1ToEvent.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton18ActionPerformed(evt);
+                btnAddAction1ToEventActionPerformed(evt);
             }
         });
-        jPanel70.add(jButton18);
-        jButton18.setBounds(220, 210, 130, 23);
+        jPanel70.add(btnAddAction1ToEvent);
+        btnAddAction1ToEvent.setBounds(220, 210, 130, 23);
 
-        updateActionBtn.setFont(updateActionBtn.getFont());
-        updateActionBtn.setText(bundle.getString("CrInstrument.updateActionBtn.text")); 
-        updateActionBtn.addActionListener(new java.awt.event.ActionListener() {
+        btnUpdateAction1.setFont(btnUpdateAction1.getFont());
+        btnUpdateAction1.setText(bundle.getString("CrInstrument.btnUpdateAction1.text")); 
+        btnUpdateAction1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                updateActionBtnActionPerformed(evt);
+                btnUpdateAction1ActionPerformed(evt);
             }
         });
-        jPanel70.add(updateActionBtn);
-        updateActionBtn.setBounds(120, 240, 100, 23);
+        jPanel70.add(btnUpdateAction1);
+        btnUpdateAction1.setBounds(120, 240, 100, 23);
 
         jPanel76.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8518,7 +8519,7 @@ public void doLayout(){
         jLabel83.setText(bundle.getString("CrInstrument.jLabel83.text")); 
         jPanel77.add(jLabel83);
 
-        jComboBox18.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Set device SN", "Set data value", "Send email message", "Send SMS message to cell phone", "Send command", "Stop continue send command", "Connect port", "Disconnect port", "Start monitor", "Stop monitor", "Open URL", "Exit application", "Restart application", "Java class" }));
+        jComboBox18.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Set device SN", "Set data value", "Send email message", "Send SMS message to cell phone", "Send command", "Next station send command", "Next device send command", "Stop continue send command", "Connect all port", "Disconnect all port", "Start monitor", "Stop monitor", "Open URL", "Exit application", "Restart application", "Java class" }));
         jComboBox18.setPreferredSize(new java.awt.Dimension(250, 25));
         jComboBox18.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -8671,7 +8672,7 @@ public void doLayout(){
         jPanel75.add(jCheckBox27);
 
         jPanel79.add(jPanel75);
-        jPanel75.setBounds(10, 100, 410, 30);
+        jPanel75.setBounds(10, 90, 410, 40);
 
         jPanel128.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8693,51 +8694,39 @@ public void doLayout(){
         jPanel70.add(jPanel79);
         jPanel79.setBounds(360, 20, 430, 270);
 
-        jButton31.setFont(jButton31.getFont());
-        jButton31.setText(bundle.getString("CrInstrument.jButton31.text")); 
-        jButton31.addActionListener(new java.awt.event.ActionListener() {
+        btnMoveUpAction1.setFont(btnMoveUpAction1.getFont());
+        btnMoveUpAction1.setText(bundle.getString("CrInstrument.btnMoveUpAction1.text")); 
+        btnMoveUpAction1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton31ActionPerformed(evt);
+                btnMoveUpAction1ActionPerformed(evt);
             }
         });
-        jPanel70.add(jButton31);
-        jButton31.setBounds(10, 210, 110, 23);
+        jPanel70.add(btnMoveUpAction1);
+        btnMoveUpAction1.setBounds(10, 210, 110, 23);
 
-        jButton32.setFont(jButton32.getFont());
-        jButton32.setText(bundle.getString("CrInstrument.jButton32.text")); 
-        jButton32.addActionListener(new java.awt.event.ActionListener() {
+        btnMoveDownAction1.setFont(btnMoveDownAction1.getFont());
+        btnMoveDownAction1.setText(bundle.getString("CrInstrument.btnMoveDownAction1.text")); 
+        btnMoveDownAction1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton32ActionPerformed(evt);
+                btnMoveDownAction1ActionPerformed(evt);
             }
         });
-        jPanel70.add(jButton32);
-        jButton32.setBounds(10, 240, 110, 23);
+        jPanel70.add(btnMoveDownAction1);
+        btnMoveDownAction1.setBounds(10, 240, 110, 23);
 
-        jButton50.setFont(jButton50.getFont());
-        jButton50.setText(bundle.getString("CrInstrument.jButton50.text")); 
-        jButton50.addActionListener(new java.awt.event.ActionListener() {
+        btnNewAction1.setFont(btnNewAction1.getFont());
+        btnNewAction1.setText(bundle.getString("CrInstrument.btnNewAction1.text")); 
+        btnNewAction1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton50ActionPerformed(evt);
+                btnNewAction1ActionPerformed(evt);
             }
         });
-        jPanel70.add(jButton50);
-        jButton50.setBounds(120, 210, 100, 23);
+        jPanel70.add(btnNewAction1);
+        btnNewAction1.setBounds(120, 210, 100, 23);
 
         jPanel78.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 255)), bundle.getString("CrInstrument.jPanel78.border.title"))); 
         jPanel78.setFont(jPanel78.getFont());
         jPanel78.setLayout(null);
-
-        buttonGroup6.add(jRadioButton10);
-        jRadioButton10.setFont(jRadioButton10.getFont());
-        jRadioButton10.setText(bundle.getString("CrInstrument.jRadioButton10.text")); 
-        jPanel78.add(jRadioButton10);
-        jRadioButton10.setBounds(20, 190, 350, 23);
-
-        buttonGroup6.add(jRadioButton11);
-        jRadioButton11.setFont(jRadioButton11.getFont());
-        jRadioButton11.setText(bundle.getString("CrInstrument.jRadioButton11.text")); 
-        jPanel78.add(jRadioButton11);
-        jRadioButton11.setBounds(20, 220, 350, 23);
 
         jPanel94.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8746,9 +8735,19 @@ public void doLayout(){
         jPanel94.add(jLabel110);
 
         jComboBox32.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Byte data", "String data" }));
+        jComboBox32.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBox32ItemStateChanged(evt);
+            }
+        });
         jPanel94.add(jComboBox32);
 
         jComboBox41.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Whole line", "Separated by space", "Separated by ',' ", "Fixed column length" }));
+        jComboBox41.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBox41ItemStateChanged(evt);
+            }
+        });
         jPanel94.add(jComboBox41);
 
         jLabel111.setFont(jLabel111.getFont());
@@ -8760,7 +8759,7 @@ public void doLayout(){
         jPanel94.add(jTextField57);
 
         jPanel78.add(jPanel94);
-        jPanel94.setBounds(10, 30, 380, 30);
+        jPanel94.setBounds(10, 20, 410, 40);
 
         jPanel121.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8796,7 +8795,7 @@ public void doLayout(){
         jPanel121.add(jTextField60);
 
         jPanel78.add(jPanel121);
-        jPanel121.setBounds(10, 90, 380, 30);
+        jPanel121.setBounds(10, 60, 410, 35);
 
         jPanel137.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8832,7 +8831,7 @@ public void doLayout(){
         jPanel137.add(jTextField69);
 
         jPanel78.add(jPanel137);
-        jPanel137.setBounds(10, 150, 380, 35);
+        jPanel137.setBounds(10, 140, 410, 35);
 
         jPanel138.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8868,24 +8867,10 @@ public void doLayout(){
         jPanel138.add(jTextField72);
 
         jPanel78.add(jPanel138);
-        jPanel138.setBounds(10, 120, 380, 30);
-
-        jPanel84.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel155.setFont(jLabel155.getFont());
-        jLabel155.setText(bundle.getString("CrInstrument.jLabel155.text")); 
-        jPanel84.add(jLabel155);
-
-        jTextField53.setText(bundle.getString("CrInstrument.jTextField53.text")); 
-        jTextField53.setToolTipText(bundle.getString("CrInstrument.jTextField53.toolTipText")); 
-        jTextField53.setPreferredSize(new java.awt.Dimension(36, 25));
-        jPanel84.add(jTextField53);
-
-        jPanel78.add(jPanel84);
-        jPanel84.setBounds(30, 60, 330, 30);
+        jPanel138.setBounds(10, 100, 410, 40);
 
         jPanel70.add(jPanel78);
-        jPanel78.setBounds(390, 30, 400, 260);
+        jPanel78.setBounds(360, 30, 430, 190);
 
         jPanel122.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9057,25 +9042,25 @@ public void doLayout(){
         jPanel69.add(jScrollPane7);
         jScrollPane7.setBounds(10, 70, 70, 90);
 
-        jButton11.setFont(jButton11.getFont());
-        jButton11.setText(bundle.getString("CrInstrument.jButton11.text")); 
-        jButton11.addActionListener(new java.awt.event.ActionListener() {
+        btnCondition1AddToEvent.setFont(btnCondition1AddToEvent.getFont());
+        btnCondition1AddToEvent.setText(bundle.getString("CrInstrument.btnCondition1AddToEvent.text")); 
+        btnCondition1AddToEvent.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton11ActionPerformed(evt);
+                btnCondition1AddToEventActionPerformed(evt);
             }
         });
-        jPanel69.add(jButton11);
-        jButton11.setBounds(210, 180, 130, 23);
+        jPanel69.add(btnCondition1AddToEvent);
+        btnCondition1AddToEvent.setBounds(210, 180, 130, 23);
 
-        jButton13.setFont(jButton13.getFont());
-        jButton13.setText(bundle.getString("CrInstrument.jButton13.text")); 
-        jButton13.addActionListener(new java.awt.event.ActionListener() {
+        btnRemoveCondition1.setFont(btnRemoveCondition1.getFont());
+        btnRemoveCondition1.setText(bundle.getString("CrInstrument.btnRemoveCondition1.text")); 
+        btnRemoveCondition1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton13ActionPerformed(evt);
+                btnRemoveCondition1ActionPerformed(evt);
             }
         });
-        jPanel69.add(jButton13);
-        jButton13.setBounds(210, 210, 130, 23);
+        jPanel69.add(btnRemoveCondition1);
+        btnRemoveCondition1.setBounds(210, 210, 130, 23);
 
         jLabel81.setBackground(new java.awt.Color(255, 255, 255));
         jLabel81.setText(bundle.getString("CrInstrument.jLabel81.text")); 
@@ -9083,15 +9068,15 @@ public void doLayout(){
         jPanel69.add(jLabel81);
         jLabel81.setBounds(230, 40, 100, 0);
 
-        updateConditionBtn.setFont(updateConditionBtn.getFont());
-        updateConditionBtn.setText(bundle.getString("CrInstrument.updateConditionBtn.text")); 
-        updateConditionBtn.addActionListener(new java.awt.event.ActionListener() {
+        btnUpdateCondition1.setFont(btnUpdateCondition1.getFont());
+        btnUpdateCondition1.setText(bundle.getString("CrInstrument.btnUpdateCondition1.text")); 
+        btnUpdateCondition1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                updateConditionBtnActionPerformed(evt);
+                btnUpdateCondition1ActionPerformed(evt);
             }
         });
-        jPanel69.add(updateConditionBtn);
-        updateConditionBtn.setBounds(110, 210, 100, 23);
+        jPanel69.add(btnUpdateCondition1);
+        btnUpdateCondition1.setBounds(110, 210, 100, 23);
 
         jPanel72.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 255)), bundle.getString("CrInstrument.jPanel72.border.title"))); 
         jPanel72.setFont(jPanel72.getFont());
@@ -9242,7 +9227,7 @@ public void doLayout(){
         jLabel78.setText(bundle.getString("CrInstrument.jLabel78.text")); 
         jPanel74.add(jLabel78);
 
-        jComboBox16.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "After system startup", "Before connected", "After connected", "Before start monitor", "After start monitor", "Before stop monitor", "After stop monitor", "Before disconnected", "After disconnected", "Over upper take-action level", "Under lower take-action level", "Over upper alert level", "Under lower alert level", "Data condition", "Data checked by Java class", "Any data", "Click button 01", "Click button 02", "Click button 03", "Click button 04", "Click button 05", "Click button 06", "Click button 07", "Click button 08", "Click button 09", "Click button 10", "Click file menuitem 01", "Click file menuitem 02", "Click file menuitem 03", "Click file menuitem 04", "Click file menuitem 05", "Click help menuitem 01", "Click help menuitem 02", "Click help menuitem 03", "Click help menuitem 04", "Click help menuitem 05", "Click tool menuitem 01", "Click tool menuitem 02", "Click tool menuitem 03", "Click tool menuitem 04", "Click tool menuitem 05", "Before system terminated", " ", " ", " " }));
+        jComboBox16.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "After system startup", "Click connect button", "Click start button", "Click stop button", "After connected", "After disconnected", "Over upper take-action level", "Under lower take-action level", "Over upper alert level", "Under lower alert level", "Data condition", "Data checked by Java class", "Any data", "Click button 01", "Click button 02", "Click button 03", "Click button 04", "Click button 05", "Click button 06", "Click button 07", "Click button 08", "Click button 09", "Click button 10", "Click file menuitem 01", "Click file menuitem 02", "Click file menuitem 03", "Click file menuitem 04", "Click file menuitem 05", "Click help menuitem 01", "Click help menuitem 02", "Click help menuitem 03", "Click help menuitem 04", "Click help menuitem 05", "Click tool menuitem 01", "Click tool menuitem 02", "Click tool menuitem 03", "Click tool menuitem 04", "Click tool menuitem 05", "Before system terminated", " ", " ", " " }));
         jComboBox16.setPreferredSize(new java.awt.Dimension(250, 21));
         jComboBox16.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -9254,35 +9239,35 @@ public void doLayout(){
         jPanel69.add(jPanel74);
         jPanel74.setBounds(10, 19, 350, 31);
 
-        jButton29.setFont(jButton29.getFont());
-        jButton29.setText(bundle.getString("CrInstrument.jButton29.text")); 
-        jButton29.addActionListener(new java.awt.event.ActionListener() {
+        btnMoveUpCondition1.setFont(btnMoveUpCondition1.getFont());
+        btnMoveUpCondition1.setText(bundle.getString("CrInstrument.btnMoveUpCondition1.text")); 
+        btnMoveUpCondition1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton29ActionPerformed(evt);
+                btnMoveUpCondition1ActionPerformed(evt);
             }
         });
-        jPanel69.add(jButton29);
-        jButton29.setBounds(10, 180, 100, 23);
+        jPanel69.add(btnMoveUpCondition1);
+        btnMoveUpCondition1.setBounds(10, 180, 100, 23);
 
-        jButton30.setFont(jButton30.getFont());
-        jButton30.setText(bundle.getString("CrInstrument.jButton30.text")); 
-        jButton30.addActionListener(new java.awt.event.ActionListener() {
+        btnMoveDownCondition1.setFont(btnMoveDownCondition1.getFont());
+        btnMoveDownCondition1.setText(bundle.getString("CrInstrument.btnMoveDownCondition1.text")); 
+        btnMoveDownCondition1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton30ActionPerformed(evt);
+                btnMoveDownCondition1ActionPerformed(evt);
             }
         });
-        jPanel69.add(jButton30);
-        jButton30.setBounds(10, 210, 100, 23);
+        jPanel69.add(btnMoveDownCondition1);
+        btnMoveDownCondition1.setBounds(10, 210, 100, 23);
 
-        jButton51.setFont(jButton51.getFont());
-        jButton51.setText(bundle.getString("CrInstrument.jButton51.text")); 
-        jButton51.addActionListener(new java.awt.event.ActionListener() {
+        btnNewCondition1.setFont(btnNewCondition1.getFont());
+        btnNewCondition1.setText(bundle.getString("CrInstrument.btnNewCondition1.text")); 
+        btnNewCondition1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton51ActionPerformed(evt);
+                btnNewCondition1ActionPerformed(evt);
             }
         });
-        jPanel69.add(jButton51);
-        jButton51.setBounds(110, 180, 100, 23);
+        jPanel69.add(btnNewCondition1);
+        btnNewCondition1.setBounds(110, 180, 100, 23);
 
         jPanel124.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 255)), bundle.getString("CrInstrument.jPanel124.border.title"))); 
         jPanel124.setFont(jPanel124.getFont());
@@ -10190,11 +10175,10 @@ public void doLayout(){
       String pw1 = new String(jPasswordField1.getPassword());
       String pw2 = new String(jPasswordField2.getPassword());
       String pw3 = new String(jPasswordField3.getPassword());
+      if(e2003.p(pw1).equals(props.getProperty("mgnt-pw"))){
 
-      if (YB642D.decode(props.getProperty("mgnt-pw")).equals(pw1)) {
         if (pw2.equals(pw3)) {
-
-          props.setProperty("mgnt-pw", YB642E.encode(pw2));
+          props.setProperty("mgnt-pw", e2003.p(pw2));
 
           JOptionPane.showMessageDialog(this,bundle2.getString("CrInstrument.xy.msg106"));
         } else {
@@ -10245,13 +10229,13 @@ public void doLayout(){
       }
       if (onlyReceiveCB.isSelected()) {
         if(type==1) JOptionPane.showMessageDialog(this, bundle2.getString("CrInstrument.xy.msg63"));
-        return;
+
       }
       if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
         sysLog("press " + btnStart.getText() + ", connected=" + connected + ", continueMonitor=" + continueMonitor + ", coorToPorts.size()=" + coorToPorts.size());
       }
       if (btnStart.getText().trim().equals(bundle2.getString("CrInstrument.xy.msg3"))) {
-        eventThread.setStatus(wn.w.getGNS(1),"",13);
+
         continueMonitor = true;
         setBegin();
 
@@ -10266,7 +10250,7 @@ public void doLayout(){
       } else {
         int an = JOptionPane.showConfirmDialog(this,bundle2.getString("CrInstrument.xy.msg64"), bundle2.getString("CrInstrument.xy.msg65"), JOptionPane.YES_OPTION | JOptionPane.CANCEL_OPTION);
         if (an == JOptionPane.YES_OPTION) {
-          eventThread.setStatus(wn.w.getGNS(1),"",15);
+
           continueMonitor = false;
           button02.setEnabled(true);
           btnConnect.setEnabled(true);
@@ -10416,7 +10400,7 @@ public void doLayout(){
     TreeMap newDeviceToKeys = new TreeMap();
     TreeMap newKeyToDevices = new TreeMap();
 
-    coorDevices.clear();
+    deviceKeyDevices.clear();
     for (int row = 0; row < rowCount; row++) {
       if (jTable1.getModel().getValueAt(row, 0)!=null && jTable1.getModel().getValueAt(row, 1)!=null
               && jTable1.getModel().getValueAt(row, 2)!=null && jTable1.getModel().getValueAt(row, 3)!=null && jTable1.getModel().getValueAt(row, 4)!=null
@@ -10548,6 +10532,7 @@ public void doLayout(){
       connected = true;
     }
     lightPanel2.setColor(Color.green, Color.green);
+    eventThread.setStatus(wn.w.getGNS(1),"",11);
 
   }
   private void showAlarmRBActionPerformed(java.awt.event.ActionEvent evt) {
@@ -10735,7 +10720,7 @@ public void doLayout(){
     dataUpdated = true;
   }
 
-  private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnNewEventActionPerformed(java.awt.event.ActionEvent evt) {
    newEvent();
   }
 private void newEvent(){
@@ -10756,7 +10741,7 @@ private void newEvent(){
     actionListModel2.removeAllElements();
     eventTM.put(newItem, newItem+",0,0,");
 }
-  private void jButton51ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnNewCondition1ActionPerformed(java.awt.event.ActionEvent evt) {
     int cnt=conditionList.getModel().getSize();
     int max=0;
     if(cnt>0){
@@ -10797,6 +10782,7 @@ void showEvent(){
   }
   if(eventList.getSelectedIndex()>-1){
      String sel=(String)eventList.getSelectedValue();
+     if(!sel.equals(currentEvent)){
      conditionListModel2.removeAllElements();
      actionListModel2.removeAllElements();
      if(eventTM.get(sel)!=null){
@@ -10806,12 +10792,18 @@ void showEvent(){
        if(data.length>2 && data[2].length()>0) cntA=Integer.parseInt(data[2]);
        if(cntC>0 && data.length>2+cntC) {
          for(int i=0;i<cntC;i++) conditionListModel2.addElement(data[3+i]);
+         conditionList2.setSelectedIndex(0);
+         showCondition2();
        }
        if(cntA>0 && data.length>2+cntC+cntA) {
          for(int i=0;i<cntA;i++) actionListModel2.addElement(data[3+cntC+i]);
+         actionList2.setSelectedIndex(0);
+         showAction2();
        }
      }
-  }
+     currentEvent=sel;
+    }
+  } else currentEvent="";
 }
 void showCondition(){
   if(conditionList.getSelectedIndex()==-1){
@@ -10843,7 +10835,7 @@ void showAction(){
   }
   showAction1();
 }
-  private void jButton50ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnNewAction1ActionPerformed(java.awt.event.ActionEvent evt) {
     getNewAction(null,null);
   }
 String getNewAction(String key,String action){
@@ -10908,8 +10900,11 @@ void showConditionItem(String sel){
       jPanel134.setVisible(false);
       jPanel135.setVisible(false);
       if(sel.equalsIgnoreCase("Data condition") || sel.equalsIgnoreCase("Any data") || sel.equalsIgnoreCase("Data checked by Java class")
-               || sel.equalsIgnoreCase("Over upper take-action level") || sel.equalsIgnoreCase("Under lower take-action level") 
-              || sel.equalsIgnoreCase("Over upper alert level") || sel.equalsIgnoreCase("Under lower alert leve"))  {
+          || sel.equalsIgnoreCase("After connected") || sel.equalsIgnoreCase("After disconnected"))  {
+      jPanel73.setVisible(true);
+
+      } else if(sel.equalsIgnoreCase("Over upper take-action level") || sel.equalsIgnoreCase("Under lower take-action level") 
+              || sel.equalsIgnoreCase("Over upper alert level") || sel.equalsIgnoreCase("Under lower alert level")){
       jPanel73.setVisible(true);
       jPanel133.setVisible(true);
       jPanel134.setVisible(true);
@@ -10930,7 +10925,7 @@ void showActionItem(String sel){
     jPanel78.setVisible(false);
 
       if(sel.equalsIgnoreCase("Set data value")) jPanel79.setVisible(true);
-      else if(sel.equalsIgnoreCase("Send command")) jPanel85.setVisible(true);
+      else if(sel.equalsIgnoreCase("Send command") || sel.equalsIgnoreCase("Next station send command") || sel.equalsIgnoreCase("Next device send command")) jPanel85.setVisible(true);
       else if(sel.equalsIgnoreCase("Set device SN")) jPanel78.setVisible(true);
       else if(sel.equalsIgnoreCase("Java class")) jPanel126.setVisible(true);
       else if(sel.equalsIgnoreCase("Open URL")) jPanel26.setVisible(true);
@@ -10939,35 +10934,47 @@ void showActionItem(String sel){
       jPanel136.setVisible(false);
       jPanel122.setVisible(false);
       jPanel132.setVisible(false);
-      if(sel.equalsIgnoreCase("Set data value") || sel.equalsIgnoreCase("Send command") || sel.equalsIgnoreCase("Set device SN"))  {
+      if(sel.equalsIgnoreCase("Set data value") )  {
       jPanel76.setVisible(true);
       jPanel136.setVisible(true);
       jPanel122.setVisible(true);
       jPanel132.setVisible(true);
+      } else if(sel.equalsIgnoreCase("Send command") || sel.equalsIgnoreCase("Set device SN") || sel.equalsIgnoreCase("Next device send command")){
+      jPanel76.setVisible(true);
+      jPanel136.setVisible(true);
+      jPanel122.setVisible(true);
       }
 
 }
-  private void jButton13ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnRemoveCondition1ActionPerformed(java.awt.event.ActionEvent evt) {
     if(conditionList.getSelectedIndex()>-1){
       String sel=(String)conditionList.getSelectedValue();
+      int selInt=conditionList.getSelectedIndex();
       conditionListModel.removeElement(sel);
       conditionTM.remove(sel);
+      if(selInt>0) conditionList.setSelectedIndex(selInt-1);
+      else if(selInt==0 && conditionTM.size()>0) conditionList.setSelectedIndex(0);
+      conditionListModel2.removeElement(sel);
       eventRemoveCondition(sel);
       showEvent();
     }
   }
 
-  private void jButton25ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnRemoveAction1ActionPerformed(java.awt.event.ActionEvent evt) {
     if(actionList.getSelectedIndex()>-1){
       String sel=(String)actionList.getSelectedValue();
+      int selInt=actionList.getSelectedIndex();
       actionListModel.removeElement(sel);
       actionTM.remove(sel);
+      if(selInt>0) actionList.setSelectedIndex(selInt-1);
+      else if(selInt==0 && actionTM.size()>0) actionList.setSelectedIndex(0);
+      actionListModel2.removeElement(sel);
       eventRemoveAction(sel);
       showEvent();
     }
   }
 
-  private void jButton28ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnRemoveCondition2ActionPerformed(java.awt.event.ActionEvent evt) {
     if(conditionList2.getSelectedIndex()>-1){
       String cond=(String)conditionList2.getSelectedValue();
       conditionListModel2.removeElement(cond);
@@ -10978,7 +10985,7 @@ void showActionItem(String sel){
     }
   }
 
-  private void jButton52ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnRemoveAction2ActionPerformed(java.awt.event.ActionEvent evt) {
     if(actionList2.getSelectedIndex()>-1){
       String act=(String)actionList2.getSelectedValue();
       actionListModel2.removeElement(act);
@@ -10989,7 +10996,7 @@ void showActionItem(String sel){
     }
   }
 
-  private void jButton12ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnRemoveEventActionPerformed(java.awt.event.ActionEvent evt) {
     int inx=eventList.getSelectedIndex();
     if(inx>-1){
       String sel=(String)eventList.getSelectedValue();
@@ -11004,7 +11011,7 @@ void showActionItem(String sel){
     }
   }
 
-  private void updateConditionBtnActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnUpdateCondition1ActionPerformed(java.awt.event.ActionEvent evt) {
     updateConditionItem();
   }
 void updateConditionItem(){
@@ -11050,7 +11057,7 @@ void updateConditionItem(){
 
 }
 
-  private void updateActionBtnActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnUpdateAction1ActionPerformed(java.awt.event.ActionEvent evt) {
     updateActionItem();
   }
 void updateActionItem(){
@@ -11094,8 +11101,6 @@ void updateActionItem(){
            else  data[25]="N";
        if(jCheckBox6.isSelected()) data[26]="Y" ;
            else  data[26]="N";
-       if(jRadioButton10.isSelected()) data[27]="Y" ;
-           else  data[27]="N";
 
        data[33]=jTextField63.getText();
        if(jCheckBox27.isSelected()) data[34]="Y" ;
@@ -11124,8 +11129,8 @@ void updateActionItem(){
        data[56]=jTextField70.getText();
        if(jCheckBox42.isSelected()) data[57]="Y" ;
            else  data[57]="N";
-       data[71]=jTextField59.getText();
-       data[72]=jTextField60.getText();
+       data[58]=jTextField71.getText();
+       data[59]=jTextField72.getText();
 
        if(jCheckBox39.isSelected()) data[65]="Y" ;
            else  data[65]="N";
@@ -11182,7 +11187,7 @@ void updateActionItem(){
     }
   }
 }
-  private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnCondition1AddToEventActionPerformed(java.awt.event.ActionEvent evt) {
     if(eventListModel.size()<1) {newEvent(); eventList.setSelectedIndex(0);}
     if(eventList.getSelectedIndex()==-1) { JOptionPane.showMessageDialog(this, "Please select which event to add to."); return;}
     if(conditionList.getSelectedIndex()>-1){
@@ -11206,7 +11211,7 @@ void updateActionItem(){
     } else  { JOptionPane.showMessageDialog(this, "Please select which condition to be added."); return;}
   }
 
-  private void jButton18ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnAddAction1ToEventActionPerformed(java.awt.event.ActionEvent evt) {
     if(eventListModel.size()<1) {newEvent(); eventList.setSelectedIndex(0);}
     if(eventList.getSelectedIndex()==-1) { JOptionPane.showMessageDialog(this, "Please select which event to add to."); return;}
     if(actionList.getSelectedIndex()>-1){
@@ -11491,36 +11496,31 @@ public String getDataSrcFromStation(String station){
         jComboBox29.setVisible(false);
         jLabel79.setVisible(false);
         jTextField56.setVisible(false);
-
-        jTextField53.setVisible(false);
         jLabel96.setVisible(false);
         jTextField15.setVisible(false);
         jCheckBox34.setText("Byte from");
       } else {
         jCheckBox27.setVisible(false);
         jComboBox29.setVisible(true);
-        jLabel79.setVisible(true);
-        jTextField56.setVisible(true);
-
-        jTextField53.setVisible(true);
-        jLabel96.setVisible(true);
-        jTextField15.setVisible(true);
         jCheckBox34.setText("Char from");
         String sel=(String)jComboBox29.getSelectedItem();
         if(sel.equalsIgnoreCase("whole line")){
         jLabel79.setVisible(false);
         jTextField56.setVisible(false);
-
-        jTextField53.setVisible(false);
         jLabel96.setVisible(false);
         jTextField15.setVisible(false);
+        } else {
+        jLabel79.setVisible(true);
+        jTextField56.setVisible(true);
+        jLabel96.setVisible(true);
+        jTextField15.setVisible(true);
         }
       }
     }
 
   }
 
-  private void jButton33ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnMoveUpEventActionPerformed(java.awt.event.ActionEvent evt) {
     int sel=eventList.getSelectedIndex();
     if(sel>0){
       String key=(String)eventList.getSelectedValue();
@@ -11533,7 +11533,7 @@ public String getDataSrcFromStation(String station){
    }
   }
 
-  private void jButton29ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnMoveUpCondition1ActionPerformed(java.awt.event.ActionEvent evt) {
     int sel=conditionList.getSelectedIndex();
     if(sel>0){
       String key=(String)conditionList.getSelectedValue();
@@ -11547,7 +11547,7 @@ public String getDataSrcFromStation(String station){
    }
   }
 
-  private void jButton31ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnMoveUpAction1ActionPerformed(java.awt.event.ActionEvent evt) {
     int sel=actionList.getSelectedIndex();
     if(sel>0){
       String key=(String)actionList.getSelectedValue();
@@ -11561,7 +11561,7 @@ public String getDataSrcFromStation(String station){
    }
   }
 
-  private void jButton34ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnMoveDownEventActionPerformed(java.awt.event.ActionEvent evt) {
     int sel=eventList.getSelectedIndex();
     if(sel>-1 && sel<(eventListModel.size()-1)){
       String key=(String)eventList.getSelectedValue();
@@ -11574,7 +11574,7 @@ public String getDataSrcFromStation(String station){
    }
   }
 
-  private void jButton30ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnMoveDownCondition1ActionPerformed(java.awt.event.ActionEvent evt) {
     int sel=conditionList.getSelectedIndex();
     if(sel>-1 && sel<(conditionListModel.size()-1)){
       String key=(String)conditionList.getSelectedValue();
@@ -11588,7 +11588,7 @@ public String getDataSrcFromStation(String station){
    }
   }
 
-  private void jButton32ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnMoveDownAction1ActionPerformed(java.awt.event.ActionEvent evt) {
     int sel=actionList.getSelectedIndex();
     if(sel>-1 && sel<(actionListModel.size()-1)){
       String key=(String)actionList.getSelectedValue();
@@ -12277,7 +12277,87 @@ private void updateItem(){
       model.removeRow(rows[i]);
     }
     }
-private void changeReceiveListItem(){
+
+    private void jComboBox41ItemStateChanged(java.awt.event.ItemEvent evt) {
+     if(evt.getStateChange()==evt.SELECTED){
+      String sel=(String)jComboBox41.getSelectedItem();
+              jLabel112.setVisible(true);
+        jTextField58.setVisible(true);
+        jLabel166.setVisible(true);
+        jTextField70.setVisible(true);
+        jLabel164.setVisible(true);
+        jTextField67.setVisible(true);
+      if(sel.equalsIgnoreCase("Whole line")){
+        jLabel111.setVisible(false);
+        jTextField57.setVisible(false);
+                jLabel112.setVisible(false);
+        jTextField58.setVisible(false);
+        jLabel166.setVisible(false);
+        jTextField70.setVisible(false);
+        jLabel164.setVisible(false);
+        jTextField67.setVisible(false);
+
+      } else if(sel.equalsIgnoreCase("Fixed column length")){
+        jLabel111.setVisible(true);
+        jTextField57.setVisible(true);
+      } else {
+        jLabel111.setVisible(false);
+        jTextField57.setVisible(false);
+      }
+    }
+
+    }
+
+    private void jComboBox32ItemStateChanged(java.awt.event.ItemEvent evt) {
+if(evt.getStateChange()==evt.SELECTED){
+      if(jComboBox32.getSelectedIndex()==0){
+          jComboBox41.setVisible(false);
+        jLabel111.setVisible(false);
+        jTextField57.setVisible(false);
+        jLabel112.setVisible(false);
+        jTextField58.setVisible(false);
+        jLabel166.setVisible(false);
+        jTextField70.setVisible(false);
+        jLabel164.setVisible(false);
+        jTextField67.setVisible(false);
+        jCheckBox36.setText("Byte from");
+        jCheckBox42.setText("Byte from");
+        jCheckBox40.setText("Byte from");
+      } else {
+          jComboBox41.setVisible(true);
+          if(((String)jComboBox41.getSelectedItem()).trim().equalsIgnoreCase("Fixed column length")){
+        jLabel111.setVisible(true);
+        jTextField57.setVisible(true);
+          } else {
+              jLabel111.setVisible(false);
+        jTextField57.setVisible(false);
+          }
+          if(((String)jComboBox41.getSelectedItem()).trim().equalsIgnoreCase("Whole line")){
+        jLabel112.setVisible(false);
+        jTextField58.setVisible(false);
+        jLabel166.setVisible(false);
+        jTextField70.setVisible(false);
+        jLabel164.setVisible(false);
+        jTextField67.setVisible(false);
+          } else {
+        jLabel112.setVisible(true);
+        jTextField58.setVisible(true);
+        jLabel166.setVisible(true);
+        jTextField70.setVisible(true);
+        jLabel164.setVisible(true);
+        jTextField67.setVisible(true);
+          }
+        jCheckBox36.setText("Char from");
+        jCheckBox42.setText("Char from");
+        jCheckBox40.setText("Char from");
+    }
+    }
+    }
+
+    private void actionList2MouseClicked(java.awt.event.MouseEvent evt) {
+      showAction2();
+    }
+ private void changeReceiveListItem(){
   String datasrc=(String)receiveList.getSelectedValue();
 
   String lastDSrc=currentViewDSrc;
@@ -12442,13 +12522,17 @@ void eventRemoveAction(String key,String act){
   void showCondition2(){
   if(conditionList2.getSelectedIndex()>-1){
      String sel=(String)conditionList2.getSelectedValue();
-     conditionList.setSelectedValue(sel, true);
-     showCondition1();
-  }
+     if(!sel.equals(currentCondition2)){
+       conditionList.setSelectedValue(sel, true);
+       showCondition1();
+       currentCondition2=sel;
+     }
+  } else currentCondition2="";
 }
 void showCondition1(){
     if(conditionList.getSelectedIndex()>-1){
      String sel=(String)conditionList.getSelectedValue();
+     if(!sel.equals(currentCondition1)){
      if(conditionTM.get(sel)!=null){
        String data[]=ylib.csvlinetoarray((String)conditionTM.get(sel));
        if(data.length>1) jComboBox14.setSelectedItem(data[1]);
@@ -12500,19 +12584,25 @@ void showCondition1(){
          }
          else jPanel72.setVisible(false);
        }
+     currentCondition1=sel;
+     } else sysLog("Condition id '"+sel+"' not found in conditionTM.");
      }
-  }
+  } else currentCondition1="";
 }
 void showAction2(){
   if(actionList2.getSelectedIndex()>-1){
      String sel=(String)actionList2.getSelectedValue();
+     if(!sel.equals(currentAction2)){
      actionList.setSelectedValue(sel, true);
      showAction1();
-  }
+     currentAction2=sel;
+     }
+  } else currentAction2="";
 }
 void showAction1(){
     if(actionList.getSelectedIndex()>-1){
      String sel=(String)actionList.getSelectedValue();
+     if(!sel.equals(currentAction1)){
      if(actionTM.get(sel)!=null){
        String data[]=ylib.csvlinetoarray((String)actionTM.get(sel));
        if(data.length>1) jComboBox19.setSelectedItem(data[1]);
@@ -12592,7 +12682,6 @@ void showAction1(){
            if(data.length>44 && !data[44].equalsIgnoreCase("Whole line")){
                jLabel112.setVisible(true);
                jTextField58.setVisible(true);
-               if(data.length>47) jTextField58.setText(data[47]);
                jLabel166.setVisible(true);
                jTextField70.setVisible(true);
                jLabel164.setVisible(true);
@@ -12611,21 +12700,22 @@ void showAction1(){
                jLabel164.setVisible(false);
                jTextField67.setVisible(false);
            }
+           if(data.length>47) jTextField58.setText(data[47]);
            if(data.length>48 && wn.w.chkValue(data[48])) jCheckBox36.setSelected(true);
            else  jCheckBox36.setSelected(false);
            if(data.length>49) jTextField59.setText(data[49]);
            if(data.length>50) jTextField60.setText(data[50]);
+           if(data.length>56) jTextField70.setText(data[56]);
            if(data.length>57 && wn.w.chkValue(data[57])) jCheckBox42.setSelected(true);
            else  jCheckBox42.setSelected(false);
            if(data.length>58) jTextField71.setText(data[58]);
            if(data.length>59) jTextField72.setText(data[59]);
+           if(data.length>66) jTextField67.setText(data[66]);
            if(data.length>67 && wn.w.chkValue(data[67])) jCheckBox40.setSelected(true);
            else  jCheckBox40.setSelected(false);
            if(data.length>68) jTextField68.setText(data[68]);
            if(data.length>69) jTextField69.setText(data[69]);
 
-           if(data.length>27 && wn.w.chkValue(data[27])) jRadioButton10.setSelected(true);
-           else  jRadioButton11.setSelected(true);
          }
          else jPanel78.setVisible(false);
          if(data[2].equalsIgnoreCase("Send command")) {
@@ -12646,8 +12736,10 @@ void showAction1(){
           } else jPanel26.setVisible(true);
          showActionItem(data[2]);
        }
+      currentAction1=sel;
+     } else sysLog("Action id '"+sel+"' not found in actionTM.");
      }
-  }
+  } else currentAction1="";
  }
 void showChart(){
     if(chartList.getSelectedIndex()>-1){
@@ -13184,12 +13276,30 @@ CrInstrument instrument;
     private javax.swing.JPanel UIPanel;
     private javax.swing.JList actionList;
     private javax.swing.JList actionList2;
+    private javax.swing.JButton btnAddAction1ToEvent;
+    private javax.swing.JButton btnCondition1AddToEvent;
     public javax.swing.JButton btnConnect;
     private javax.swing.JButton btnEditSrc;
     private javax.swing.JButton btnLogoutAdmin;
+    private javax.swing.JButton btnMoveDownAction1;
+    private javax.swing.JButton btnMoveDownCondition1;
+    private javax.swing.JButton btnMoveDownEvent;
+    private javax.swing.JButton btnMoveUpAction1;
+    private javax.swing.JButton btnMoveUpCondition1;
+    private javax.swing.JButton btnMoveUpEvent;
+    private javax.swing.JButton btnNewAction1;
+    private javax.swing.JButton btnNewCondition1;
+    private javax.swing.JButton btnNewEvent;
+    private javax.swing.JButton btnRemoveAction1;
+    private javax.swing.JButton btnRemoveAction2;
+    private javax.swing.JButton btnRemoveCondition1;
+    private javax.swing.JButton btnRemoveCondition2;
+    private javax.swing.JButton btnRemoveEvent;
     public javax.swing.JButton btnStart;
     private javax.swing.JButton btnTestEMail;
     private javax.swing.JButton btnTestSMS;
+    private javax.swing.JButton btnUpdateAction1;
+    private javax.swing.JButton btnUpdateCondition1;
     private javax.swing.JButton btnZoomIn;
     private javax.swing.JButton btnZoomOut;
     public javax.swing.JButton button02;
@@ -13206,7 +13316,6 @@ CrInstrument instrument;
     private javax.swing.ButtonGroup buttonGroup3;
     private javax.swing.ButtonGroup buttonGroup4;
     private javax.swing.ButtonGroup buttonGroup5;
-    private javax.swing.ButtonGroup buttonGroup6;
     private javax.swing.ButtonGroup buttonGroup7;
     private javax.swing.ButtonGroup buttonGroup8;
     private javax.swing.ButtonGroup buttonGroup9;
@@ -13244,14 +13353,10 @@ CrInstrument instrument;
     private javax.swing.JMenuItem helpMenuItem05;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton10;
-    private javax.swing.JButton jButton11;
-    private javax.swing.JButton jButton12;
-    private javax.swing.JButton jButton13;
     private javax.swing.JButton jButton14;
     private javax.swing.JButton jButton15;
     private javax.swing.JButton jButton16;
     private javax.swing.JButton jButton17;
-    private javax.swing.JButton jButton18;
     private javax.swing.JButton jButton19;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton20;
@@ -13259,17 +13364,9 @@ CrInstrument instrument;
     private javax.swing.JButton jButton22;
     private javax.swing.JButton jButton23;
     private javax.swing.JButton jButton24;
-    private javax.swing.JButton jButton25;
     private javax.swing.JButton jButton26;
     private javax.swing.JButton jButton27;
-    private javax.swing.JButton jButton28;
-    private javax.swing.JButton jButton29;
     private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton30;
-    private javax.swing.JButton jButton31;
-    private javax.swing.JButton jButton32;
-    private javax.swing.JButton jButton33;
-    private javax.swing.JButton jButton34;
     private javax.swing.JButton jButton35;
     private javax.swing.JButton jButton36;
     private javax.swing.JButton jButton37;
@@ -13285,15 +13382,11 @@ CrInstrument instrument;
     private javax.swing.JButton jButton46;
     private javax.swing.JButton jButton47;
     private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton50;
-    private javax.swing.JButton jButton51;
-    private javax.swing.JButton jButton52;
     private javax.swing.JButton jButton57;
     private javax.swing.JButton jButton58;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
-    private javax.swing.JButton jButton9;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox10;
     private javax.swing.JCheckBox jCheckBox11;
@@ -13450,7 +13543,6 @@ CrInstrument instrument;
     private javax.swing.JLabel jLabel152;
     private javax.swing.JLabel jLabel153;
     private javax.swing.JLabel jLabel154;
-    private javax.swing.JLabel jLabel155;
     private javax.swing.JLabel jLabel156;
     private javax.swing.JLabel jLabel157;
     private javax.swing.JLabel jLabel158;
@@ -13824,7 +13916,6 @@ CrInstrument instrument;
     private javax.swing.JPanel jPanel81;
     private javax.swing.JPanel jPanel82;
     private javax.swing.JPanel jPanel83;
-    private javax.swing.JPanel jPanel84;
     private javax.swing.JPanel jPanel85;
     private javax.swing.JPanel jPanel86;
     private javax.swing.JPanel jPanel87;
@@ -13850,8 +13941,6 @@ CrInstrument instrument;
     private javax.swing.JPasswordField jPasswordField8;
     private javax.swing.JPasswordField jPasswordField9;
     private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton10;
-    private javax.swing.JRadioButton jRadioButton11;
     private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JRadioButton jRadioButton3;
     private javax.swing.JRadioButton jRadioButton4;
@@ -13928,7 +14017,6 @@ CrInstrument instrument;
     private javax.swing.JTextField jTextField50;
     private javax.swing.JTextField jTextField51;
     private javax.swing.JTextField jTextField52;
-    private javax.swing.JTextField jTextField53;
     private javax.swing.JTextField jTextField54;
     private javax.swing.JTextField jTextField55;
     private javax.swing.JTextField jTextField56;
@@ -13982,7 +14070,5 @@ CrInstrument instrument;
     private javax.swing.JMenuItem toolMenuItem03;
     private javax.swing.JMenuItem toolMenuItem04;
     private javax.swing.JMenuItem toolMenuItem05;
-    private javax.swing.JButton updateActionBtn;
-    private javax.swing.JButton updateConditionBtn;
 
 }

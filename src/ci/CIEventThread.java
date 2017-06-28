@@ -159,14 +159,14 @@ CrInstrument instrument;
                 String cId=evt[3+i];
                 if(instrument.conditionTM.get(cId)!=null){
                   String cond[]=ylib.csvlinetoarray((String)instrument.conditionTM.get(cId));
-                   if(status==1 && cond[2].trim().equalsIgnoreCase("After connected")){}
-                   else if(status==2 && cond[2].trim().equalsIgnoreCase("After disconnected")){}
-                   else if(status==11 && cond[2].trim().equalsIgnoreCase("Before connected")){}
-                   else if(status==13 && cond[2].trim().equalsIgnoreCase("Before start monitor")){}
-                   else if(status==14 && cond[2].trim().equalsIgnoreCase("After start monitor")){}
-                   else if(status==15 && cond[2].trim().equalsIgnoreCase("Before stop monitor")){}
-                   else if(status==16 && cond[2].trim().equalsIgnoreCase("After stop monitorm")){}
-                   else if(status==17 && cond[2].trim().equalsIgnoreCase("Before disconnected")){}
+                   if(status==1 && cond[2].trim().equalsIgnoreCase("After connected") && cond[1].equalsIgnoreCase((String)instrument.ports.get(dataClass.dataSrc))){}
+                   else if(status==2 && cond[2].trim().equalsIgnoreCase("After disconnected") && cond[1].equalsIgnoreCase((String)instrument.ports.get(dataClass.dataSrc))){}
+                   else if(status==11 && cond[2].trim().equalsIgnoreCase("Click connect button")){}
+
+                   else if(status==14 && cond[2].trim().equalsIgnoreCase("Click start button")){}
+
+                   else if(status==16 && cond[2].trim().equalsIgnoreCase("Click stop button")){}
+
                    else if(status==19 && cond[2].trim().equalsIgnoreCase("Over upper take-action level")){}
                    else if(status==20 && cond[2].trim().equalsIgnoreCase("Under lower take-action level")){}
                    else if(status==21 && cond[2].trim().equalsIgnoreCase("Over upper alert level")){}

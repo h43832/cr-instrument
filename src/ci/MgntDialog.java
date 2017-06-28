@@ -70,8 +70,8 @@ public class MgntDialog extends javax.swing.JDialog {
 
     private void jPasswordField1ActionPerformed(java.awt.event.ActionEvent evt) {
        String pw=new String(jPasswordField1.getPassword());
+       if(d2003.de(pw, pro.props.getProperty("mgnt-pw")).equals(pw)) {
 
-       if(YB642D.decode(pro.props.getProperty("mgnt-pw")).equals(pw)) {
            jPasswordField1.setText("");
            setVisible(false); 
            pro.jTabbedPane1.add("Admin",pro.jPanel3);

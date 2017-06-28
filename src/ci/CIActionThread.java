@@ -37,23 +37,278 @@ CrInstrument instrument;
             } else {
 
             }
+            TreeMap sensorClone=(TreeMap)instrument.sensors.clone();
+            boolean changeSensor=false;
             Iterator it=actionDataClass.actionCodeTM.keySet().iterator();
-            String SN="01",key="";
             boolean sendEmail=false,sendSms=false;
             TreeMap newActionTM=new TreeMap();
+            String SN="01";
+            boolean foundSN=false;
             for(;it.hasNext();){
               String actionCode=(String)it.next();
              String act[]=ylib.csvlinetoarray((String)instrument.actionTM.get(actionCode));
-            if(act[2].trim().equalsIgnoreCase("Set device SN")){
 
+            if(!foundSN){
+            Iterator it2=sensorClone.keySet().iterator();
+            for(;it2.hasNext();){
+                String keyInfo[]=ylib.csvlinetoarray((String)it2.next());
+                if(keyInfo[0].equalsIgnoreCase(act[1]) && keyInfo[1].equalsIgnoreCase(act[39]) && keyInfo[2].equalsIgnoreCase(act[16])){
+                    SN=keyInfo[3];
+                    break;
+                }
+            }
+            }
+            String key="";
+            if(act[2].trim().equalsIgnoreCase("Set device SN")){
+              String gottenMasterId="",gottenDeviceId="",gottenDummyId="",setMasterId="",setDeviceId="",setDummyId="";
+              String column[]=new String[]{""};
+              Iterator it2=sensorClone.keySet().iterator();
+              for(;it2.hasNext();){
+                String key2=(String)it2.next();
+                String keyInfo[]=ylib.csvlinetoarray(key2);
+                if(keyInfo[0].equalsIgnoreCase(act[1]) && keyInfo[1].equalsIgnoreCase(act[39]) && keyInfo[2].equalsIgnoreCase(act[16])){
+                  String info[]=ylib.csvlinetoarray((String)sensorClone.get(key2));
+                  setMasterId=info[10].trim();
+                    break;
+                }
+              }
+                if(act[43].trim().equalsIgnoreCase("Byte data")){
+                    column[0]=dataHex;
+                } else if(act[43].trim().equalsIgnoreCase("String data")){
+                     if(act[44].trim().equalsIgnoreCase("Whole line")){
+                            column[0]=dataStr;
+                          } else {
+                            if(act[44].trim().equalsIgnoreCase("Separated by space")){
+                              column=dataStr.split(" ");
+                            } else if(act[44].trim().equalsIgnoreCase("Separated by ','")){
+                              column=ylib.csvlinetoarray(dataStr);
+                            } else if(act[44].trim().equalsIgnoreCase("Fixed column length")){
+                               int len=Integer.parseInt(act[55]);
+                               int cnt=dataStr.length()/len + (dataStr.length()%len >0 ? 1:0);
+                               column=new String[cnt];
+                               for(int j=0;j<cnt;j++){
+                                 column[j]=dataStr.substring(j*len, (j*len+len >dataStr.length() ? dataStr.length():j*len+len));
+                               }
+                            }
+                          }
+                }
+              if(instrument.wn.w.chkValue(act[46])){
+                  if(act[43].trim().equalsIgnoreCase("Byte data")){
+                          if(instrument.wn.w.chkValue(act[48]) && instrument.isNumeric(act[49]) && instrument.isNumeric(act[50])){
+                              int from=Integer.parseInt(act[49]);
+                              int to=Integer.parseInt(act[50]);
+                              if(from>0 && from<to && to<=column[0].length()) {
+                                  from=3*(from-1);
+                                  to=3*(to-1)+2;
+                                  gottenMasterId=column[0].substring(from, to);
+                              }
+                          } else gottenMasterId=column[0];
+                  } else {
+                      int colN=(instrument.isNumeric(act[47])? Integer.parseInt(act[47]):1);
+                      if(colN<1) colN=1;
+                      if(column.length>=colN){
+                          if(instrument.wn.w.chkValue(act[48]) && instrument.isNumeric(act[49]) && instrument.isNumeric(act[50])){
+                              int from=Integer.parseInt(act[49]);
+                              int to=Integer.parseInt(act[50]);
+                              if(from>0 && from<to && to<=column[colN-1].length()) gottenMasterId=column[colN-1].substring(from-1, to);
+                          } else gottenMasterId=column[colN-1];
+                      }
+
+                  }
+                  if(gottenMasterId.length()>0){
+                    boolean update=false;
+                    if(setMasterId.length()>0){
+                      if(setMasterId.equalsIgnoreCase(gottenMasterId)){
+                        update=true;
+                      }
+                    } else {
+                        update=true;
+                     }
+                   if(update){
+                     instrument.portToCoors.put(instrument.wn.getPort(actionDataClass.dataClass.dataSrc), gottenMasterId);
+                     instrument.coorToPorts.put(gottenMasterId, instrument.wn.getPort(actionDataClass.dataClass.dataSrc));
+                     it2=sensorClone.keySet().iterator();
+                     for(;it2.hasNext();){
+                       String key2=(String)it2.next();
+                       String keyInfo[]=ylib.csvlinetoarray(key2);
+                       if(keyInfo[0].equalsIgnoreCase(act[1])){
+                         String info[]=ylib.csvlinetoarray((String)sensorClone.get(key2));
+                         info[11]=gottenMasterId;
+                         sensorClone.put(key2,ylib.arrayToCsvLine(info));
+                         changeSensor=true;
+                     }
+                    }
+                   }
+                  }
+              }
+              if(instrument.wn.w.chkValue(act[55])){
+                  if(act[43].trim().equalsIgnoreCase("Byte data")){
+                          if(instrument.wn.w.chkValue(act[57]) && instrument.isNumeric(act[58]) && instrument.isNumeric(act[59])){
+                              int from=Integer.parseInt(act[58]);
+                              int to=Integer.parseInt(act[59]);
+                              if(from>0 && from<to && to<=column[0].length()) {
+                                  from=3*(from-1);
+                                  to=3*(to-1)+2;
+                                  gottenDeviceId=column[0].substring(from, to);
+                              }
+                          } else gottenDeviceId=column[0];
+                  } else {
+                      int colN=(instrument.isNumeric(act[56])? Integer.parseInt(act[56]):1);
+                      if(colN<1) colN=1;
+                      if(column.length>=colN){
+                          if(instrument.wn.w.chkValue(act[57]) && instrument.isNumeric(act[58]) && instrument.isNumeric(act[59])){
+                              int from=Integer.parseInt(act[58]);
+                              int to=Integer.parseInt(act[59]);
+                              if(from>0 && from<to && to<=column[colN-1].length()) gottenDeviceId=column[colN-1].substring(from-1, to);
+                          } else gottenDeviceId=column[colN-1];
+                      }
+                  }
+                  if(gottenDeviceId.length()>0){
+                    it2=sensorClone.keySet().iterator();
+                    for(;it2.hasNext();){
+                      String key2=(String)it2.next();
+                      String keyInfo[]=ylib.csvlinetoarray(key2);
+                      if(keyInfo[0].equalsIgnoreCase(act[1]) && keyInfo[1].equalsIgnoreCase(act[39]) && keyInfo[2].equalsIgnoreCase(act[16])){
+                        String info[]=ylib.csvlinetoarray((String)sensorClone.get(key2));
+                        setDeviceId=info[15].trim();
+                        if(setDeviceId.length()>0 && setDeviceId.equalsIgnoreCase(gottenDeviceId)){
+                           foundSN=true;
+                           SN=info[3];
+                           if(info[11].trim().length()>0){
+                              TreeMap tm=(TreeMap)instrument.deviceKeyDevices.get(keyInfo[0]+","+keyInfo[1]+","+keyInfo[2]);
+                              if(tm==null) tm=new TreeMap();
+                              tm.put(SN,gottenDeviceId);
+                              instrument.deviceKeyDevices.put(keyInfo[0]+","+keyInfo[1]+","+keyInfo[2], tm);
+                           }
+                            String key3=keyInfo[0]+","+keyInfo[1]+","+keyInfo[2]+","+SN;
+                            instrument.deviceToKeys.put(gottenDeviceId,key3);
+                            instrument.keyToDevices.put(key3,gottenDeviceId);
+                           if(!info[23].equalsIgnoreCase(gottenDeviceId)){
+                             info[23]=gottenDeviceId;
+                             sensorClone.put(key2, ylib.arrayToCsvLine(info));
+                             changeSensor=true;
+                           }
+                        }
+                      }
+                    }
+                   if(!foundSN){
+                     it2=sensorClone.keySet().iterator();
+                     for(;it2.hasNext();){
+                       String key2=(String)it2.next();
+                       String keyInfo[]=ylib.csvlinetoarray(key2);
+                       if(keyInfo[0].equalsIgnoreCase(act[1]) && keyInfo[1].equalsIgnoreCase(act[39]) && keyInfo[2].equalsIgnoreCase(act[16])){
+                         String info[]=ylib.csvlinetoarray((String)sensorClone.get(key2));
+                         if(info[23].trim().length()>0 && info[23].trim().equalsIgnoreCase(gottenDeviceId)) {
+                             foundSN=true;
+                             SN=info[3];
+                             break;
+                         }
+                     }
+                    }
+                   }
+                   if(!foundSN){
+                     it2=sensorClone.keySet().iterator();
+                     for(;it2.hasNext();){
+                       String key2=(String)it2.next();
+                       String keyInfo[]=ylib.csvlinetoarray(key2);
+                       if(keyInfo[0].equalsIgnoreCase(act[1]) && keyInfo[1].equalsIgnoreCase(act[39]) && keyInfo[2].equalsIgnoreCase(act[16])){
+                         String info[]=ylib.csvlinetoarray((String)sensorClone.get(key2));
+                         if(info[23].trim().length()==0) {
+                             foundSN=true;
+                             SN=info[3];
+                             info[23]=gottenDeviceId;
+                             sensorClone.put(key2, ylib.arrayToCsvLine(info));
+                             changeSensor=true;
+                            if(info[11].trim().length()>0){
+                              TreeMap tm=(TreeMap)instrument.deviceKeyDevices.get(info[11]);
+                              if(tm==null) tm=new TreeMap();
+                              tm.put(SN,gottenDeviceId);
+                              instrument.deviceKeyDevices.put(info[11], tm);
+                           }
+                            String key3=keyInfo[0]+","+keyInfo[1]+","+keyInfo[2]+","+SN;
+                            instrument.deviceToKeys.put(gottenDeviceId,key3);
+                            instrument.keyToDevices.put(key3,gottenDeviceId);
+                             break;
+                         }
+                     }
+                    }
+                    if(foundSN==true){
+                    it2=sensorClone.keySet().iterator();
+                     for(;it2.hasNext();){
+                       String key2=(String)it2.next();
+                       String keyInfo[]=ylib.csvlinetoarray(key2);
+                       if(keyInfo[0].equalsIgnoreCase(act[1]) && keyInfo[1].equalsIgnoreCase(act[39]) && keyInfo[2].equalsIgnoreCase(act[16])){
+                         String info[]=ylib.csvlinetoarray((String)sensorClone.get(key2));
+                         if(info[23].trim().length()==0 &&  info[3].equals(SN)) {
+                             info[23]=gottenDeviceId;
+                             sensorClone.put(key2, ylib.arrayToCsvLine(info));
+                             changeSensor=true;
+                         }
+                     }
+                    }
+                   }
+                   }
+                  }
+                  if(!foundSN) SN="99";
+
+              }
+              if(instrument.wn.w.chkValue(act[65])){
+                  if(act[43].trim().equalsIgnoreCase("Byte data")){
+                          if(instrument.wn.w.chkValue(act[67]) && instrument.isNumeric(act[68]) && instrument.isNumeric(act[69])){
+                              int from=Integer.parseInt(act[68]);
+                              int to=Integer.parseInt(act[69]);
+                              if(from>0 && from<to && to<=column[0].length()) {
+                                  from=3*(from-1);
+                                  to=3*(to-1)+2;
+                                  gottenDeviceId=column[0].substring(from, to);
+                              }
+                          } else gottenDeviceId=column[0];
+                  } else {
+                      int colN=(instrument.isNumeric(act[66])? Integer.parseInt(act[66]):1);
+                      if(colN<1) colN=1;
+                      if(column.length>=colN){
+                          if(instrument.wn.w.chkValue(act[67]) && instrument.isNumeric(act[68]) && instrument.isNumeric(act[69])){
+                              int from=Integer.parseInt(act[68]);
+                              int to=Integer.parseInt(act[69]);
+                              if(from>0 && from<to && to<=column[colN-1].length()) gottenDeviceId=column[colN-1].substring(from-1, to);
+                          } else gottenDeviceId=column[colN-1];
+                      }
+                  }
+                  if(gottenDummyId.length()>0){
+                    it2=sensorClone.keySet().iterator();
+                    for(;it2.hasNext();){
+                      String key2=(String)it2.next();
+                      String keyInfo[]=ylib.csvlinetoarray(key2);
+                      if(keyInfo[0].equalsIgnoreCase(act[1]) && keyInfo[1].equalsIgnoreCase(act[39]) && keyInfo[2].equalsIgnoreCase(act[16])){
+                        String info[]=ylib.csvlinetoarray((String)sensorClone.get(key2));
+                        setDummyId=info[26].trim();
+                        if(SN.equals(info[3])){
+                          if(setDummyId.length()>0 && setDummyId.equalsIgnoreCase(gottenDummyId)){
+                           if(!info[27].equalsIgnoreCase(gottenDummyId) || !info[5].equals("0")){
+                             info[27]=gottenDummyId;
+                             info[25]="0";
+                             sensorClone.put(key2, ylib.arrayToCsvLine(info));
+                             changeSensor=true;
+                           }
+                          } else {
+                           if(!info[27].equalsIgnoreCase(gottenDummyId) || !info[5].equals("1")){
+                             info[27]=gottenDummyId;
+                             info[25]="1";
+                             sensorClone.put(key2, ylib.arrayToCsvLine(info));
+                             changeSensor=true;
+                           }
+                          }
+                        }
+                      }
+                    }
+              }
+              }
             }
             else if(act[2].trim().equalsIgnoreCase("Set data value")){
                String dataX="";
                double dataValue=0.0;
                byte b2[];
                 key=act[1]+","+act[39]+","+act[16]+","+SN+","+act[17];
-               if(instrument.wn.w.chkValue(act[28])){}
-               else SN="01";
                        if(act[3].trim().equalsIgnoreCase("Byte data")){
                          if(instrument.wn.w.chkValue(act[7])){
                            int from=Integer.parseInt(act[8]);
@@ -124,8 +379,8 @@ CrInstrument instrument;
                } else dataTM=(TreeMap) instrument.allDatum.get(key);
                dataTM.put(actionDataClass.dataClass.time, dataValue);
                instrument.allDatum.put(key, dataTM);
-               if(instrument.sensors.get(key)!=null){
-                 String info[]=ylib.csvlinetoarray((String)instrument.sensors.get(key));
+               if(sensorClone.get(key)!=null){
+                 String info[]=ylib.csvlinetoarray((String)sensorClone.get(key));
 
                  double d5 = 1000000.0, d6 = -1000000.0, d7 = 1000000.0, d8 = -1000000.0;
                  if (isNumeric(info[5])) d5 = Double.parseDouble(info[5]);
@@ -261,12 +516,15 @@ CrInstrument instrument;
                  info[20]=instrument.getRound2(dataValue,d14);
                  info[22]=String.valueOf(time);
                  info[24]=String.valueOf(time);
-                 instrument.sensors.put(key,ylib.arrayToCsvLine(info));
+                 sensorClone.put(key,ylib.arrayToCsvLine(info));
+
+                 changeSensor=true;
                  instrument.lastDataTime=time;
                }
                instrument.allConfigTM.put(key, instrument.getConfig(key));
                instrument.allStatusTM.put(key, instrument.getStatus(key));
                instrument.dataUpdated=true;
+
             }
 
             else if(act[2].trim().equalsIgnoreCase("Send email message")){
@@ -301,10 +559,10 @@ CrInstrument instrument;
             else if(act[2].trim().equalsIgnoreCase("Stop continue send command")){
               instrument.miscThread.setData(12,act[0],actionDataClass.dataClass.data);
             }
-            else if(act[2].trim().equalsIgnoreCase("Connect port")){
+            else if(act[2].trim().equalsIgnoreCase("Connect all port")){
               instrument.miscThread.setData(10,act[0],actionDataClass.dataClass.data);
             }
-            else if(act[2].trim().equalsIgnoreCase("Disconnect port")){
+            else if(act[2].trim().equalsIgnoreCase("Disconnect all port")){
               instrument.miscThread.setData(11,act[0],actionDataClass.dataClass.data);
             }
             else if(act[2].trim().equalsIgnoreCase("Start monitor")){
@@ -332,6 +590,7 @@ CrInstrument instrument;
               waitV.add(dataClass);
             }
             waitV.remove(0);
+            if(changeSensor) instrument.sensors=sensorClone;
            }
            if(instrument.chkProps("recordwhenreceive") && instrument.lastDataTime>instrument.lastRecordTime){
               instrument.saveData3(instrument.lastDataTime,instrument.lastDataTime,5);
