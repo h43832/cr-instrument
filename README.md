@@ -1,5 +1,5 @@
 # ![](http://cloud-rain.com/web/cr_instrument2_t.gif)cr-Instrument
-cr-Instrument is an easy-to-use WSN system. 
+cr-Instrument is an easy-to-use WSN system, used for instrument monitoring automation. 
 
 # Download cr-Instrument
   <a href="https://drive.google.com/drive/folders/0B__KtdLXDfLKMDNHazdydlFZTnM?usp=sharing" targer="_blank">click here to download</a>
