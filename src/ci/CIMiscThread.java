@@ -34,12 +34,12 @@ CrInstrument instrument;
                        if(!instrument.loadClass(act[35],2)) {instrument.sysLog("java action class \""+dataClass.data+"\" not exist or not implements CIAction interface."); return;}
                      }
                      if(((CIAction)instrument.jClasses.get(act[35]))!=null){
-                       ((CIAction)instrument.jClasses.get(act[35])).startAction(instrument, dataClass.dataSrc,dataClass.data);
+                       ((CIAction)instrument.jClasses.get(act[35])).startAction(instrument, dataClass.dataSrc,dataClass);
                      }
                    }
                    else if(miscCode==5){
                      String act[]=ylib.csvlinetoarray((String)instrument.actionTM.get(dataClass.dataSrc));
-                     sendCmd(act);
+                     sendCmd(act,1);
                    }
                    else if(miscCode==6){
                      if (instrument.btnStart.getText().trim().equals(bundle2.getString("CrInstrument.xy.msg3")))  instrument.pressStartBtn(2);
@@ -48,9 +48,12 @@ CrInstrument instrument;
                      if (instrument.btnStart.getText().trim().equals(bundle2.getString("CrInstrument.xy.msg4")))instrument.pressStartBtn(2);
                    }
                    else if(miscCode==8){
-
+                     String act[]=ylib.csvlinetoarray((String)instrument.actionTM.get(dataClass.dataSrc));
+                     sendCmd(act,2);
                    }
                    else if(miscCode==9){
+                     String act[]=ylib.csvlinetoarray((String)instrument.actionTM.get(dataClass.dataSrc));
+                     sendCmd(act,3);
                    }
                    else if(miscCode==10){
                      instrument.connect();
@@ -79,24 +82,45 @@ CrInstrument instrument;
           }
       }
   }
-  void sendCmd(String actInfo[]){
+
+  void sendCmd(String actInfo[],int type){
   String cmd="";
   if(actInfo.length>37 && actInfo[36]!=null && actInfo[36].equalsIgnoreCase("Y") && actInfo[37].length()>0){
-     if(((CIDataGenerator)instrument.jClasses.get(actInfo[37]))==null){
+    if(((CIDataGenerator)instrument.jClasses.get(actInfo[37]))==null){
        if(!instrument.loadClass(actInfo[37],4)) instrument.sysLog("Failed to load cmd class "+actInfo[37]+".");
-     }
-     if(((CIDataGenerator)instrument.jClasses.get(actInfo[37]))!=null){
+    }
+    if(((CIDataGenerator)instrument.jClasses.get(actInfo[37]))!=null){
       byte b[]= ((CIDataGenerator)instrument.jClasses.get(actInfo[37])).getData();
       cmd=(actInfo[10].equals("1")? instrument.wn.byteToStr(b):new String(b)).trim(); 
     }
   } else cmd=actInfo[11];
 
+  if(type==2){
+     String nextInfo[]=instrument.getNextDevice(actInfo[1],actInfo[39],actInfo[16],actInfo[30]); 
+     if(nextInfo==null) {instrument.sysLog(actInfo[1]+"-"+actInfo[39]+"-"+actInfo[16]+"-"+actInfo[30]+" has no next device."); return;}
+     String key=nextInfo[0]+","+nextInfo[1]+","+nextInfo[2]+","+nextInfo[3]+","+nextInfo[4];
+     String info[]=ylib.csvlinetoarray((String)instrument.sensors.get(key));  
+     actInfo[1]=nextInfo[0];
+     actInfo[27]=info[11];
+     actInfo[28]=info[23];
+  } else if(type==3){
+     String nextInfo[]=instrument.getNextStation(actInfo[1]); 
+     if(nextInfo==null) {instrument.sysLog(actInfo[1]+" has no next station."); return;}
+     actInfo[1]=nextInfo[0];
+     actInfo[27]= (String)instrument.portToCoors.get(instrument.wn.getPort(nextInfo[1]));
+  }
+  cmd=ylib.replace(cmd, "[#masterid#]", actInfo[27]);
+  cmd=ylib.replace(cmd, "[#deviceid#]", actInfo[28]);
+  cmd=ylib.replace(cmd, "[#Masterid#]", actInfo[27]);
+  cmd=ylib.replace(cmd, "[#Deviceid#]", actInfo[28]);
+  cmd=ylib.replace(cmd, "[#MASTERID#]", actInfo[27]);
+  cmd=ylib.replace(cmd, "[#DEVICEID#]", actInfo[28]);
   cmd=instrument.wn.w.e642(cmd);
   if(cmd.trim().length()<1) {
       instrument.sysLog("No commad or data to be send");
       return;
   }
-  if(instrument.connected){
+
       byte [] b=null;
 
       if(actInfo[14].equalsIgnoreCase("Y")) {
@@ -113,12 +137,9 @@ CrInstrument instrument;
        String id=instrument.getItemId(instrument.getDataSrcFromStation(actInfo[1]));
 
           cmd="performcommand wsn.WSN cmd "+instrument.getDataSrcFromStation(actInfo[1])+" all "+actInfo[10].equalsIgnoreCase("Byte data")+" "+
-                  (actInfo.length>12 && actInfo[12]!=null && actInfo[12].equalsIgnoreCase("Y"))+" "+actInfo[14].equalsIgnoreCase("Y")+" "+actInfo[15]+" "+cmd+" "+instrument.wn.w.e642((actInfo.length>13? actInfo[13]:""))+" 0 0 0 0 0"; 
+                  (actInfo.length>12 && actInfo[12]!=null && actInfo[12].equalsIgnoreCase("Y"))+" "+actInfo[14].equalsIgnoreCase("Y")+" "+(actInfo[15].length()>0 && instrument.isNumeric(actInfo[15])? actInfo[15]:"10000.0")+" "+cmd+" "+instrument.wn.w.e642((actInfo.length>13? actInfo[13]:""))+" 0 0 0 0 0"; 
           instrument.wn.w.sendToOne(cmd,id);
 
-  } else {
-      instrument.sysLog("Yet not connected! can't send command.");
-  }
 }
 
    public void setData(long time,String dataSrc,String data){

@@ -37,9 +37,9 @@ import javax.swing.text.StyleConstants;
  * @author Administrator
  */
 public class CrInstrument extends WSNApplication implements Runnable {
-  public static String version = "2.17.0022";
+  public static String version = "2.17.0023";
   public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-  String versionTime = "20170629-080000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
+  String versionTime = "20170703-080000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
           stationFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_stations.txt",
           sensorFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_sensors.txt",currentViewDSrc="",
           statusFile = System.getProperty("user.home") + File.separator + "ci_status.txt", 
@@ -366,6 +366,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
       CIDT.EnumOS os=CIDT.getOs();
       if(!os.isWindows()) jMenuItem9.setVisible(false);
 
+    btnLogoutUser.setVisible(false);
+    jPanel28.setVisible(false);
     fileUpLoadMenuItem.setVisible(false);
     if(!(System.getProperty("user.language").equalsIgnoreCase("zh") && System.getProperty("user.country").equalsIgnoreCase("TW"))) jMenuItem20.setVisible(false);
     jTabbedPane3.remove(UIPanel);
@@ -1464,8 +1466,8 @@ public Config getConfig(String curveId){
       if(WSN.isNumeric(info[14])){
         confA[108]=info[14];
         confA_2[47]=info[14];
-        confA[47]=wn.w.removeOneVar(confA[47],2);
-        confA[47]=wn.w.removeOneVar(confA[47],52);
+        confA[47]=wn.w.addOneVar(confA[47],2);
+        confA[47]=wn.w.addOneVar(confA[47],52);
       }
       if(foundLimit){confA[1]=wn.w.removeOneVar(confA[1],14);} else {confA[1]=wn.w.addOneVar(confA[1],14);}
 
@@ -1490,12 +1492,16 @@ public Config getConfig(String curveId){
 
 public Status getStatus(String curveId){
   if(allStatusTM.get(curveId)!=null) return (Status)allStatusTM.get(curveId);
-  String statusStr = startTime + ",1,0,0,0,0,0,0,0,0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,0,0,0,0,0,0";
+  String statusStr = startTime + ",1,0,0,0,0,0,0,0,0,0.0,0.0,0.0,0.0,0.0,0,0,0,0,0,0,0,0,0,0,0.0,0.0,0.0,0.0,0.0";
   String stat[] = ylib.csvlinetoarray(statusStr);
+  
+
   Status rtn = new Status(new long[]{Long.parseLong(stat[0]), Long.parseLong(stat[1]), Long.parseLong(stat[2]), Long.parseLong(stat[3]), Long.parseLong(stat[4]),
       Long.parseLong(stat[20]), Long.parseLong(stat[21]), Long.parseLong(stat[22]), Long.parseLong(stat[23]), Long.parseLong(stat[24])},
             new int[]{Integer.parseInt(stat[5]), Integer.parseInt(stat[6]), Integer.parseInt(stat[7]), Integer.parseInt(stat[8]), Integer.parseInt(stat[9])},
-            new double[]{Double.parseDouble(stat[10]), Double.parseDouble(stat[11]), Double.parseDouble(stat[12]), Double.parseDouble(stat[13]), Double.parseDouble(stat[14])}, stat);
+            new double[]{Double.parseDouble(stat[10]), Double.parseDouble(stat[11]), Double.parseDouble(stat[12]), Double.parseDouble(stat[13]), Double.parseDouble(stat[14]),
+                Double.parseDouble(stat[25]), Double.parseDouble(stat[26]), Double.parseDouble(stat[27]), Double.parseDouble(stat[28]), Double.parseDouble(stat[29])},
+          stat);
   return rtn;
 }
 
@@ -2427,9 +2433,9 @@ String getFileHead(String station){
     String title="cr-Instrument " + version;
     if(currentUI.get("frame")!=null){
         String info[]=ylib.csvlinetoarray((String)currentUI.get("frame"));
-        if(info.length>1 && info[1].trim().length()>0) title=info[1].trim();
+        if(info.length>1 && info[1].trim().length()>0) title=info[1].trim()+" "+info[9];
     }
-    if(wn!=null )setTitle(title + "          in Group: " + wn.w.getGNS(11) + (wn.w.getGNS(38).length() > 0 ? "      connect to: " + wn.w.getGNS(8) : "") + (wn.gs != null ? "      number of client: " + wn.gs.connectionCount() : "") + (hasNewVersion ? "      (" + bundle2.getString("CrInstrument.xy.msg1") + ")" : ""));
+    if(wn!=null )setTitle(title + "       in Group: " + wn.w.getGNS(11) + (wn.w.getGNS(38).length() > 0 ? "    connect to: " + wn.w.getGNS(8) : "") + (wn.gs != null ? "    number of client: " + wn.gs.connectionCount() : "") +"    "+bundle2.getString("CrInstrument.xy.msg139") +(adminLogin ? bundle2.getString("CrInstrument.xy.msg140"):(userLogin? bundle2.getString("CrInstrument.xy.msg141"): bundle2.getString("CrInstrument.xy.msg142")))+ (hasNewVersion ? "    (" + bundle2.getString("CrInstrument.xy.msg1") + ")" : ""));
   }
 
   void handleWaitDevice_c() {
@@ -2665,7 +2671,7 @@ String getFileHead(String station){
           String info[] = ylib.csvlinetoarray(str1);
 
           info[11] = "0.0";
-          info[12] = "0.0";
+          info[12] = "100000000.0";
           info[13] = "0.0";
           info[17] = "0.0";
           info[18] = "0.0";
@@ -3198,6 +3204,120 @@ String getFileHead(String station){
       }
     }
 
+    return null;
+  }
+
+   public String[] getNextStation(String currentStation) {
+    if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
+      sysLog("getNextStation(" + currentStation + "), sensors.size=" + sensors.size() + ",stations.size=" + stations.size());
+    }
+    boolean found = false;
+    if (currentStation.length() < 1) {
+      found = true;
+    }
+    TreeMap sensorsC = (TreeMap) sensors.clone();
+    Iterator it = sensorsC.keySet().iterator();
+    for (; it.hasNext();) {
+      String key = (String) it.next();
+      String info[] = ylib.csvlinetoarray((String) sensors.get(key));
+      String port = (String) stations.get(info[0]);
+      if (currentStation.equals(info[0])) {
+          found = true;
+        }        
+      if (port != null) {
+        if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
+          sysLog("1.key=" + key + ",info.length=" + info.length + ",info[0]=" + info[0] + ",info[1]=" + info[1] + ",info[22]=" + (info.length > 22 ? info[22] : "")
+                  + ",info[23]=" + (info.length > 23 ? info[23] : "") + ",info[24]=" + (info.length > 24 ? info[24] : "") + ",info[25]=" + (info.length > 25 ? info[25] : "") + ",port=" + port + ",found=" + found);
+        }
+        if (found) {
+          if (currentStation.equals("") || (!(currentStation.equals(info[0])))) {
+            if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
+              sysLog("next sation id=" + info[0]);
+            }
+            return new String[]{info[0], port};
+
+          }
+        }
+      }
+    }
+    if(found){
+     it = sensorsC.keySet().iterator();
+     for (; it.hasNext();) {
+      String key = (String) it.next();
+      String info[] = ylib.csvlinetoarray((String) sensorsC.get(key));
+      String port = (String) stations.get(info[0]);
+      if (port != null) {
+        if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
+          sysLog("2.key=" + key + ",info.length=" + info.length + ",info[0]=" + info[0] + ",info[1]=" + info[1] + ",info[22]=" + (info.length > 22 ? info[22] : "")
+                  + ",info[23]=" + (info.length > 23 ? info[23] : "") + ",info[24]=" + (info.length > 24 ? info[24] : "") + ",info[25]=" + (info.length > 25 ? info[25] : "") + ",port=" + port + ",found=" + found);
+        }
+        if (info[25].equals("1")) {
+            if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
+              sysLog("next station id=" + info[0]);
+            }
+            return new String[]{info[0], port};
+
+          }
+      }
+     }
+    }
+    return null;
+  }
+
+    public String[] getNextDevice(String currentStation, String currentDevice,String currentModel,String currentSN) {
+    if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
+      sysLog("getNextDevice(" + currentStation + "," + currentDevice+","+currentModel+","+currentSN + "), sensors.size=" + sensors.size() + ",stations.size=" + stations.size());
+    }
+    boolean found = false;
+    if (currentStation.length() < 1) {
+      found = true;
+    }
+    TreeMap sensorsC = (TreeMap) sensors.clone();
+    Iterator it = sensorsC.keySet().iterator();
+    for (; it.hasNext();) {
+      String key = (String) it.next();
+      String info[] = ylib.csvlinetoarray((String) sensorsC.get(key));
+      String port = (String) stations.get(info[0]);
+      if (currentStation.equals(info[0]) && currentDevice.equals(info[1]) && currentModel.equals(info[2]) && currentSN.equals(info[3])) {
+          found = true;
+        }        
+      if (port != null) {
+        if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
+          sysLog("1.key=" + key + ",info.length=" + info.length + ",info[0]=" + info[0] + ",info[1]=" + info[1] + ",info[22]=" + (info.length > 22 ? info[22] : "")
+                  + ",info[23]=" + (info.length > 23 ? info[23] : "") + ",info[24]=" + (info.length > 24 ? info[24] : "") + ",info[25]=" + (info.length > 25 ? info[25] : "") + ",port=" + port + ",found=" + found);
+        }
+        if (found) {
+          if (info[25].equals("1") && (currentStation.equals("") || (!(currentStation.equals(info[0]) && currentDevice.equals(info[1]) && currentModel.equals(info[2]) && currentSN.equals(info[3]))))) {
+            if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
+              sysLog("next device id=" + info[0]+","+info[1]+","+info[2]+","+info[3]+","+info[4]);
+            }
+            return new String[]{info[0], info[1],info[2],info[3], info[4],port};
+
+          }
+        }
+      }
+    }
+    if(found){
+     it = sensorsC.keySet().iterator();
+     for (; it.hasNext();) {
+      String key = (String) it.next();
+      String info[] = ylib.csvlinetoarray((String) sensorsC.get(key));
+      String port = (String) stations.get(info[0]);
+      if (port != null) {
+        if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
+          sysLog("2.key=" + key + ",info.length=" + info.length + ",info[0]=" + info[0] + ",info[1]=" + info[1] + ",info[22]=" + (info.length > 22 ? info[22] : "")
+                  + ",info[23]=" + (info.length > 23 ? info[23] : "") + ",info[24]=" + (info.length > 24 ? info[24] : "") + ",info[25]=" + (info.length > 25 ? info[25] : "") + ",port=" + port + ",found=" + found);
+        }
+        if (info[25].equals("1")) {
+            if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
+              sysLog("next device id=" + info[0]+","+info[1]+","+info[2]+","+info[3]+","+info[4]);
+            }
+            return new String[]{info[0], info[1],info[2],info[3],info[4], port};
+
+          }
+      }
+     }
+    }
     return null;
   }
   
@@ -4217,8 +4337,7 @@ String getFileHead(String station){
       
 
     }
-    if (currentLightStat != currentStat && continueMonitor);
-    currentLightStat = currentStat;
+    if (currentLightStat != currentStat && continueMonitor) currentLightStat = currentStat;
   }
 
 public void setStatus(String nodeId,String dataSrc[],int statusCode){
@@ -5013,12 +5132,14 @@ public void doLayout(){
         jPanel4 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
-        jButton23 = new javax.swing.JButton();
+        btnApplySetting_device = new javax.swing.JButton();
         btnEditSrc = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
+        jButton9 = new javax.swing.JButton();
+        btnLogoutUser = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jPanel9 = new javax.swing.JPanel();
         jScrollPane20 = new javax.swing.JScrollPane();
@@ -5030,7 +5151,7 @@ public void doLayout(){
         jTable5 = new javax.swing.JTable();
         jButton19 = new javax.swing.JButton();
         jButton26 = new javax.swing.JButton();
-        jButton7 = new javax.swing.JButton();
+        btnApplySetting_ports = new javax.swing.JButton();
         jPanel15 = new javax.swing.JPanel();
         jPanel16 = new javax.swing.JPanel();
         jLabel26 = new javax.swing.JLabel();
@@ -5119,7 +5240,18 @@ public void doLayout(){
         jComboBox3 = new javax.swing.JComboBox();
         jLabel49 = new javax.swing.JLabel();
         CBUseEngineerUnit = new javax.swing.JCheckBox();
-        jButton17 = new javax.swing.JButton();
+        btnApplySetting_records = new javax.swing.JButton();
+        jPanel28 = new javax.swing.JPanel();
+        jButton7 = new javax.swing.JButton();
+        jPanel29 = new javax.swing.JPanel();
+        jLabel11 = new javax.swing.JLabel();
+        jPasswordField4 = new javax.swing.JPasswordField();
+        jPanel30 = new javax.swing.JPanel();
+        jLabel36 = new javax.swing.JLabel();
+        jPasswordField10 = new javax.swing.JPasswordField();
+        jPanel31 = new javax.swing.JPanel();
+        jLabel37 = new javax.swing.JLabel();
+        jPasswordField11 = new javax.swing.JPasswordField();
         jPanel3 = new javax.swing.JPanel();
         jTabbedPane3 = new javax.swing.JTabbedPane();
         jPanel44 = new javax.swing.JPanel();
@@ -5181,13 +5313,13 @@ public void doLayout(){
         jPanel68 = new javax.swing.JPanel();
         jLabel24 = new javax.swing.JLabel();
         jPasswordField9 = new javax.swing.JPasswordField();
-        jButton24 = new javax.swing.JButton();
+        btnApplySetting_accounts = new javax.swing.JButton();
         UIPanel = new javax.swing.JPanel();
         jTabbedPane4 = new javax.swing.JTabbedPane();
         jPanel36 = new javax.swing.JPanel();
         jPanel140 = new javax.swing.JPanel();
         jButton57 = new javax.swing.JButton();
-        jButton58 = new javax.swing.JButton();
+        btnApplySetting_ui = new javax.swing.JButton();
         jPanel144 = new javax.swing.JPanel();
         jPanel141 = new javax.swing.JPanel();
         jComboBox36 = new javax.swing.JComboBox();
@@ -5218,6 +5350,8 @@ public void doLayout(){
         jPanel110 = new javax.swing.JPanel();
         jLabel147 = new javax.swing.JLabel();
         jTextField45 = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        jTextField11 = new javax.swing.JTextField();
         jLabel75 = new javax.swing.JLabel();
         jComboBox54 = new javax.swing.JComboBox();
         jPanel146 = new javax.swing.JPanel();
@@ -5290,7 +5424,7 @@ public void doLayout(){
         stopContinueSendBtn = new javax.swing.JButton();
         clearSendBtn = new javax.swing.JButton();
         NodeMgntPanel = new javax.swing.JPanel();
-        jButton41 = new javax.swing.JButton();
+        btnApplySetting_node = new javax.swing.JButton();
         jScrollPane15 = new javax.swing.JScrollPane();
         jList9 = new javax.swing.JList(listModel9);
         jScrollPane16 = new javax.swing.JScrollPane();
@@ -5345,6 +5479,8 @@ public void doLayout(){
         jCheckBox7 = new javax.swing.JCheckBox();
         jCheckBox6 = new javax.swing.JCheckBox();
         jPanel104 = new javax.swing.JPanel();
+        jCheckBox47 = new javax.swing.JCheckBox();
+        jLabel9 = new javax.swing.JLabel();
         jLabel149 = new javax.swing.JLabel();
         jLabel39 = new javax.swing.JLabel();
         jPanel75 = new javax.swing.JPanel();
@@ -5602,8 +5738,8 @@ public void doLayout(){
         fileMenuItem05 = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
-        jMenuItem3 = new javax.swing.JMenuItem();
-        jMenuItem4 = new javax.swing.JMenuItem();
+        menuItemLoginAdmin = new javax.swing.JMenuItem();
+        menuItemLoginUser = new javax.swing.JMenuItem();
         toolMenuItem01 = new javax.swing.JMenuItem();
         toolMenuItem02 = new javax.swing.JMenuItem();
         toolMenuItem03 = new javax.swing.JMenuItem();
@@ -6816,15 +6952,15 @@ public void doLayout(){
         jPanel4.add(jScrollPane1);
         jScrollPane1.setBounds(0, 0, 1014, 280);
 
-        jButton23.setFont(jButton23.getFont().deriveFont(jButton23.getFont().getSize()+12f));
-        jButton23.setText(bundle.getString("CrInstrument.jButton23.text")); 
-        jButton23.addActionListener(new java.awt.event.ActionListener() {
+        btnApplySetting_device.setFont(btnApplySetting_device.getFont());
+        btnApplySetting_device.setText(bundle.getString("CrInstrument.btnApplySetting_device.text")); 
+        btnApplySetting_device.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton23ActionPerformed(evt);
+                btnApplySetting_deviceActionPerformed(evt);
             }
         });
-        jPanel4.add(jButton23);
-        jButton23.setBounds(740, 360, 240, 60);
+        jPanel4.add(btnApplySetting_device);
+        btnApplySetting_device.setBounds(680, 290, 170, 23);
 
         btnEditSrc.setFont(btnEditSrc.getFont().deriveFont(btnEditSrc.getFont().getSize()+12f));
         btnEditSrc.setText(bundle.getString("CrInstrument.btnEditSrc.text")); 
@@ -6834,7 +6970,7 @@ public void doLayout(){
             }
         });
         jPanel4.add(btnEditSrc);
-        btnEditSrc.setBounds(180, 360, 290, 60);
+        btnEditSrc.setBounds(30, 460, 300, 60);
 
         jButton1.setFont(jButton1.getFont());
         jButton1.setText(bundle.getString("CrInstrument.jButton1.text")); 
@@ -6864,12 +7000,37 @@ public void doLayout(){
             }
         });
         jPanel4.add(jButton6);
-        jButton6.setBounds(480, 290, 120, 23);
+        jButton6.setBounds(480, 290, 180, 23);
 
         jButton5.setFont(jButton5.getFont().deriveFont(jButton5.getFont().getSize()+12f));
         jButton5.setText(bundle.getString("CrInstrument.jButton5.text")); 
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
         jPanel4.add(jButton5);
-        jButton5.setBounds(500, 360, 220, 60);
+        jButton5.setBounds(690, 460, 260, 60);
+
+        jButton9.setFont(jButton9.getFont().deriveFont(jButton9.getFont().getSize()+12f));
+        jButton9.setText(bundle.getString("CrInstrument.jButton9.text")); 
+        jButton9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton9ActionPerformed(evt);
+            }
+        });
+        jPanel4.add(jButton9);
+        jButton9.setBounds(360, 460, 300, 60);
+
+        btnLogoutUser.setFont(btnLogoutUser.getFont().deriveFont(btnLogoutUser.getFont().getSize()+12f));
+        btnLogoutUser.setText(bundle.getString("CrInstrument.btnLogoutUser.text")); 
+        btnLogoutUser.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnLogoutUserActionPerformed(evt);
+            }
+        });
+        jPanel4.add(btnLogoutUser);
+        btnLogoutUser.setBounds(690, 380, 260, 60);
 
         jTabbedPane2.addTab(bundle.getString("CrInstrument.jPanel4.TabConstraints.tabTitle"), jPanel4); 
 
@@ -6904,7 +7065,7 @@ public void doLayout(){
             }
         });
         jPanel9.add(jButton27);
-        jButton27.setBounds(40, 140, 90, 23);
+        jButton27.setBounds(20, 140, 140, 23);
 
         jButton43.setText(bundle.getString("CrInstrument.jButton43.text")); 
         jButton43.addActionListener(new java.awt.event.ActionListener() {
@@ -6913,7 +7074,7 @@ public void doLayout(){
             }
         });
         jPanel9.add(jButton43);
-        jButton43.setBounds(150, 140, 130, 23);
+        jButton43.setBounds(170, 140, 130, 23);
 
         jPanel5.add(jPanel9);
         jPanel9.setBounds(390, 30, 330, 180);
@@ -6945,7 +7106,7 @@ public void doLayout(){
             }
         });
         jPanel11.add(jButton19);
-        jButton19.setBounds(50, 140, 100, 23);
+        jButton19.setBounds(20, 140, 160, 23);
 
         jButton26.setText(bundle.getString("CrInstrument.jButton26.text")); 
         jButton26.addActionListener(new java.awt.event.ActionListener() {
@@ -6954,20 +7115,20 @@ public void doLayout(){
             }
         });
         jPanel11.add(jButton26);
-        jButton26.setBounds(170, 140, 130, 23);
+        jButton26.setBounds(200, 140, 130, 23);
 
         jPanel5.add(jPanel11);
         jPanel11.setBounds(18, 28, 360, 180);
 
-        jButton7.setFont(jButton7.getFont().deriveFont(jButton7.getFont().getSize()+12f));
-        jButton7.setText(bundle.getString("CrInstrument.jButton7.text")); 
-        jButton7.addActionListener(new java.awt.event.ActionListener() {
+        btnApplySetting_ports.setFont(btnApplySetting_ports.getFont().deriveFont(btnApplySetting_ports.getFont().getSize()+12f));
+        btnApplySetting_ports.setText(bundle.getString("CrInstrument.btnApplySetting_ports.text")); 
+        btnApplySetting_ports.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton7ActionPerformed(evt);
+                btnApplySetting_portsActionPerformed(evt);
             }
         });
-        jPanel5.add(jButton7);
-        jButton7.setBounds(740, 30, 240, 50);
+        jPanel5.add(btnApplySetting_ports);
+        btnApplySetting_ports.setBounds(740, 30, 240, 50);
 
         jPanel15.setBackground(new java.awt.Color(255, 255, 255));
         jPanel15.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel15.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("·s²Ó©úÅé", 0, 12), new java.awt.Color(0, 153, 153))); 
@@ -7102,7 +7263,7 @@ public void doLayout(){
             }
         });
         jPanel22.add(jButton16);
-        jButton16.setBounds(50, 110, 80, 23);
+        jButton16.setBounds(20, 110, 140, 23);
 
         jButton20.setFont(jButton20.getFont());
         jButton20.setText(bundle.getString("CrInstrument.jButton20.text")); 
@@ -7112,7 +7273,7 @@ public void doLayout(){
             }
         });
         jPanel22.add(jButton20);
-        jButton20.setBounds(150, 110, 110, 23);
+        jButton20.setBounds(170, 110, 110, 23);
 
         jPanel5.add(jPanel22);
         jPanel22.setBounds(420, 230, 300, 140);
@@ -7146,7 +7307,7 @@ public void doLayout(){
             }
         });
         jPanel21.add(jButton21);
-        jButton21.setBounds(50, 110, 80, 23);
+        jButton21.setBounds(20, 110, 140, 23);
 
         jButton22.setFont(jButton22.getFont());
         jButton22.setText(bundle.getString("CrInstrument.jButton22.text")); 
@@ -7156,7 +7317,7 @@ public void doLayout(){
             }
         });
         jPanel21.add(jButton22);
-        jButton22.setBounds(150, 110, 110, 23);
+        jButton22.setBounds(170, 110, 110, 23);
 
         jPanel5.add(jPanel21);
         jPanel21.setBounds(420, 390, 300, 140);
@@ -7429,15 +7590,70 @@ public void doLayout(){
         jPanel20.add(jPanel27);
         jPanel27.setBounds(30, 20, 550, 110);
 
-        jButton17.setFont(jButton17.getFont().deriveFont(jButton17.getFont().getSize()+12f));
-        jButton17.setText(bundle.getString("CrInstrument.jButton17.text")); 
-        jButton17.addActionListener(new java.awt.event.ActionListener() {
+        btnApplySetting_records.setFont(btnApplySetting_records.getFont().deriveFont(btnApplySetting_records.getFont().getSize()+12f));
+        btnApplySetting_records.setText(bundle.getString("CrInstrument.btnApplySetting_records.text")); 
+        btnApplySetting_records.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton17ActionPerformed(evt);
+                btnApplySetting_recordsActionPerformed(evt);
             }
         });
-        jPanel20.add(jButton17);
-        jButton17.setBounds(720, 30, 250, 50);
+        jPanel20.add(btnApplySetting_records);
+        btnApplySetting_records.setBounds(720, 30, 250, 50);
+
+        jPanel28.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 204, 204)), bundle.getString("CrInstrument.jPanel28.border.title"))); 
+        jPanel28.setOpaque(false);
+        jPanel28.setLayout(null);
+
+        jButton7.setText(bundle.getString("CrInstrument.jButton7.text")); 
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+        jPanel28.add(jButton7);
+        jButton7.setBounds(60, 160, 170, 30);
+
+        jPanel29.setOpaque(false);
+        jPanel29.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel11.setText(bundle.getString("CrInstrument.jLabel11.text")); 
+        jPanel29.add(jLabel11);
+
+        jPasswordField4.setText(bundle.getString("CrInstrument.jPasswordField4.text")); 
+        jPasswordField4.setPreferredSize(new java.awt.Dimension(126, 25));
+        jPanel29.add(jPasswordField4);
+
+        jPanel28.add(jPanel29);
+        jPanel29.setBounds(10, 30, 270, 40);
+
+        jPanel30.setOpaque(false);
+        jPanel30.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel36.setText(bundle.getString("CrInstrument.jLabel36.text")); 
+        jPanel30.add(jLabel36);
+
+        jPasswordField10.setText(bundle.getString("CrInstrument.jPasswordField10.text")); 
+        jPasswordField10.setPreferredSize(new java.awt.Dimension(126, 25));
+        jPanel30.add(jPasswordField10);
+
+        jPanel28.add(jPanel30);
+        jPanel30.setBounds(10, 70, 270, 40);
+
+        jPanel31.setOpaque(false);
+        jPanel31.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel37.setText(bundle.getString("CrInstrument.jLabel37.text")); 
+        jPanel31.add(jLabel37);
+
+        jPasswordField11.setText(bundle.getString("CrInstrument.jPasswordField11.text")); 
+        jPasswordField11.setPreferredSize(new java.awt.Dimension(126, 25));
+        jPanel31.add(jPasswordField11);
+
+        jPanel28.add(jPanel31);
+        jPanel31.setBounds(10, 110, 270, 40);
+
+        jPanel20.add(jPanel28);
+        jPanel28.setBounds(710, 150, 290, 200);
 
         jTabbedPane2.addTab(bundle.getString("CrInstrument.jPanel20.TabConstraints.tabTitle"), jPanel20); 
 
@@ -7769,15 +7985,15 @@ public void doLayout(){
         jPanel44.add(jPanel13);
         jPanel13.setBounds(30, 230, 320, 170);
 
-        jButton24.setFont(jButton24.getFont().deriveFont(jButton24.getFont().getSize()+12f));
-        jButton24.setText(bundle.getString("CrInstrument.jButton24.text")); 
-        jButton24.addActionListener(new java.awt.event.ActionListener() {
+        btnApplySetting_accounts.setFont(btnApplySetting_accounts.getFont().deriveFont(btnApplySetting_accounts.getFont().getSize()+12f));
+        btnApplySetting_accounts.setText(bundle.getString("CrInstrument.btnApplySetting_accounts.text")); 
+        btnApplySetting_accounts.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton24ActionPerformed(evt);
+                btnApplySetting_accountsActionPerformed(evt);
             }
         });
-        jPanel44.add(jButton24);
-        jButton24.setBounds(740, 100, 250, 50);
+        jPanel44.add(btnApplySetting_accounts);
+        btnApplySetting_accounts.setBounds(740, 100, 250, 50);
 
         jTabbedPane3.addTab(bundle.getString("CrInstrument.jPanel44.TabConstraints.tabTitle"), jPanel44); 
 
@@ -7803,15 +8019,15 @@ public void doLayout(){
         jPanel36.add(jButton57);
         jButton57.setBounds(720, 30, 260, 60);
 
-        jButton58.setFont(jButton58.getFont().deriveFont(jButton58.getFont().getSize()+12f));
-        jButton58.setText(bundle.getString("CrInstrument.jButton58.text")); 
-        jButton58.addActionListener(new java.awt.event.ActionListener() {
+        btnApplySetting_ui.setFont(btnApplySetting_ui.getFont().deriveFont(btnApplySetting_ui.getFont().getSize()+12f));
+        btnApplySetting_ui.setText(bundle.getString("CrInstrument.btnApplySetting_ui.text")); 
+        btnApplySetting_ui.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton58ActionPerformed(evt);
+                btnApplySetting_uiActionPerformed(evt);
             }
         });
-        jPanel36.add(jButton58);
-        jButton58.setBounds(720, 120, 260, 50);
+        jPanel36.add(btnApplySetting_ui);
+        btnApplySetting_ui.setBounds(720, 120, 260, 50);
 
         jPanel144.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 255)), bundle.getString("CrInstrument.jPanel144.border.title"))); 
         jPanel144.setFont(jPanel144.getFont());
@@ -7931,6 +8147,13 @@ public void doLayout(){
         jTextField45.setPreferredSize(new java.awt.Dimension(306, 21));
         jPanel110.add(jTextField45);
 
+        jLabel8.setText(bundle.getString("CrInstrument.jLabel8.text")); 
+        jPanel110.add(jLabel8);
+
+        jTextField11.setText(bundle.getString("CrInstrument.jTextField11.text")); 
+        jTextField11.setPreferredSize(new java.awt.Dimension(106, 21));
+        jPanel110.add(jTextField11);
+
         jLabel75.setFont(jLabel75.getFont());
         jLabel75.setText(bundle.getString("CrInstrument.jLabel75.text")); 
         jPanel110.add(jLabel75);
@@ -7939,7 +8162,7 @@ public void doLayout(){
         jPanel110.add(jComboBox54);
 
         jPanel145.add(jPanel110);
-        jPanel110.setBounds(20, 20, 720, 30);
+        jPanel110.setBounds(20, 20, 890, 30);
 
         jPanel146.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8323,10 +8546,10 @@ public void doLayout(){
         NodeMgntPanel.setFont(NodeMgntPanel.getFont());
         NodeMgntPanel.setLayout(null);
 
-        jButton41.setFont(jButton41.getFont().deriveFont(jButton41.getFont().getSize()+12f));
-        jButton41.setText(bundle.getString("CrInstrument.jButton41.text")); 
-        NodeMgntPanel.add(jButton41);
-        jButton41.setBounds(780, 70, 200, 60);
+        btnApplySetting_node.setFont(btnApplySetting_node.getFont().deriveFont(btnApplySetting_node.getFont().getSize()+12f));
+        btnApplySetting_node.setText(bundle.getString("CrInstrument.btnApplySetting_node.text")); 
+        NodeMgntPanel.add(btnApplySetting_node);
+        btnApplySetting_node.setBounds(780, 70, 200, 60);
 
         jScrollPane15.setViewportView(jList9);
 
@@ -8566,7 +8789,7 @@ public void doLayout(){
         jPanel83.add(jTextField56);
 
         jPanel79.add(jPanel83);
-        jPanel83.setBounds(10, 50, 410, 40);
+        jPanel83.setBounds(10, 20, 410, 35);
 
         jPanel86.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8593,7 +8816,7 @@ public void doLayout(){
         jPanel86.add(jTextField29);
 
         jPanel79.add(jPanel86);
-        jPanel86.setBounds(30, 170, 390, 30);
+        jPanel86.setBounds(30, 130, 390, 35);
 
         jPanel87.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8623,9 +8846,15 @@ public void doLayout(){
         jPanel88.add(jCheckBox6);
 
         jPanel79.add(jPanel88);
-        jPanel88.setBounds(50, 230, 340, 30);
+        jPanel88.setBounds(50, 230, 360, 30);
 
         jPanel104.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox47.setText(bundle.getString("CrInstrument.jCheckBox47.text")); 
+        jPanel104.add(jCheckBox47);
+
+        jLabel9.setText(bundle.getString("CrInstrument.jLabel9.text")); 
+        jPanel104.add(jLabel9);
 
         jLabel149.setFont(jLabel149.getFont());
         jLabel149.setText(bundle.getString("CrInstrument.jLabel149.text")); 
@@ -8635,7 +8864,7 @@ public void doLayout(){
         jPanel104.add(jLabel39);
 
         jPanel79.add(jPanel104);
-        jPanel104.setBounds(200, 20, 190, 30);
+        jPanel104.setBounds(50, 170, 350, 30);
 
         jPanel75.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8672,7 +8901,7 @@ public void doLayout(){
         jPanel75.add(jCheckBox27);
 
         jPanel79.add(jPanel75);
-        jPanel75.setBounds(10, 90, 410, 40);
+        jPanel75.setBounds(10, 55, 410, 35);
 
         jPanel128.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -8689,7 +8918,7 @@ public void doLayout(){
         jPanel128.add(jTextField63);
 
         jPanel79.add(jPanel128);
-        jPanel128.setBounds(10, 140, 400, 30);
+        jPanel128.setBounds(10, 90, 410, 35);
 
         jPanel70.add(jPanel79);
         jPanel79.setBounds(360, 20, 430, 270);
@@ -8984,6 +9213,9 @@ public void doLayout(){
         jPanel85.add(jPanel129);
         jPanel129.setBounds(90, 70, 290, 40);
 
+        jPanel70.add(jPanel85);
+        jPanel85.setBounds(370, 70, 410, 220);
+
         jPanel126.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(51, 0, 255)), bundle.getString("CrInstrument.jPanel126.border.title"))); 
         jPanel126.setFont(jPanel126.getFont());
         jPanel126.setLayout(null);
@@ -9001,8 +9233,8 @@ public void doLayout(){
         jPanel126.add(jPanel127);
         jPanel127.setBounds(10, 20, 370, 40);
 
-        jPanel85.add(jPanel126);
-        jPanel126.setBounds(0, 90, 400, 80);
+        jPanel70.add(jPanel126);
+        jPanel126.setBounds(360, 80, 430, 100);
 
         jPanel26.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 255)), bundle.getString("CrInstrument.jPanel26.border.title"))); 
         jPanel26.setLayout(null);
@@ -9019,11 +9251,8 @@ public void doLayout(){
         jPanel26.add(jPanel139);
         jPanel139.setBounds(10, 30, 380, 40);
 
-        jPanel85.add(jPanel26);
-        jPanel26.setBounds(0, 30, 400, 90);
-
-        jPanel70.add(jPanel85);
-        jPanel85.setBounds(370, 40, 410, 250);
+        jPanel70.add(jPanel26);
+        jPanel26.setBounds(380, 50, 400, 90);
 
         jPanel49.add(jPanel70);
         jPanel70.setBounds(210, 280, 800, 300);
@@ -9992,23 +10221,23 @@ public void doLayout(){
         jMenu2.setText(bundle.getString("CrInstrument.jMenu2.text")); 
         jMenu2.setFont(jMenu2.getFont());
 
-        jMenuItem3.setFont(jMenuItem3.getFont());
-        jMenuItem3.setText(bundle.getString("CrInstrument.jMenuItem3.text")); 
-        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+        menuItemLoginAdmin.setFont(menuItemLoginAdmin.getFont());
+        menuItemLoginAdmin.setText(bundle.getString("CrInstrument.menuItemLoginAdmin.text")); 
+        menuItemLoginAdmin.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem3ActionPerformed(evt);
+                menuItemLoginAdminActionPerformed(evt);
             }
         });
-        jMenu2.add(jMenuItem3);
+        jMenu2.add(menuItemLoginAdmin);
 
-        jMenuItem4.setFont(jMenuItem4.getFont());
-        jMenuItem4.setText(bundle.getString("CrInstrument.jMenuItem4.text")); 
-        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+        menuItemLoginUser.setFont(menuItemLoginUser.getFont());
+        menuItemLoginUser.setText(bundle.getString("CrInstrument.menuItemLoginUser.text")); 
+        menuItemLoginUser.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem4ActionPerformed(evt);
+                menuItemLoginUserActionPerformed(evt);
             }
         });
-        jMenu2.add(jMenuItem4);
+        jMenu2.add(menuItemLoginUser);
 
         toolMenuItem01.setFont(toolMenuItem01.getFont());
         toolMenuItem01.setText(bundle.getString("CrInstrument.toolMenuItem01.text")); 
@@ -10169,6 +10398,10 @@ public void doLayout(){
     private void btnLogoutAdminActionPerformed(java.awt.event.ActionEvent evt) {
       jTabbedPane1.remove(jPanel3);
       adminLogin = false;
+      menuItemLoginAdmin.setEnabled(true);
+      if(userLogin) menuItemLoginUser.setEnabled(false);
+      else menuItemLoginUser.setEnabled(true);
+      updateTitle();
     }
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
@@ -10302,7 +10535,7 @@ public void doLayout(){
     }
   }
 
-  private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnApplySetting_portsActionPerformed(java.awt.event.ActionEvent evt) {
     if (!adminLogin && !userLogin) {
       if (userDialog == null) {
         userDialog = new UserDialog(this, true);
@@ -10322,7 +10555,7 @@ public void doLayout(){
     }
   }
 
-  private void jButton17ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnApplySetting_recordsActionPerformed(java.awt.event.ActionEvent evt) {
     if (!adminLogin && !userLogin) {
       if (userDialog == null) {
         userDialog = new UserDialog(this, true);
@@ -10621,7 +10854,7 @@ public void doLayout(){
     }
   }
 
-  private void jButton23ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnApplySetting_deviceActionPerformed(java.awt.event.ActionEvent evt) {
     if (!adminLogin && !userLogin) {
       if (userDialog == null) {
         userDialog = new UserDialog(this, true);
@@ -10647,7 +10880,7 @@ public void doLayout(){
     }
   }
 
-  private void jButton24ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnApplySetting_accountsActionPerformed(java.awt.event.ActionEvent evt) {
     updateProps_admin();
     jTabbedPane1.setSelectedComponent(jPanel1);
 
@@ -10768,6 +11001,11 @@ void updateEventTM(){
   }
 }
 void showEvent(){
+    showEvent("","","","");
+}
+
+void showEvent(String setCond2,String setCond1,String setAct2,String setAct1){
+  String selEvent="",selCond2="",selCond1="",selAct2="",selAct1="";
   if(eventList.getSelectedIndex()==-1){
     if(eventListModel.size()>0){
       eventList.setSelectedIndex(0);
@@ -10780,28 +11018,34 @@ void showEvent(){
         eventList.setSelectedIndex(0);
       }
   }
+  if(conditionList2.getSelectedIndex()>-1) selCond2=(String)conditionList2.getSelectedValue();
+  if(conditionList.getSelectedIndex()>-1) selCond1=(String)conditionList.getSelectedValue();
+  if(actionList2.getSelectedIndex()>-1) selAct2=(String)actionList2.getSelectedValue();
+  if(actionList.getSelectedIndex()>-1) selAct1=(String)actionList.getSelectedValue();
   if(eventList.getSelectedIndex()>-1){
-     String sel=(String)eventList.getSelectedValue();
-     if(!sel.equals(currentEvent)){
+     selEvent=(String)eventList.getSelectedValue();
+     if(!selEvent.equals(currentEvent) || eventTM.size()!=this.eventListModel.size() || !selAct2.equalsIgnoreCase(selAct1) || !selCond2.equalsIgnoreCase(selCond1)){
      conditionListModel2.removeAllElements();
      actionListModel2.removeAllElements();
-     if(eventTM.get(sel)!=null){
-       String data[]=ylib.csvlinetoarray((String)eventTM.get(sel));
-       int cntC=0,cntA=0;
-       if(data.length>1 && data[1].length()>0) cntC=Integer.parseInt(data[1]);
-       if(data.length>2 && data[2].length()>0) cntA=Integer.parseInt(data[2]);
-       if(cntC>0 && data.length>2+cntC) {
-         for(int i=0;i<cntC;i++) conditionListModel2.addElement(data[3+i]);
-         conditionList2.setSelectedIndex(0);
-         showCondition2();
+     if(eventTM.get(selEvent)!=null){
+       String data[]=ylib.csvlinetoarray((String)eventTM.get(selEvent));
+       int cntCond=0,cntAct=0;
+       if(data.length>1 && data[1].length()>0) cntCond=Integer.parseInt(data[1]);
+       if(data.length>2 && data[2].length()>0) cntAct=Integer.parseInt(data[2]);
+       if(cntCond>0 && data.length>2+cntCond) {
+         for(int i=0;i<cntCond;i++) conditionListModel2.addElement(data[3+i]);
+         if(setCond2.length()==0) conditionList2.setSelectedIndex(0);
+         else conditionList2.setSelectedValue(setCond2, true);
+         showCondition2(setCond1);
        }
-       if(cntA>0 && data.length>2+cntC+cntA) {
-         for(int i=0;i<cntA;i++) actionListModel2.addElement(data[3+cntC+i]);
-         actionList2.setSelectedIndex(0);
-         showAction2();
+       if(cntAct>0 && data.length>2+cntCond+cntAct) {
+         for(int i=0;i<cntAct;i++) actionListModel2.addElement(data[3+cntCond+i]);
+         if(setAct2.length()==0) actionList2.setSelectedIndex(0);
+         else actionList2.setSelectedValue(setAct2, true);
+         showAction2(setAct1);
        }
      }
-     currentEvent=sel;
+     currentEvent=selEvent;
     }
   } else currentEvent="";
 }
@@ -10860,9 +11104,9 @@ String getNewAction(String key,String action){
     if(key!=null){
       String keyInfo[]=ylib.csvlinetoarray(key);
       if(keyInfo.length>0) {newInfo[1]=keyInfo[0]; jComboBox19.setSelectedItem(newInfo[1]);}
-      if(keyInfo.length>1) {newInfo[39]=keyInfo[1]; jComboBox49.setSelectedItem(newInfo[1]);}
-      if(keyInfo.length>2) {newInfo[16]=keyInfo[2]; jComboBox44.setSelectedItem(newInfo[1]);}
-      if(keyInfo.length>4) {newInfo[17]=keyInfo[4]; jComboBox45.setSelectedItem(newInfo[1]);}
+      if(keyInfo.length>1) {newInfo[39]=keyInfo[1]; jComboBox49.setSelectedItem(newInfo[39]);}
+      if(keyInfo.length>2) {newInfo[16]=keyInfo[2]; jComboBox44.setSelectedItem(newInfo[16]);}
+      if(keyInfo.length>4) {newInfo[17]=keyInfo[4]; jComboBox45.setSelectedItem(newInfo[17]);}
     }
     actionTM.put(newItem,ylib.arrayToCsvLine(newInfo));
     return newItem;
@@ -10872,7 +11116,7 @@ String getNewAction(String key,String action){
   }
 
   private void conditionList2MouseClicked(java.awt.event.MouseEvent evt) {
-    showCondition2();
+    showCondition2("");
   }
 
   private void conditionListMouseClicked(java.awt.event.MouseEvent evt) {
@@ -10943,6 +11187,8 @@ void showActionItem(String sel){
       jPanel76.setVisible(true);
       jPanel136.setVisible(true);
       jPanel122.setVisible(true);
+      } else if(sel.equalsIgnoreCase("Next station send command")){
+         jPanel76.setVisible(true);
       }
 
 }
@@ -11102,6 +11348,8 @@ void updateActionItem(){
        if(jCheckBox6.isSelected()) data[26]="Y" ;
            else  data[26]="N";
 
+       if(jCheckBox47.isSelected()) data[31]="Y" ;
+           else  data[31]="N";
        data[33]=jTextField63.getText();
        if(jCheckBox27.isSelected()) data[34]="Y" ;
            else  data[34]="N";
@@ -12137,7 +12385,7 @@ eventThread.setStatus(wn.w.getGNS(1),"",34);
          openURL.open(webAddr);
   }
 
-  private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void menuItemLoginAdminActionPerformed(java.awt.event.ActionEvent evt) {
     if(!adminLogin){
       if (mgntDialog == null) {
         mgntDialog = new MgntDialog(this, true);
@@ -12146,7 +12394,7 @@ eventThread.setStatus(wn.w.getGNS(1),"",34);
     }
   }
 
-  private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void menuItemLoginUserActionPerformed(java.awt.event.ActionEvent evt) {
     if (!adminLogin && !userLogin) {
       if (userDialog == null) {
         userDialog = new UserDialog(this, true);
@@ -12172,7 +12420,7 @@ eventThread.setStatus(wn.w.getGNS(1),"",34);
    framePanel.setItems(currentUI);
   }
 
-  private void jButton58ActionPerformed(java.awt.event.ActionEvent evt) {
+  private void btnApplySetting_uiActionPerformed(java.awt.event.ActionEvent evt) {
     TreeMap tm=framePanel.getItems();
     Iterator it=tm.keySet().iterator();
     for(;it.hasNext();){
@@ -12355,7 +12603,78 @@ if(evt.getStateChange()==evt.SELECTED){
     }
 
     private void actionList2MouseClicked(java.awt.event.MouseEvent evt) {
-      showAction2();
+      showAction2("");
+    }
+
+    private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {
+   if (!adminLogin && !userLogin) {
+      if (userDialog == null) {
+        userDialog = new UserDialog(this, true);
+      }
+      userDialog.setVisible(true);
+    }
+    if (adminLogin || userLogin) {
+      TreeMap sensorClone=(TreeMap)sensors.clone();
+      Iterator it=sensorClone.keySet().iterator();
+      for(;it.hasNext();){
+          String key=(String) it.next();
+          String info[]=ylib.csvlinetoarray((String)sensorClone.get(key));
+          if(info.length>11)  {
+             info[12]="100000000.0";
+             sensorClone.put(key, ylib.arrayToCsvLine(info));
+          }
+      }
+      sensors=sensorClone;
+    }
+    }
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {
+   if (!adminLogin && !userLogin) {
+      if (userDialog == null) {
+        userDialog = new UserDialog(this, true);
+      }
+      userDialog.setVisible(true);
+    }
+    if (adminLogin || userLogin) {
+      TreeMap sensorClone=(TreeMap)sensors.clone();
+      Iterator it=sensorClone.keySet().iterator();
+      for(;it.hasNext();){
+          String key=(String) it.next();
+          String info[]=ylib.csvlinetoarray((String)sensorClone.get(key));
+                  if(info.length>11)  info[11]=""; 
+                  if(info.length>23)  info[23]="";
+                  if(info.length>27)  info[27]=""; 
+          sensorClone.put(key, ylib.arrayToCsvLine(info));
+      }
+      sensors=sensorClone;
+    }
+    }
+
+    private void btnLogoutUserActionPerformed(java.awt.event.ActionEvent evt) {
+      userLogin = false;
+      btnLogoutUser.setVisible(false);
+      jPanel28.setVisible(false);
+      if(adminLogin) menuItemLoginUser.setEnabled(false); else menuItemLoginUser.setEnabled(true);
+      updateTitle();
+    }
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {
+      String pw1 = new String(jPasswordField4.getPassword());
+      String pw2 = new String(jPasswordField10.getPassword());
+      String pw3 = new String(jPasswordField11.getPassword());
+
+      if (YB642D.decode(props.getProperty("setting-pw")).equals(pw1)) {
+        if (pw2.equals(pw3)) {
+
+          props.setProperty("setting-pw", YB642E.encode(pw2));
+
+          JOptionPane.showMessageDialog(this,bundle2.getString("CrInstrument.xy.msg143"));
+        } else {
+          JOptionPane.showMessageDialog(this,bundle2.getString("CrInstrument.xy.msg144"));
+        }
+      } else {
+        JOptionPane.showMessageDialog(this, bundle2.getString("CrInstrument.xy.msg145"));
+      }
     }
  private void changeReceiveListItem(){
   String datasrc=(String)receiveList.getSelectedValue();
@@ -12519,14 +12838,18 @@ void eventRemoveAction(String key,String act){
       }
     }
 }
-  void showCondition2(){
+
+  void showCondition2(String setCond1){
   if(conditionList2.getSelectedIndex()>-1){
      String sel=(String)conditionList2.getSelectedValue();
-     if(!sel.equals(currentCondition2)){
+     if(setCond1.length()>0 && !setCond1.equals(currentCondition1)){
+       conditionList.setSelectedValue(setCond1, true);
+       showCondition1();
+     } else if(!sel.equals(currentCondition2)){
        conditionList.setSelectedValue(sel, true);
        showCondition1();
-       currentCondition2=sel;
      }
+     currentCondition2=sel;
   } else currentCondition2="";
 }
 void showCondition1(){
@@ -12589,14 +12912,18 @@ void showCondition1(){
      }
   } else currentCondition1="";
 }
-void showAction2(){
+
+void showAction2(String setAct1){
   if(actionList2.getSelectedIndex()>-1){
      String sel=(String)actionList2.getSelectedValue();
-     if(!sel.equals(currentAction2)){
+     if(setAct1.length()>0 && !setAct1.equals(currentAction1)){
+     actionList.setSelectedValue(setAct1, true);
+     showAction1();
+     } else if(!sel.equals(currentAction2)){
      actionList.setSelectedValue(sel, true);
      showAction1();
-     currentAction2=sel;
      }
+     currentAction2=sel;
   } else currentAction2="";
 }
 void showAction1(){
@@ -12650,7 +12977,8 @@ void showAction1(){
            else  jCheckBox7.setSelected(false);
            if(data.length>26 && wn.w.chkValue(data[26])) jCheckBox6.setSelected(true);
            else  jCheckBox6.setSelected(false);
-
+           if(data.length>31 && wn.w.chkValue(data[31])) jCheckBox47.setSelected(true);
+           else  jCheckBox47.setSelected(false);
            if(data.length>33) jTextField63.setText(data[33]);
            if(data.length>34 && wn.w.chkValue(data[34])) jCheckBox27.setSelected(true);
            else  jCheckBox27.setSelected(false);
@@ -13248,7 +13576,7 @@ CrInstrument instrument;
 }
 }
 class ShowStationChartThread extends Thread{
-CrInstrument instrument;
+  CrInstrument instrument;
 
   boolean isSleep=false;
   String key="";
@@ -13277,10 +13605,17 @@ CrInstrument instrument;
     private javax.swing.JList actionList;
     private javax.swing.JList actionList2;
     private javax.swing.JButton btnAddAction1ToEvent;
+    private javax.swing.JButton btnApplySetting_accounts;
+    private javax.swing.JButton btnApplySetting_device;
+    private javax.swing.JButton btnApplySetting_node;
+    private javax.swing.JButton btnApplySetting_ports;
+    private javax.swing.JButton btnApplySetting_records;
+    private javax.swing.JButton btnApplySetting_ui;
     private javax.swing.JButton btnCondition1AddToEvent;
     public javax.swing.JButton btnConnect;
     private javax.swing.JButton btnEditSrc;
     private javax.swing.JButton btnLogoutAdmin;
+    public javax.swing.JButton btnLogoutUser;
     private javax.swing.JButton btnMoveDownAction1;
     private javax.swing.JButton btnMoveDownCondition1;
     private javax.swing.JButton btnMoveDownEvent;
@@ -13356,14 +13691,11 @@ CrInstrument instrument;
     private javax.swing.JButton jButton14;
     private javax.swing.JButton jButton15;
     private javax.swing.JButton jButton16;
-    private javax.swing.JButton jButton17;
     private javax.swing.JButton jButton19;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton20;
     private javax.swing.JButton jButton21;
     private javax.swing.JButton jButton22;
-    private javax.swing.JButton jButton23;
-    private javax.swing.JButton jButton24;
     private javax.swing.JButton jButton26;
     private javax.swing.JButton jButton27;
     private javax.swing.JButton jButton3;
@@ -13374,7 +13706,6 @@ CrInstrument instrument;
     private javax.swing.JButton jButton39;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton40;
-    private javax.swing.JButton jButton41;
     private javax.swing.JButton jButton42;
     private javax.swing.JButton jButton43;
     private javax.swing.JButton jButton44;
@@ -13383,10 +13714,10 @@ CrInstrument instrument;
     private javax.swing.JButton jButton47;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton57;
-    private javax.swing.JButton jButton58;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
+    private javax.swing.JButton jButton9;
     private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox10;
     private javax.swing.JCheckBox jCheckBox11;
@@ -13428,6 +13759,7 @@ CrInstrument instrument;
     private javax.swing.JCheckBox jCheckBox44;
     private javax.swing.JCheckBox jCheckBox45;
     private javax.swing.JCheckBox jCheckBox46;
+    private javax.swing.JCheckBox jCheckBox47;
     private javax.swing.JCheckBox jCheckBox48;
     private javax.swing.JCheckBox jCheckBox5;
     private javax.swing.JCheckBox jCheckBox6;
@@ -13495,6 +13827,7 @@ CrInstrument instrument;
     private javax.swing.JLabel jLabel107;
     private javax.swing.JLabel jLabel108;
     private javax.swing.JLabel jLabel109;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel110;
     private javax.swing.JLabel jLabel111;
     private javax.swing.JLabel jLabel112;
@@ -13721,6 +14054,8 @@ CrInstrument instrument;
     private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
+    private javax.swing.JLabel jLabel36;
+    private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
     private javax.swing.JLabel jLabel39;
     private javax.swing.JLabel jLabel4;
@@ -13755,6 +14090,7 @@ CrInstrument instrument;
     private javax.swing.JLabel jLabel77;
     private javax.swing.JLabel jLabel78;
     private javax.swing.JLabel jLabel79;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel80;
     private javax.swing.JLabel jLabel81;
     private javax.swing.JLabel jLabel82;
@@ -13765,6 +14101,7 @@ CrInstrument instrument;
     private javax.swing.JLabel jLabel87;
     private javax.swing.JLabel jLabel88;
     private javax.swing.JLabel jLabel89;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabel90;
     private javax.swing.JLabel jLabel91;
     private javax.swing.JLabel jLabel92;
@@ -13786,8 +14123,6 @@ CrInstrument instrument;
     private javax.swing.JMenuItem jMenuItem20;
     private javax.swing.JMenuItem jMenuItem26;
     private javax.swing.JMenuItem jMenuItem27;
-    private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JMenuItem jMenuItem8;
@@ -13862,7 +14197,11 @@ CrInstrument instrument;
     private javax.swing.JPanel jPanel25;
     private javax.swing.JPanel jPanel26;
     private javax.swing.JPanel jPanel27;
+    public javax.swing.JPanel jPanel28;
+    private javax.swing.JPanel jPanel29;
     public javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel30;
+    private javax.swing.JPanel jPanel31;
     private javax.swing.JPanel jPanel34;
     private javax.swing.JPanel jPanel35;
     private javax.swing.JPanel jPanel36;
@@ -13933,8 +14272,11 @@ CrInstrument instrument;
     private javax.swing.JPanel jPanel98;
     private javax.swing.JPanel jPanel99;
     private javax.swing.JPasswordField jPasswordField1;
+    private javax.swing.JPasswordField jPasswordField10;
+    private javax.swing.JPasswordField jPasswordField11;
     private javax.swing.JPasswordField jPasswordField2;
     private javax.swing.JPasswordField jPasswordField3;
+    private javax.swing.JPasswordField jPasswordField4;
     private javax.swing.JPasswordField jPasswordField5;
     private javax.swing.JPasswordField jPasswordField6;
     private javax.swing.JPasswordField jPasswordField7;
@@ -13980,6 +14322,7 @@ CrInstrument instrument;
     private javax.swing.JTable jTable6;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField10;
+    private javax.swing.JTextField jTextField11;
     private javax.swing.JTextField jTextField12;
     private javax.swing.JTextField jTextField13;
     private javax.swing.JTextField jTextField14;
@@ -14046,6 +14389,8 @@ CrInstrument instrument;
     private javax.swing.JTextField jTextField8;
     private javax.swing.JTextField jTextField9;
     private ci.LightPanel lightPanel2;
+    public javax.swing.JMenuItem menuItemLoginAdmin;
+    public javax.swing.JMenuItem menuItemLoginUser;
     private javax.swing.JCheckBox onlyReceiveCB;
     public javax.swing.JList receiveList;
     private javax.swing.JTextPane receiveTP;

@@ -75,6 +75,10 @@ public class UserDialog extends javax.swing.JDialog {
            jPasswordField1.setText("");
            setVisible(false); 
            pro.userLogin=true;
+           pro.btnLogoutUser.setVisible(true);
+           pro.jPanel28.setVisible(true);
+           pro.menuItemLoginUser.setEnabled(false);
+           pro.updateTitle();
        }
        else JOptionPane.showMessageDialog(this, bundle2.getString("CrInstrument.xy.msg105"));
     }

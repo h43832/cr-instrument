@@ -77,6 +77,9 @@ public class MgntDialog extends javax.swing.JDialog {
            pro.jTabbedPane1.add("Admin",pro.jPanel3);
            pro.jTabbedPane1.setSelectedComponent(pro.jPanel3);
            pro.adminLogin=true;
+           pro.menuItemLoginAdmin.setEnabled(false);
+           pro.menuItemLoginUser.setEnabled(false);
+           pro.updateTitle();
        }
        else JOptionPane.showMessageDialog(this, bundle2.getString("CrInstrument.xy.msg104"));
     }

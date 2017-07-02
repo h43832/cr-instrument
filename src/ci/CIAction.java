@@ -4,5 +4,6 @@ package ci;
  */
 public interface CIAction {
     CrInstrument instrument=null;
-    public void startAction(CrInstrument instrument,String actionCode,String data);
+
+    public void startAction(CrInstrument instrument,String actionCode,CIDataClass dc);
 }

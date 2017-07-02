@@ -38,7 +38,7 @@ CrInstrument instrument;
 
             }
             TreeMap sensorClone=(TreeMap)instrument.sensors.clone();
-            boolean changeSensor=false;
+
             Iterator it=actionDataClass.actionCodeTM.keySet().iterator();
             boolean sendEmail=false,sendSms=false;
             TreeMap newActionTM=new TreeMap();
@@ -134,8 +134,9 @@ CrInstrument instrument;
                        if(keyInfo[0].equalsIgnoreCase(act[1])){
                          String info[]=ylib.csvlinetoarray((String)sensorClone.get(key2));
                          info[11]=gottenMasterId;
-                         sensorClone.put(key2,ylib.arrayToCsvLine(info));
-                         changeSensor=true;
+                         String tmp=ylib.arrayToCsvLine(info);
+                         sensorClone.put(key2,tmp);
+                         instrument.sensors.put(key2,tmp);
                      }
                     }
                    }
@@ -185,8 +186,9 @@ CrInstrument instrument;
                             instrument.keyToDevices.put(key3,gottenDeviceId);
                            if(!info[23].equalsIgnoreCase(gottenDeviceId)){
                              info[23]=gottenDeviceId;
-                             sensorClone.put(key2, ylib.arrayToCsvLine(info));
-                             changeSensor=true;
+                             String tmp=ylib.arrayToCsvLine(info);
+                             sensorClone.put(key2,tmp);
+                             instrument.sensors.put(key2,tmp);
                            }
                         }
                       }
@@ -217,8 +219,9 @@ CrInstrument instrument;
                              foundSN=true;
                              SN=info[3];
                              info[23]=gottenDeviceId;
-                             sensorClone.put(key2, ylib.arrayToCsvLine(info));
-                             changeSensor=true;
+                             String tmp=ylib.arrayToCsvLine(info);
+                             sensorClone.put(key2,tmp);
+                             instrument.sensors.put(key2,tmp);
                             if(info[11].trim().length()>0){
                               TreeMap tm=(TreeMap)instrument.deviceKeyDevices.get(info[11]);
                               if(tm==null) tm=new TreeMap();
@@ -241,8 +244,9 @@ CrInstrument instrument;
                          String info[]=ylib.csvlinetoarray((String)sensorClone.get(key2));
                          if(info[23].trim().length()==0 &&  info[3].equals(SN)) {
                              info[23]=gottenDeviceId;
-                             sensorClone.put(key2, ylib.arrayToCsvLine(info));
-                             changeSensor=true;
+                             String tmp=ylib.arrayToCsvLine(info);
+                             sensorClone.put(key2,tmp);
+                             instrument.sensors.put(key2,tmp);
                          }
                      }
                     }
@@ -274,7 +278,7 @@ CrInstrument instrument;
                           } else gottenDeviceId=column[colN-1];
                       }
                   }
-                  if(gottenDummyId.length()>0){
+
                     it2=sensorClone.keySet().iterator();
                     for(;it2.hasNext();){
                       String key2=(String)it2.next();
@@ -283,25 +287,48 @@ CrInstrument instrument;
                         String info[]=ylib.csvlinetoarray((String)sensorClone.get(key2));
                         setDummyId=info[26].trim();
                         if(SN.equals(info[3])){
-                          if(setDummyId.length()>0 && setDummyId.equalsIgnoreCase(gottenDummyId)){
+                         if(gottenDummyId.length()>0){
+                          if(setDummyId.length()>0){
+                           if(setDummyId.equalsIgnoreCase(gottenDummyId)){
                            if(!info[27].equalsIgnoreCase(gottenDummyId) || !info[5].equals("0")){
                              info[27]=gottenDummyId;
                              info[25]="0";
-                             sensorClone.put(key2, ylib.arrayToCsvLine(info));
-                             changeSensor=true;
+                             String tmp=ylib.arrayToCsvLine(info);
+                             sensorClone.put(key2,tmp);
+                             instrument.sensors.put(key2,tmp);
+                           }
+                           } else{
+                           if(!info[27].equalsIgnoreCase(gottenDummyId) || !info[5].equals("1")){
+                             info[27]=gottenDummyId;
+                             info[25]="1";
+                             String tmp=ylib.arrayToCsvLine(info);
+                             sensorClone.put(key2,tmp);
+                             instrument.sensors.put(key2,tmp);
+                           }
                            }
                           } else {
                            if(!info[27].equalsIgnoreCase(gottenDummyId) || !info[5].equals("1")){
                              info[27]=gottenDummyId;
                              info[25]="1";
-                             sensorClone.put(key2, ylib.arrayToCsvLine(info));
-                             changeSensor=true;
+                             String tmp=ylib.arrayToCsvLine(info);
+                             sensorClone.put(key2,tmp);
+                             instrument.sensors.put(key2,tmp);
                            }
                           }
+                         }
+                         else {
+                           if(info[27].length()>0 || !info[5].equals("1")){
+                             info[27]=gottenDummyId;
+                             info[25]="1";
+                             String tmp=ylib.arrayToCsvLine(info);
+                             sensorClone.put(key2,tmp);
+                             instrument.sensors.put(key2,tmp);
+                           }
+                         }
                         }
                       }
                     }
-              }
+
               }
             }
             else if(act[2].trim().equalsIgnoreCase("Set data value")){
@@ -362,7 +389,19 @@ CrInstrument instrument;
                            if(WSN.isNumeric(dataX)) dataValue=Double.parseDouble(dataX);
                        } 
                 double rawData=dataValue;
-                if(act.length>38 && act[38].equalsIgnoreCase("Y")){
+
+               if(sensorClone.get(key)!=null){
+                 String info[]=ylib.csvlinetoarray((String)sensorClone.get(key));
+
+                 double vA0=0.0;
+                 if(instrument.isNumeric(info[12])) vA0=Double.parseDouble(info[12]);
+                 if(vA0> 99999999.0 && vA0<100000001.0) {
+                     vA0=dataValue;
+                     info[12]=String.valueOf(dataValue);
+                 }
+                 if(act[31].equalsIgnoreCase("Y")) dataValue=dataValue - vA0;
+
+                 if(act.length>38 && act[38].equalsIgnoreCase("Y")){
                   if(((CITransferClass)instrument.jClasses.get(act[33]))==null){
                     if(!instrument.loadClass(act[33],1)) {instrument.sysLog("java transfer class "+act[33]+" not exist or not implements CITransferClass interface."); return;}
                   }
@@ -370,17 +409,23 @@ CrInstrument instrument;
                     dataValue=((CITransferClass)instrument.jClasses.get(act[33])).getValue(dataValue);
                   }
                 }
-                if(dataValue<0 && !act[26].equalsIgnoreCase("Y")){
-                   dataValue=Math.abs(dataValue);
+                if(act[19].equalsIgnoreCase("Y")){
+                  double x2=0.0,x1=0.0,aV=0.0;
+                  if(instrument.isNumeric(act[20])) x2=Double.parseDouble(info[20]);
+                  if(instrument.isNumeric(act[21])) x1=Double.parseDouble(info[21]);
+                  if(instrument.isNumeric(act[22])) aV=Double.parseDouble(info[22]);
+                  dataValue= x2 * dataValue + x1 * dataValue + aV;
                 }
+                if(dataValue<0 && !act[26].equalsIgnoreCase("Y")){
+
+                }
+
                 TreeMap dataTM=null;
-               if(instrument.allDatum.get(key)==null){
-                 dataTM=new TreeMap();
-               } else dataTM=(TreeMap) instrument.allDatum.get(key);
-               dataTM.put(actionDataClass.dataClass.time, dataValue);
-               instrument.allDatum.put(key, dataTM);
-               if(sensorClone.get(key)!=null){
-                 String info[]=ylib.csvlinetoarray((String)sensorClone.get(key));
+                if(instrument.allDatum.get(key)==null){
+                  dataTM=new TreeMap();
+                } else dataTM=(TreeMap) instrument.allDatum.get(key);
+                dataTM.put(actionDataClass.dataClass.time, dataValue);
+                instrument.allDatum.put(key, dataTM);
 
                  double d5 = 1000000.0, d6 = -1000000.0, d7 = 1000000.0, d8 = -1000000.0;
                  if (isNumeric(info[5])) d5 = Double.parseDouble(info[5]);
@@ -516,14 +561,14 @@ CrInstrument instrument;
                  info[20]=instrument.getRound2(dataValue,d14);
                  info[22]=String.valueOf(time);
                  info[24]=String.valueOf(time);
-                 sensorClone.put(key,ylib.arrayToCsvLine(info));
-
-                 changeSensor=true;
+                 String tmp=ylib.arrayToCsvLine(info);
+                 sensorClone.put(key,tmp);
+                 instrument.sensors.put(key,tmp);
                  instrument.lastDataTime=time;
+                 instrument.allConfigTM.put(key, instrument.getConfig(key));
+                 instrument.allStatusTM.put(key, instrument.getStatus(key));
+                 instrument.dataUpdated=true;
                }
-               instrument.allConfigTM.put(key, instrument.getConfig(key));
-               instrument.allStatusTM.put(key, instrument.getStatus(key));
-               instrument.dataUpdated=true;
 
             }
 
@@ -554,7 +599,42 @@ CrInstrument instrument;
               }
             }
             else if(act[2].trim().equalsIgnoreCase("Send command")){
+              if(act[11].toUpperCase().indexOf("[#MASTERID#]")!=-1 || act[11].toUpperCase().indexOf("[#DEVICEID#]")!=-1){
+                key=act[1]+","+act[39]+","+act[16]+","+SN+","+act[17];
+                if(instrument.sensors.get(key)!=null){
+                String info[]=ylib.csvlinetoarray((String)instrument.sensors.get(key));
+
+                act[27]=info[11];
+                act[28]=info[23];
+                act[30]=SN;
+                instrument.actionTM.put(act[0],ylib.arrayToCsvLine(act));
+                }
+              }
               instrument.miscThread.setData(5,act[0],actionDataClass.dataClass.data);
+            }
+            else if(act[2].trim().equalsIgnoreCase("Next device send command")){
+
+              key=act[1]+","+act[39]+","+act[16]+","+SN+","+act[17];
+              if(instrument.sensors.get(key)!=null){
+              String info[]=ylib.csvlinetoarray((String)instrument.sensors.get(key));
+
+              act[30]=SN;
+              } else act[30]=SN;
+              instrument.actionTM.put(act[0],ylib.arrayToCsvLine(act));
+              instrument.miscThread.setData(8,act[0],actionDataClass.dataClass.data);
+
+            }
+            else if(act[2].trim().equalsIgnoreCase("Next Station send command")){
+
+              key=act[1]+","+act[39]+","+act[16]+","+SN+","+act[17];
+              if(instrument.sensors.get(key)!=null){
+              String info[]=ylib.csvlinetoarray((String)instrument.sensors.get(key));
+
+              act[30]=SN;
+              instrument.actionTM.put(act[0],ylib.arrayToCsvLine(act));
+              } else act[30]=SN;
+
+              instrument.miscThread.setData(9,act[0],actionDataClass.dataClass.data);
             }
             else if(act[2].trim().equalsIgnoreCase("Stop continue send command")){
               instrument.miscThread.setData(12,act[0],actionDataClass.dataClass.data);
@@ -590,7 +670,7 @@ CrInstrument instrument;
               waitV.add(dataClass);
             }
             waitV.remove(0);
-            if(changeSensor) instrument.sensors=sensorClone;
+
            }
            if(instrument.chkProps("recordwhenreceive") && instrument.lastDataTime>instrument.lastRecordTime){
               instrument.saveData3(instrument.lastDataTime,instrument.lastDataTime,5);

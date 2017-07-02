@@ -38,7 +38,7 @@ public class CIEditFrame extends javax.swing.JFrame {
         int h2=712;
         setSize(w2,h2);
         setLocation((width-w2)/2,(h-h2)/2);
-        setTitle("Setup Sensors");
+
         setIconImage(instrument.iconImage);
         init();
   }
@@ -171,13 +171,16 @@ public void setFile(String filename){
 
         jPanel1 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
-        btnApply = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
+        btnApply = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("ci/Bundle"); 
+        setTitle(bundle.getString("CIEditFrame.title")); 
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
@@ -186,7 +189,7 @@ public void setFile(String filename){
 
         jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("ci/Bundle"); 
+        jButton1.setFont(jButton1.getFont());
         jButton1.setText(bundle.getString("CIEditFrame.jButton1.text")); 
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -195,14 +198,11 @@ public void setFile(String filename){
         });
         jPanel1.add(jButton1);
 
-        btnApply.setText(bundle.getString("CIEditFrame.btnApply.text")); 
-        btnApply.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnApplyActionPerformed(evt);
-            }
-        });
-        jPanel1.add(btnApply);
+        jButton3.setFont(jButton3.getFont());
+        jButton3.setText(bundle.getString("CIEditFrame.jButton3.text")); 
+        jPanel1.add(jButton3);
 
+        jButton2.setFont(jButton2.getFont());
         jButton2.setText(bundle.getString("CIEditFrame.jButton2.text")); 
         jButton2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -211,6 +211,16 @@ public void setFile(String filename){
         });
         jPanel1.add(jButton2);
 
+        btnApply.setFont(btnApply.getFont());
+        btnApply.setText(bundle.getString("CIEditFrame.btnApply.text")); 
+        btnApply.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnApplyActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnApply);
+
+        jButton4.setFont(jButton4.getFont());
         jButton4.setText(bundle.getString("CIEditFrame.jButton4.text")); 
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -324,9 +334,40 @@ void resetDeviceAddr(){
                   boolean modifiedLine=false;
                   String info[]=ylib.csvlinetoarray(str1);
                   if(info.length>11)  {info[11]=""; modifiedLine=true; modifiedAll=true;}
-                  if(info.length>12)  {info[12]=""; modifiedLine=true; modifiedAll=true;}
                   if(info.length>23)  {info[23]=""; modifiedLine=true; modifiedAll=true;}
                   if(info.length>27)  {info[27]=""; modifiedLine=true; modifiedAll=true;}
+                  if(modifiedLine) str1=ylib.arrayToCsvLine(info);
+                 }
+            }
+            sb.append(firstLine? str1:"\r\n"+str1);
+            if(firstLine)  firstLine=false;
+          }
+          if(modifiedAll) jTextArea1.setText(sb.toString());
+      } catch (IOException e){e.printStackTrace();}
+}
+void resetOffsetValue(){
+      String content=jTextArea1.getText();  
+    boolean firstLine=true;
+    StringBuffer sb=new StringBuffer();
+    try{
+        String str1="";
+          StringReader sin=new StringReader(content);
+          BufferedReader d = new BufferedReader(sin);
+          boolean modifiedAll=false;
+          while(true){
+            str1=d.readLine();
+            if(str1==null) {d.close(); break; }
+            if(firstLine){
+              if(str1.length()>0) {
+
+              }  else {
+              }
+            } else {
+                if(str1.length()==0) {}
+                 else {
+                  boolean modifiedLine=false;
+                  String info[]=ylib.csvlinetoarray(str1);
+                  if(info.length>11)  {info[12]="100000000.0"; modifiedLine=true; modifiedAll=true;}
                   if(modifiedLine) str1=ylib.arrayToCsvLine(info);
                  }
             }
@@ -442,6 +483,7 @@ boolean chk(){
     private javax.swing.JButton btnApply;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
