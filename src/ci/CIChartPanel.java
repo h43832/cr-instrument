@@ -17,22 +17,8 @@ public class CIChartPanel extends javax.swing.JPanel {
     initComponents();
     this.instrument=instrument;
   }
-public void setItems(TreeMap tm){
+  
 
-  this.itemTM.clear();
-    Iterator it=tm.keySet().iterator();
-    for(;it.hasNext();){
-       String key=(String)it.next();
-       Object obj=tm.get(key);
-       if(obj!=null){
-           this.itemTM.put(key, (String)obj);
-       }
-    }
-  repaint();
-}
-public TreeMap getItems(){
-    return (TreeMap)itemTM.clone();
-}
 protected void paintComponent(Graphics g) {
 
 }

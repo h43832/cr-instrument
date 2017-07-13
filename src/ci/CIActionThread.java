@@ -53,6 +53,7 @@ CrInstrument instrument;
             for(;it2.hasNext();){
                 String keyInfo[]=ylib.csvlinetoarray((String)it2.next());
                 if(keyInfo[0].equalsIgnoreCase(act[1]) && keyInfo[1].equalsIgnoreCase(act[39]) && keyInfo[2].equalsIgnoreCase(act[16])){
+
                     SN=keyInfo[3];
                     break;
                 }

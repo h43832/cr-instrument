@@ -37,9 +37,9 @@ import javax.swing.text.StyleConstants;
  * @author Administrator
  */
 public class CrInstrument extends WSNApplication implements Runnable {
-  public static String version = "2.17.0023";
+  public static String version = "2.17.0024";
   public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-  String versionTime = "20170703-080000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
+  String versionTime = "20170714-080000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
           stationFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_stations.txt",
           sensorFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_sensors.txt",currentViewDSrc="",
           statusFile = System.getProperty("user.home") + File.separator + "ci_status.txt", 
@@ -51,7 +51,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
           uiFile ="apps" + File.separator + "cr-wsn" + File.separator + "ci_ui.txt", 
           conditionFile="",actionFile="",currentChartPara="",dataDir="ci-data",usedDataDir="",logDir="ci-log",
           smsSpFile="",emailSpFile="",currentEvent="",currentCondition2="",currentAction2="",currentCondition1="",currentAction1="";
-  String restartStr="";
+  String restartStr="",selectedUIAreaItem="",selectedDataItem="",selectedChart="",selectedMenuItem="";
 
   JLabel button01;
   CIEditFrame editFrame;
@@ -77,6 +77,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
   DefaultStyledDocument styleDoc=new DefaultStyledDocument();
   Vector displayV=new Vector();
   double roomValues[] = {0.01, 0.02, 0.03, 0.05, 0.1, 0.15, 0.2, 0.25, 0.5, 1.0, 1.5, 3.0, 10.0, 30.0, 90.0};
+  public double dataAreaRatio=1.0;
   int roomIndex = 7,eventMaxArrCnt=15,condMaxArrCnt=40,actMaxArrCnt=80,chartMaxArrCnt=60,curveMaxArrCnt=60,
           currentChartType=1,n120=1;
   public int showIndex=7,showType=2,maxMainLogLength=100000,maxDSrcLogLength=10000;
@@ -94,13 +95,17 @@ public class CrInstrument extends WSNApplication implements Runnable {
 
   MultiPanel2 multiPanel;
   CIFramePanel framePanel=new CIFramePanel(this);
-  CIChartPanel chartPanel=new CIChartPanel(this);
+  CIChartPanel chartPanel3=new CIChartPanel(this);
+  CIDataAreaPanel dataPanel2=new CIDataAreaPanel(this);
+  CIUIPanel uiPanel2=new CIUIPanel(this);
+  CICurveSetupPanel curvePanel2=new CICurveSetupPanel(this);
+  CINodeMgntPanel nodeMgntPanel2=new CINodeMgntPanel(this);
   public TreeMap jClasses=new TreeMap();
   public Hashtable aTime=new Hashtable();
   TreeMap stations = new TreeMap(), sensors = new TreeMap(), allDatum = new TreeMap(), ports = new TreeMap(),
            deviceModuleTM = new TreeMap(), rowToRandomID = new TreeMap(),
           eventTM=new TreeMap(),chartTM=new TreeMap(),curveTM=new TreeMap(),conditionTM=new TreeMap(),actionTM=new TreeMap(),
-          dSrcRecord=new TreeMap(),nameIdMap=new TreeMap(),defaultUI=new TreeMap(),currentUI=new TreeMap(),
+          dSrcRecord=new TreeMap(),nameIdMap=new TreeMap(),defaultUI=new TreeMap(),currentUI=new TreeMap(),editUI,
           smsSpTM=new TreeMap(),emailSpTM=new TreeMap();
   TreeMap deviceToKeys = new TreeMap(), keyToDevices = new TreeMap(),
           portToCoors = new TreeMap(), coorToPorts = new TreeMap(),
@@ -113,8 +118,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
           currentStat2 = 0, currentLightStat2 = 0;
   public ImageIcon iconRed, iconGray, iconGreen, iconYellow;
   public DefaultListModel stationListModel = new DefaultListModel(),eventListModel = new DefaultListModel(),conditionListModel = new DefaultListModel(),
-          actionListModel = new DefaultListModel(),chartListModel = new DefaultListModel(),curveListModel = new DefaultListModel(),
-          receiveListModel = new DefaultListModel(),sendListModel = new DefaultListModel(),listModel9 = new DefaultListModel(),
+          actionListModel = new DefaultListModel(),chartListModel = new DefaultListModel(),
+          receiveListModel = new DefaultListModel(),sendListModel = new DefaultListModel(),
           conditionListModel2 = new DefaultListModel(),actionListModel2 = new DefaultListModel();
   public Image iconImage;
   public Properties props = new Properties(), statuses = new Properties();
@@ -129,12 +134,36 @@ public class CrInstrument extends WSNApplication implements Runnable {
   int resetCnt = 300,
           waitDeviceAction_c = 0, waitDeviceActionCount_c = 0, waitKeyAction_m = 0, waitKeyActionCount_m = 0;
 
-  Color[] colors={Color.white,Color.red,Color.blue,Color.green,Color.BLACK,Color.CYAN,Color.DARK_GRAY,Color.LIGHT_GRAY,Color.MAGENTA,Color.ORANGE,Color.PINK,Color.YELLOW};
   double [][] currentPanels={{}};
 
   public CrInstrument() {
 
+  }
+
+  void init() {
+
+    read_ci_Props();
+    readStatus();
+
+    readEvents();
+    readConditions();
+    readActions();
+    readCharts();
+    readCurves();
+    readSmsSp();
+    readEmailSp();
+    readDefaultUI();
+    readUI();
+    editUI=(TreeMap)currentUI.clone();
+    button01 = new JLabel(" Cloud-Rain ");
     initComponents();
+    jPanel142.add(chartPanel3,BorderLayout.CENTER);
+    uiPanel.add(uiPanel2,BorderLayout.CENTER);
+    uiPanel2.setFromUITM();
+    uiPanel2.updateDataAreaPanel();
+    nodeMgntPanel.add(nodeMgntPanel2,BorderLayout.CENTER);
+    curvePanel.add(curvePanel2,BorderLayout.CENTER);
+
     int width = Toolkit.getDefaultToolkit().getScreenSize().width;
     int h = Toolkit.getDefaultToolkit().getScreenSize().height - 20;
 
@@ -149,10 +178,6 @@ public class CrInstrument extends WSNApplication implements Runnable {
 
     iconImage = new ImageIcon(getClass().getClassLoader().getResource("cr_instrument_t.gif")).getImage();
     setIconImage(iconImage);
-    init();
-  }
-
-  void init() {
 
     receiveList.setPrototypeCellValue("256.256.256.256-100 yyy.yyy");
     sendList.setPrototypeCellValue("256.256.256.256-100 xxx.xxx");
@@ -178,6 +203,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
 
   public void init(WSN wsn) {
     this.wn = wsn;
+    init();
     makeDataDir();
     nameIdMap.put(allItemsName,"0");
     receiveListModel.addElement(allItemsName);
@@ -186,14 +212,14 @@ public class CrInstrument extends WSNApplication implements Runnable {
     updateList();
     String cmdStr="performmessage wsn.WSN getdatasource ";
     wsn.w.sendToAll(cmdStr);
-    jLabel34.setText("");
-    jLabel35.setText("");
+    da_device_01.setText("");
+    da_dataname_01.setText("");
     myThread = new Thread(this);
     myThread.start();
     
 
     if (openPorts(2)) {
-      lightPanel2.setColor(Color.green, Color.green);
+      lightPanel.setColor(Color.green, Color.green);
     }
     if (chkProps("monitor-autostart")) {
       pressStartBtn(2);
@@ -206,7 +232,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
       button02.setEnabled(true);
       btnStart.setText(bundle2.getString("CrInstrument.xy.msg3"));
 
-      lightPanel2.setColor(Color.gray, Color.gray);
+      lightPanel.setColor(Color.gray, Color.gray);
       currentStat = 9;
       currentLightStat = 9;
     }
@@ -217,7 +243,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
   void init3() {
 
     jMenuBar1.add(Box.createHorizontalGlue());
-    button01 = new JLabel(" Cloud-Rain ");
+
     button01.addMouseListener(new java.awt.event.MouseAdapter() {
       public void mouseClicked(java.awt.event.MouseEvent evt) {
         menuLabel4MouseClicked(evt);
@@ -225,18 +251,15 @@ public class CrInstrument extends WSNApplication implements Runnable {
     });
     jMenuBar1.add(button01);
 
-    read_ci_Props();
-    readStatus();
-
     jTabbedPane1.remove(jPanel3);
     jScrollPane1.getViewport().setBackground(Color.white);
     jScrollPane3.getViewport().setBackground(Color.white);
     jTable1.setShowHorizontalLines(true);
     jTable1.setShowVerticalLines(true);
-    jTable2.setShowHorizontalLines(true);
-    jTable2.setShowVerticalLines(true);
-    jTable2.setDefaultRenderer(Object.class, new MyTableCellRenderer());
-    lightPanel2.setColor(Color.gray, Color.gray);
+    deviceTable.setShowHorizontalLines(true);
+    deviceTable.setShowVerticalLines(true);
+    deviceTable.setDefaultRenderer(Object.class, new MyTableCellRenderer());
+    lightPanel.setColor(Color.gray, Color.gray);
 
     setUpSerialPortColumnFromSerialTM(jTable5,jTable5.getColumnModel().getColumn(0));
 
@@ -259,19 +282,11 @@ public class CrInstrument extends WSNApplication implements Runnable {
     double panels[][] = {{0.02, 0.02, 0.96, 0.53}, {0.02, 0.57, 0.96, 0.41}};
     multiPanel = new MultiPanel2(Color.white, panels);
     if (OneVar.check(props.getProperty("lky-n"), 1)) {
-      jPanel18.add(multiPanel);
+      chartPanel.add(multiPanel);
     }
-    multiPanel.setBounds(5, 20, jPanel18.getWidth() - 10, jPanel18.getHeight() - 25);
+    multiPanel.setBounds(5, 20, chartPanel.getWidth() - 10, chartPanel.getHeight() - 25);
     getCurrentRN();
-    readDefaultUI();
-    readUI();
-    readEvents();
-    readConditions();
-    readActions();
-    readCharts();
-    readCurves();
-    readSmsSp();
-    readEmailSp();
+
     chkAndAdjustEvents();
     saveRecordThread.start();
 
@@ -289,10 +304,6 @@ public class CrInstrument extends WSNApplication implements Runnable {
 
       showStation((String) stationListModel.getElementAt(0));
     }
-    jPanel140.add(framePanel, BorderLayout.CENTER);
-    jPanel142.add(chartPanel,BorderLayout.CENTER);
-    framePanel.setItems(currentUI);
-    chartPanel.setItems(eventTM);
 
       JTableHeader th = jTable3.getTableHeader();
       TableColumnModel tcm = th.getColumnModel();
@@ -304,7 +315,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
       tc = tcm.getColumn(0);
       tc.setHeaderValue( bundle2.getString("CrInstrument.xy.msg25"));
       th.repaint();
-      th = jTable2.getTableHeader();
+      th = deviceTable.getTableHeader();
       tcm = th.getColumnModel();
       tc = tcm.getColumn(0);
       tc.setHeaderValue( bundle2.getString("CrInstrument.xy.msg6"));
@@ -370,8 +381,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     jPanel28.setVisible(false);
     fileUpLoadMenuItem.setVisible(false);
     if(!(System.getProperty("user.language").equalsIgnoreCase("zh") && System.getProperty("user.country").equalsIgnoreCase("TW"))) jMenuItem20.setVisible(false);
-    jTabbedPane3.remove(UIPanel);
-    jTabbedPane3.remove(NodeMgntPanel);
+
+    jTabbedPane3.remove(nodeMgntPanel);
     CBUseEngineerUnit.setVisible(false);
     jPanel23.setVisible(false);
     jPanel25.setVisible(false);
@@ -546,8 +557,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     }
   }
   void readEvents() {
-    if (wn.w.getValueString(props.getProperty("event-file")).length() > 0) {
-      eventFile = wn.w.getValueString(props.getProperty("event-file"));
+    if (getPropsString("event-file").length() > 0) {
+      eventFile = getPropsString("event-file");
       eventFile = eventFile.replace('\\', File.separatorChar);
       eventFile=eventFile.replace('/', File.separatorChar);
       if (new File(eventFile).exists()) {
@@ -584,8 +595,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     } else  sysLog("event-file undefied.");
   }
   void readCharts() {
-    if (wn.w.getValueString(props.getProperty("chart-file")).length() > 0) {
-      chartFile = wn.w.getValueString(props.getProperty("chart-file"));
+    if (getPropsString("chart-file").length() > 0) {
+      chartFile = getPropsString("chart-file");
       chartFile = chartFile.replace('\\', File.separatorChar);
       chartFile=chartFile.replace('/',File.pathSeparatorChar);
       if (new File(chartFile).exists()) {
@@ -621,8 +632,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     } else sysLog("chart-file undefied.");
   }
   void readDefaultUI() {
-    if (wn.w.getValueString(props.getProperty("default-ui-file")).length() > 0) {
-      String defaultUIFile = wn.w.getValueString(props.getProperty("default-ui-file"));
+    if (getPropsString("default-ui-file").length() > 0) {
+      String defaultUIFile = getPropsString("default-ui-file");
       defaultUIFile = defaultUIFile.replace('\\', File.separatorChar);
       defaultUIFile=defaultUIFile.replace('/', File.separatorChar);
       if (new File(defaultUIFile).exists()) {
@@ -658,8 +669,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     } else sysLog("default-ui-file undefied.");
   }
   void readUI() {
-    if (wn.w.getValueString(props.getProperty("ui-file")).length() > 0) {
-      uiFile = wn.w.getValueString(props.getProperty("ui-file"));
+    if (getPropsString("ui-file").length() > 0) {
+      uiFile = getPropsString("ui-file");
       uiFile = uiFile.replace('\\', File.separatorChar);
       uiFile=uiFile.replace('/', File.separatorChar);
       if (new File(uiFile).exists()) {
@@ -696,8 +707,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     if(currentUI.size()<1) currentUI=(TreeMap)defaultUI.clone();
   }
   void readCurves() {
-    if (wn.w.getValueString(props.getProperty("curve-file")).length() > 0) {
-      curveFile = wn.w.getValueString(props.getProperty("curve-file"));
+    if (getPropsString("curve-file").length() > 0) {
+      curveFile = getPropsString("curve-file");
       curveFile = curveFile.replace('\\', File.separatorChar);
       curveFile=curveFile.replace('/',File.separatorChar);
       if (new File(curveFile).exists()) {
@@ -733,8 +744,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     } else sysLog("curve-file undefied.");
   }
   void readConditions() {
-    if (wn.w.getValueString(props.getProperty("condition-file")).length() > 0) {
-      conditionFile = wn.w.getValueString(props.getProperty("condition-file"));
+    if (getPropsString("condition-file").length() > 0) {
+      conditionFile = getPropsString("condition-file");
       conditionFile = conditionFile.replace('\\', File.separatorChar);
       conditionFile=conditionFile.replace('/', File.separatorChar);
       if (new File(conditionFile).exists()) {
@@ -772,8 +783,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     } else sysLog("condition-file undefied.");
   }
   void readActions() {
-    if (wn.w.getValueString(props.getProperty("action-file")).length() > 0) {
-      actionFile = wn.w.getValueString(props.getProperty("action-file"));
+    if (getPropsString("action-file").length() > 0) {
+      actionFile = getPropsString("action-file");
       actionFile = actionFile.replace('\\', File.separatorChar);
       actionFile=actionFile.replace('/', File.separatorChar);
       if (new File(actionFile).exists()) {
@@ -809,8 +820,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     } else sysLog("action-file undefied.");
   }
     void readSmsSp() {
-    if (wn.w.getValueString(props.getProperty("sms-sp-file")).length() > 0) {
-      smsSpFile = wn.w.getValueString(props.getProperty("sms-sp-file"));
+    if (getPropsString("sms-sp-file").length() > 0) {
+      smsSpFile = getPropsString("sms-sp-file");
       smsSpFile = smsSpFile.replace('\\', File.separatorChar);
       smsSpFile=smsSpFile.replace('/', File.separatorChar);
       if (new File(smsSpFile).exists()) {
@@ -846,8 +857,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     } else sysLog("sms-sp-file undefied.");
   }
     void readEmailSp() {
-    if (wn.w.getValueString(props.getProperty("email-sp-file")).length() > 0) {
-      emailSpFile = wn.w.getValueString(props.getProperty("email-sp-file"));
+    if (getPropsString("email-sp-file").length() > 0) {
+      emailSpFile = getPropsString("email-sp-file");
       emailSpFile = emailSpFile.replace('\\', File.separatorChar);
       emailSpFile=emailSpFile.replace('/',File.separatorChar);
       if (new File(emailSpFile).exists()) {
@@ -888,7 +899,7 @@ void updateChartProfile(){
   currentDatumTM.clear();
   currentConfigTM.clear();
   currentStatusTM.clear();
-  if(byStation.isSelected()){
+  if(uiPanel2.byStation.isSelected()){
     if(stationList.getSelectedValue()!=null){
       String station=(String)stationList.getSelectedValue();
 
@@ -967,12 +978,12 @@ void updateChartProfile(){
     }
     if(currentChartTM.size()>0) return;
   }
-  if(byDevice.isSelected()){
-    if(stationList.getSelectedValue()!=null && jTable2.getSelectedRow()>-1){
-      int sel=jTable2.getSelectedRow();
-      String device=(String)jTable2.getModel().getValueAt(sel, 0);
-      String model=(String)jTable2.getModel().getValueAt(sel, 1);
-      String sn=(String)jTable2.getModel().getValueAt(sel, 2);
+  if(uiPanel2.byDevice.isSelected()){
+    if(stationList.getSelectedValue()!=null && deviceTable.getSelectedRow()>-1){
+      int sel=deviceTable.getSelectedRow();
+      String device=(String)deviceTable.getModel().getValueAt(sel, 0);
+      String model=(String)deviceTable.getModel().getValueAt(sel, 1);
+      String sn=(String)deviceTable.getModel().getValueAt(sel, 2);
       String station=(String)stationList.getSelectedValue();
 
       Iterator it=curveTM.values().iterator();
@@ -1051,12 +1062,12 @@ void updateChartProfile(){
     }
     if(currentChartTM.size()>0) return;
   }
-  if(byModel.isSelected()){
-    if(stationList.getSelectedValue()!=null && jTable2.getSelectedRow()>-1){
-      int sel=jTable2.getSelectedRow();
-      String device=(String)jTable2.getModel().getValueAt(sel, 0);
-      String model=(String)jTable2.getModel().getValueAt(sel, 1);
-      String sn=(String)jTable2.getModel().getValueAt(sel, 2);
+  if(uiPanel2.byModel.isSelected()){
+    if(stationList.getSelectedValue()!=null && deviceTable.getSelectedRow()>-1){
+      int sel=deviceTable.getSelectedRow();
+      String device=(String)deviceTable.getModel().getValueAt(sel, 0);
+      String model=(String)deviceTable.getModel().getValueAt(sel, 1);
+      String sn=(String)deviceTable.getModel().getValueAt(sel, 2);
       String station=(String)stationList.getSelectedValue();
 
       Iterator it=curveTM.values().iterator();
@@ -1135,14 +1146,14 @@ void updateChartProfile(){
     }
     if(currentChartTM.size()>0) return;
   }
-  if(byDataName.isSelected()){
-    if(stationList.getSelectedValue()!=null && jTable2.getSelectedRow()>-1){
-      int sel=jTable2.getSelectedRow();
-      String device=(String)jTable2.getModel().getValueAt(sel, 0);
-      String model=(String)jTable2.getModel().getValueAt(sel, 1);
-      String sn=(String)jTable2.getModel().getValueAt(sel, 2);
+  if(uiPanel2.byDataName.isSelected()){
+    if(stationList.getSelectedValue()!=null && deviceTable.getSelectedRow()>-1){
+      int sel=deviceTable.getSelectedRow();
+      String device=(String)deviceTable.getModel().getValueAt(sel, 0);
+      String model=(String)deviceTable.getModel().getValueAt(sel, 1);
+      String sn=(String)deviceTable.getModel().getValueAt(sel, 2);
       String station=(String)stationList.getSelectedValue();
-      String dataName=(String)jTable2.getModel().getValueAt(sel, 3);
+      String dataName=(String)deviceTable.getModel().getValueAt(sel, 3);
 
       Iterator it=curveTM.values().iterator();
       for(;it.hasNext();){
@@ -1219,9 +1230,9 @@ void updateChartProfile(){
     }
     if(currentChartTM.size()>0) return;
   }
-  if(byChartGroup.isSelected()){
-    if(chartGroupCB.getSelectedItem()!=null && ((String)chartGroupCB.getSelectedItem()).length()>0){
-      String chartGroupName=(String)chartGroupCB.getSelectedItem();
+  if(uiPanel2.byChartGroup.isSelected()){
+    if(uiPanel2.chartGroupCB.getSelectedItem()!=null && ((String)uiPanel2.chartGroupCB.getSelectedItem()).length()>0){
+      String chartGroupName=(String)uiPanel2.chartGroupCB.getSelectedItem();
 
       Iterator it=chartTM.values().iterator();
       for(;it.hasNext();){
@@ -1299,7 +1310,7 @@ void updateChartProfile(){
   }
   if(currentChartTM.size()<1){
     double pnls[][]=new double[][]{{0.02,0.02,0.96,0.73}};
-    multiPanel.setPanels(pnls);
+    if(multiPanel!=null) multiPanel.setPanels(pnls);
     currentChartPara="default";
   }
 }
@@ -1616,8 +1627,8 @@ public Status getStatus(String curveId){
   }
 
  public void readPorts() {
-    if (wn.w.getValueString(props.getProperty("station-file")).length() > 0) {
-      stationFile = wn.w.getValueString(props.getProperty("station-file"));
+    if (getPropsString("station-file").length() > 0) {
+      stationFile = getPropsString("station-file");
       stationFile=ylib.replace(stationFile, "\\", File.separator);
       stationFile=ylib.replace(stationFile, "/", File.separator);
       if(new File(stationFile).exists()){
@@ -1663,19 +1674,19 @@ public Status getStatus(String curveId){
       int socketInx = 0, comInx = 0;
       jComboBox14.addItem("");
       jComboBox19.addItem("");
-      jComboBox40.addItem("");
+      curvePanel2.jComboBox40.addItem("");
       for (; it.hasNext();) {
         String key = (String) it.next();
         String port = (String) stations.get(key);
         stationListModel.addElement(key);
         jComboBox14.addItem(key);
         jComboBox19.addItem(key);
-        jComboBox40.addItem(key);
+        curvePanel2.jComboBox40.addItem(key);
 
       }
       jComboBox14.setSelectedIndex(0);
       jComboBox19.setSelectedIndex(0);
-      jComboBox40.setSelectedIndex(0);
+      curvePanel2.jComboBox40.setSelectedIndex(0);
       setUpSerialPortColumnFromStationTM();
       setUpSocketPortColumnFromStationTM(jTable6, jTable6.getColumnModel().getColumn(0));
       } else sysLog("station file "+stationFile+" not found.");
@@ -1779,9 +1790,9 @@ public Status getStatus(String curveId){
     if (currentStation != null && currentStation.length() > 0 && !currentStation.equals(oldStation)) {
       showStation(currentStation);
     } else if (currentStation == null || currentStation.trim().length() == 0) {
-      int rcount = jTable2.getRowCount();
+      int rcount = deviceTable.getRowCount();
       for (int i = rcount - 1; i > -1; i--) {
-        ((DefaultTableModel) jTable2.getModel()).removeRow(i);
+        ((DefaultTableModel) deviceTable.getModel()).removeRow(i);
       }
     }
 
@@ -2373,7 +2384,7 @@ String getFileHead(String station){
             }
             if (str1.length() > 11) {
               String info[] = ylib.csvlinetoarray(str1);
-              if (wn.isNumeric(info[1])) {
+              if (isNumeric(info[1])) {
                 rowNumber = Long.parseLong(info[0]);
               }
             }
@@ -2406,7 +2417,7 @@ String getFileHead(String station){
             }
             if (str1.length() > 11) {
               String info[] = ylib.csvlinetoarray(str1);
-              if (wn.isNumeric(info[1])) {
+              if (isNumeric(info[1])) {
                 rowNumber2 = Long.parseLong(info[0]);
               }
             }
@@ -2648,8 +2659,8 @@ String getFileHead(String station){
   }
 
   public void readSensors() {
-    if (wn.w.getValueString(props.getProperty("sensor-file")).length() > 0) {
-      sensorFile = wn.w.getValueString(props.getProperty("sensor-file"));
+    if (getPropsString("sensor-file").length() > 0) {
+      sensorFile = getPropsString("sensor-file");
       sensorFile = sensorFile.replace('\\', File.separatorChar);
       sensorFile=sensorFile.replace('/',File.separatorChar);
       if(new File(sensorFile).exists()){
@@ -2808,7 +2819,7 @@ String getFileHead(String station){
 
   public void onExit(int type) {
 
-    if(wn!=null) eventThread.setStatus(wn.w.getGNS(1),"",51);
+    if(wn!=null && eventThread!=null) eventThread.setStatus(wn.w.getGNS(1),"",51);
     updateProps_else();
     saveProps();
 
@@ -3509,18 +3520,25 @@ String getFileHead(String station){
               }
               String mailTo[] = ylib.csvlinetoarray(getPropsString("email-to"));
               boolean chkMail = true;
+              if(getPropsString("email-to").trim().length()<1){
+                  if(type==1) sysLog(bundle2.getString("CrInstrument.xy.msg148"));
+                  else JOptionPane.showMessageDialog(this,bundle2.getString("CrInstrument.xy.msg148"));
+                  chkMail = false;
+              }
+              if(chkMail){
               for (int i = 0; i < mailTo.length; i++) {
                 if(mailTo[i].trim().length()<1){
-                  if(type==1) sysLog("Email failed, wrong email format: empty email.");
-                  else JOptionPane.showMessageDialog(this,"Email failed, wrong email format: empty email.");
+                  if(type==1) sysLog(bundle2.getString("CrInstrument.xy.msg147"));
+                  else JOptionPane.showMessageDialog(this,bundle2.getString("CrInstrument.xy.msg147"));
                   chkMail = false;
                   break;
                 } else if (!isValidEmailAddress(mailTo[i])) {
-                  if(type==1) sysLog("Email failed, wrong email format:" + mailTo[i]);
-                  else JOptionPane.showMessageDialog(this,"Email failed, wrong email format:" + mailTo[i]);
+                  if(type==1) sysLog(bundle2.getString("CrInstrument.xy.msg149") + mailTo[i]);
+                  else JOptionPane.showMessageDialog(this,bundle2.getString("CrInstrument.xy.msg149") + mailTo[i]);
                   chkMail = false;
                   break;
                 }
+              }
               }
               if (chkMail) {
                 if(emailSp.equalsIgnoreCase("gmail")){
@@ -3620,7 +3638,7 @@ String getFileHead(String station){
                         str1 = str1.trim();
                         if (smsSpInfo[0].equalsIgnoreCase("SMS King") && str1.indexOf("kmsgid=") > -1 & str1.length() > 7) {
                           String nmu = str1.substring(7);
-                          if (wn.isNumeric(nmu)) {
+                          if (isNumeric(nmu)) {
                             if (Integer.parseInt(nmu) > 0) {
                               result = "successful";
                             } else {
@@ -4037,16 +4055,16 @@ String getFileHead(String station){
           if (chkProps("up-action-email")) {
             props.setProperty("down-action-email", "Y");
           }     
-          if (wn.w.getValueString(props.getProperty("logfile-head")).length() > 0) {
-            logFileHead = wn.w.getValueString(props.getProperty("logfile-head"));
+          if (getPropsString("logfile-head").length() > 0) {
+            logFileHead = getPropsString("logfile-head");
             logFileHead = logFileHead.replace('\\', File.separatorChar);
           }
-          if (wn.w.getValueString(props.getProperty("data-dir")).length() > 0) {
-            dataDir = wn.w.getValueString(props.getProperty("data-dir"));
+          if (getPropsString("data-dir").length() > 0) {
+            dataDir = getPropsString("data-dir");
             dataDir = dataDir.replace('\\', File.separatorChar);
           } else dataDir="ci-data";
-          if (wn.w.getValueString(props.getProperty("log-dir")).length() > 0) {
-            logDir = wn.w.getValueString(props.getProperty("log-dir"));
+          if (getPropsString("log-dir").length() > 0) {
+            logDir = getPropsString("log-dir");
             logDir = logDir.replace('\\', File.separatorChar);
           } else logDir="ci-log";
           if (!new File(logDir).exists()) {
@@ -4065,8 +4083,8 @@ String getFileHead(String station){
   }
 
   void readStatus() {
-    if (wn.w.getValueString(props.getProperty("status-file")).length() > 0) {
-      statusFile = wn.w.getValueString(props.getProperty("status-file"));
+    if (getPropsString("status-file").length() > 0) {
+      statusFile = getPropsString("status-file");
       statusFile = statusFile.replace('\\', File.separatorChar);
       statusFile=statusFile.replace('/', File.separatorChar);
     File f = new File(statusFile);
@@ -4299,7 +4317,7 @@ String getFileHead(String station){
     }
 
     if (bln) {
-      jLabel13.setText(format4.format(new Date()));
+      if(timeLabel!=null) timeLabel.setText(format4.format(new Date()));
       
 
       if (chkProps("recordwhenreceive") || (getPropsInt("monitor-interval-h") == getPropsInt("record-interval-h")
@@ -4362,7 +4380,22 @@ public void setStatus(String nodeId,String dataSrc[],int statusCode){
     dataSrc=wn.getPort(dataSrc);
     if(continueMonitor) {
       if(showCB.isSelected()) showThread.setData(time, nodeId, dataSrc, data);
-      eventThread.setData(time, nodeId, dataSrc, data);
+
+      try{
+        String str1="";
+          StringReader sin=new StringReader(data);
+          BufferedReader d = new BufferedReader(sin);
+          boolean firstLine=true;
+          while(true){
+            str1=d.readLine();
+            if(str1==null) {d.close(); break; }
+		 else if(str1.length()>0){
+                   eventThread.setData(time, nodeId, dataSrc, str1);
+		 }
+        }
+	sin.close();
+	d.close();
+     } catch (IOException e){e.printStackTrace();}
       if(saveFileCB.isSelected()) fileThread.setData(time, nodeId, dataSrc, data);
     }
   }
@@ -4488,16 +4521,18 @@ public void doLayout(){
   int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
   int frameWidth = 1024;
   int frameHeight = 712;
+
   if(currentUI.get("frame")!=null){
     String frameInfo=(String)currentUI.get("frame");
+
     if(!frameInfo.equals(preFrameInfo)) {
     info=ylib.csvlinetoarray(frameInfo);
 
     if(info.length > 5 && info[5].length()>0){
-        if(info[2].equals("%")) frameWidth=(int)(Double.parseDouble(info[5]) * ((double)screenWidth)); else frameWidth=Integer.parseInt(info[5]);
+        if(info[2].equals("%")) frameWidth=(int)Math.round(Double.parseDouble(info[5]) * ((double)screenWidth)); else frameWidth=(int)Double.parseDouble(info[5]);
     }
     if(info.length > 6 && info[6].length()>0){
-        if(info[2].equals("%")) frameHeight=(int)(Double.parseDouble(info[6]) * ((double)screenHeight)); else frameHeight=Integer.parseInt(info[6]);
+        if(info[2].equals("%")) frameHeight=(int)Math.round(Double.parseDouble(info[6]) * ((double)screenHeight)); else frameHeight=(int)Double.parseDouble(info[6]);
     }
     if(info.length > 13 && info[13].equalsIgnoreCase("f")){
        device=java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -4511,11 +4546,16 @@ public void doLayout(){
            setLocation((screenWidth - frameWidth) / 2, (screenHeight -20 - frameHeight) / 2 - 10);
         } else {
             if(info.length > 3 && info[3].length()>0){
-              if(info[2].equals("%")) x=(int)(Double.parseDouble(info[3]) * ((double)screenWidth)); else x=Integer.parseInt(info[3]);
+              if(info[2].equals("%")) x=(int)Math.round(Double.parseDouble(info[3]) * ((double)screenWidth)); else x=(int)Double.parseDouble(info[3]);
             }
             if(info.length > 4 && info[4].length()>0){
-              if(info[4].equals("%")) y=(int)(Double.parseDouble(info[4]) * ((double)screenHeight)); else y=Integer.parseInt(info[4]);
+              if(info[4].equals("%")) y=(int)Math.round(Double.parseDouble(info[4]) * ((double)screenHeight)); else y=(int)Double.parseDouble(info[4]);
             }
+            if(x<0) x=0;
+            if(x>screenWidth-20) x=screenWidth-20;
+            if(y<0) y=0;
+            if(y>screenHeight-20) y=screenHeight-20;
+            setLocation(x, y);
            }
         if(info[2].equals("%") && x==100 && y==100){
             this.setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -4525,7 +4565,8 @@ public void doLayout(){
         }
         if(info.length>14 && info[14].equalsIgnoreCase("r")) setResizable(true); else setResizable(false);
     }
-    jPanel1.setBackground((info.length>7 && info[7].length()>0 && wn.isNumeric(info[7]))? new Color(Integer.parseInt(info[7])):jPanel1.getBackground());
+
+    jPanel1.setBackground((info.length>7 && info[7].length()>0 && isNumeric(info[7]))? new Color(Integer.parseInt(info[7])):jPanel1.getBackground());
     preFrameInfo=frameInfo;
     }
 
@@ -4537,8 +4578,8 @@ public void doLayout(){
         if(info.length>1 && info[1].length() >0) button01.setText(" "+info[1]+ " ");
         Font font=button01.getFont();
         button01.setFont(getFont(font,font.getSize(),info[8],info[9],info[11].equalsIgnoreCase("b"),info[12].equalsIgnoreCase("i")));
-        button01.setBackground((info.length>7 && info[7].length()>0 && wn.isNumeric(info[7]))? new Color(Integer.parseInt(info[7])):button01.getBackground());
-        button01.setForeground((info.length>10 && info[10].length()>0 && wn.isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):button01.getForeground());
+        button01.setBackground((info.length>7 && info[7].length()>0 && isNumeric(info[7]))? new Color(Integer.parseInt(info[7])):button01.getBackground());
+        button01.setForeground((info.length>10 && info[10].length()>0 && isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):button01.getForeground());
     } else  button01.setVisible(false);
   }
   setButton("button 02",button02,frameWidth,frameHeight);
@@ -4567,18 +4608,21 @@ public void doLayout(){
   setMenuItem("help menuitem 03",helpMenuItem03,frameWidth,frameHeight);
   setMenuItem("help menuitem 04",helpMenuItem04,frameWidth,frameHeight);
   setMenuItem("help menuitem 05",helpMenuItem05,frameWidth,frameHeight);
-  setPanel("data area",jPanel19,frameWidth,frameHeight);
-  setPanel("chart area",jPanel18,frameWidth,frameHeight);
-  setScrollPane("table area",jScrollPane3,frameWidth,frameHeight);
-  setScrollPane("station list area",jScrollPane2,frameWidth,frameHeight);
-  setLabel("light label area",jLabel45,frameWidth,frameHeight);
-  setPanel("light area",lightPanel2,frameWidth,frameHeight);
-  setLabel("time area",jLabel13,frameWidth,frameHeight);
-  setPanel("chart option area",chartOptionPanel,frameWidth,frameHeight);
+  setPanel("data area",dataPanel,frameWidth,frameHeight,bundle2.getString("CrInstrument.dataPanel.border.title"));
+  setPanel("chart area",chartPanel,frameWidth,frameHeight,bundle2.getString("CrInstrument.chartPanel.border.title"));
+  setScrollPane("device table area",jScrollPane3,frameWidth,frameHeight,bundle2.getString("CrInstrument.jScrollPane3.border.title"));
+  setScrollPane("station list area",jScrollPane2,frameWidth,frameHeight,bundle2.getString("CrInstrument.jScrollPane2.border.title"));
+  setLabel("light label area",statusLabel,frameWidth,frameHeight);
+  setPanel("light area",lightPanel,frameWidth,frameHeight,"");
+  setLabel("time area",timeLabel,frameWidth,frameHeight);
+  setPanel("chart option area",chartOptionPanel,frameWidth,frameHeight,bundle2.getString("CrInstrument.chartOptionPanel.border.title"));
   setDataArea(frameWidth,frameHeight);
+
+  if(uiPanel2!=null) uiPanel2.updateFramePanel();
+
 }
    public Font getFont(Font defaultFont,int defaultFontSize,String fontname,String fontsize,boolean bold,boolean italy){
-     return new Font((fontname.length()>0? fontname:defaultFont.getName()),(bold? (italy? (Font.BOLD | Font.ITALIC):Font.BOLD):(italy? Font.ITALIC:defaultFont.getStyle())),(wn.isNumeric(fontsize) && Integer.parseInt(fontsize)>0 ? Integer.parseInt(fontsize):defaultFontSize));
+     return new Font((fontname.length()>0? fontname:defaultFont.getName()),(bold? (italy? (Font.BOLD | Font.ITALIC):Font.BOLD):(italy? Font.ITALIC:defaultFont.getStyle())),(isNumeric(fontsize) && Integer.parseInt(fontsize)>0 ? Integer.parseInt(fontsize):defaultFontSize));
    }
   void setMenuItem(String key,JMenuItem menuItem,int frameWidth,int frameHeight){
     String info[];
@@ -4590,7 +4634,7 @@ public void doLayout(){
       } else    menuItem.setVisible(false);
     }  else if(currentUI.size()>0) sysLog("Warning: menuitem key '"+key+"' not found.");
   }
-  void setScrollPane(String key,JScrollPane scrollPane,int frameWidth,int frameHeight){
+  void setScrollPane(String key,JScrollPane scrollPane,int frameWidth,int frameHeight,String title){
       String info[];
   if(currentUI.get(key)!=null){
     info=ylib.csvlinetoarray((String)currentUI.get(key));
@@ -4602,11 +4646,17 @@ public void doLayout(){
         if(info.length > 5 && info[5].length()>0) width=(int)(Double.parseDouble(info[5]) * ((double)frameWidth));
         if(info.length > 6 && info[6].length()>0) height=(int)(Double.parseDouble(info[6]) * ((double)frameHeight));
         scrollPane.setBounds(x, y,width,height);
+        if(title.length()>0){
+        Color fontColor=((info.length>10 && info[10].length()>0 && isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):scrollPane.getForeground());
+        Color borderColor=((info.length>13 && info[13].length()>0 && isNumeric(info[13]))? new Color(Integer.parseInt(info[13])):new java.awt.Color(102, 0, 255));
+
+         scrollPane.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(borderColor), title, javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, scrollPane.getFont(), fontColor)); 
+        }
 
     } else scrollPane.setVisible(false);
   }  else if(currentUI.size()>0) sysLog("Warning: scrollpane key '"+key+"' not found.");
   }
-  void setPanel(String key,JPanel panel,int frameWidth,int frameHeight){
+  void setPanel(String key,JPanel panel,int frameWidth,int frameHeight,String title){
       String info[];
         if(currentUI.get(key)!=null){
     info=ylib.csvlinetoarray((String)currentUI.get(key));
@@ -4618,8 +4668,18 @@ public void doLayout(){
         if(info.length > 5 && info[5].length()>0) width=(int)(Double.parseDouble(info[5]) * ((double)frameWidth));
         if(info.length > 6 && info[6].length()>0) height=(int)(Double.parseDouble(info[6]) * ((double)frameHeight));
         panel.setBounds(x, y,width,height);
-        panel.setBackground((info.length>7 && info[7].length()>0 && wn.isNumeric(info[7]))? new Color(Integer.parseInt(info[7])):panel.getBackground());
-        panel.setForeground((info.length>10 && info[10].length()>0 && wn.isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):panel.getForeground());
+        panel.setBackground((info.length>7 && info[7].length()>0 && isNumeric(info[7]))? new Color(Integer.parseInt(info[7])):panel.getBackground());
+        panel.setForeground((info.length>10 && info[10].length()>0 && isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):panel.getForeground());
+        if(title.length()>0){
+        Color fontColor=((info.length>10 && info[10].length()>0 && isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):panel.getForeground());
+        Color borderColor=((info.length>13 && info[13].length()>0 && isNumeric(info[13]))? new Color(Integer.parseInt(info[13])):new java.awt.Color(102, 0, 255));
+
+          Font titleFont=panel.getFont();
+         int fontSize=(isNumeric(info[9])? Integer.parseInt(info[9]):panel.getFont().getSize());
+         titleFont=getFont(panel.getFont(), fontSize, panel.getFont().getFontName(), ""+fontSize, info[11].equalsIgnoreCase("b"), info[12].equalsIgnoreCase("i"));
+         Border titleBorder=javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(borderColor), title, javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, titleFont, fontColor);
+         panel.setBorder(titleBorder); 
+        }
     } else panel.setVisible(false);
   } else if(currentUI.size()>0) sysLog("Warning: panel key '"+key+"' not found.");
   }
@@ -4639,156 +4699,156 @@ public void doLayout(){
         Font font=button.getFont();
         button.setFont(getFont(font,font.getSize(),info[8],info[9],info[11].equalsIgnoreCase("b"),info[12].equalsIgnoreCase("i")));
 
-        if(info.length>7 && info[7].length()>0 && wn.isNumeric(info[7])) button.setBackground(new Color(Integer.parseInt(info[7])));
-        button.setForeground((info.length>10 && info[10].length()>0 && wn.isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):button.getForeground());
+        if(info.length>7 && info[7].length()>0 && isNumeric(info[7])) button.setBackground(new Color(Integer.parseInt(info[7])));
+        button.setForeground((info.length>10 && info[10].length()>0 && isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):button.getForeground());
     } else  button.setVisible(false);
   }   else if(currentUI.size()>0) sysLog("Warning: button key '"+key+"' not found.");
    }
    void setDataArea(int frameWidth,int frameHeight){
-      setLabel("da_station 01",jLabel20,frameWidth,frameHeight);
-      setLabel("da_station 02",jLabel85,frameWidth,frameHeight);
-      setLabel("da_station 03",jLabel168,frameWidth,frameHeight);
-      setLabel("da_station 04",jLabel173,frameWidth,frameHeight);
-      setLabel("da_station 05",jLabel174,frameWidth,frameHeight);
-      setLabel("da_station 06",jLabel175,frameWidth,frameHeight);
-      setLabel("da_station 07",jLabel176,frameWidth,frameHeight);
-      setLabel("da_station 08",jLabel177,frameWidth,frameHeight);
-      setLabel("da_station 09",jLabel178,frameWidth,frameHeight);
-      setLabel("da_station 10",jLabel179,frameWidth,frameHeight);
-      setLabel("da_station 11",jLabel180,frameWidth,frameHeight);
-      setLabel("da_station 12",jLabel181,frameWidth,frameHeight);
-      setLabel("da_station 13",jLabel182,frameWidth,frameHeight);
-      setLabel("da_station 14",jLabel183,frameWidth,frameHeight);
-      setLabel("da_station 15",jLabel184,frameWidth,frameHeight);
-      setLabel("da_station 16",jLabel185,frameWidth,frameHeight);
-      setLabel("da_device 01",jLabel34,frameWidth,frameHeight);
-      setLabel("da_device 02",jLabel186,frameWidth,frameHeight);
-      setLabel("da_device 03",jLabel187,frameWidth,frameHeight);
-      setLabel("da_device 04",jLabel188,frameWidth,frameHeight);
-      setLabel("da_device 05",jLabel189,frameWidth,frameHeight);
-      setLabel("da_device 06",jLabel190,frameWidth,frameHeight);
-      setLabel("da_device 07",jLabel191,frameWidth,frameHeight);
-      setLabel("da_device 08",jLabel192,frameWidth,frameHeight);
-      setLabel("da_device 09",jLabel193,frameWidth,frameHeight);
-      setLabel("da_device 10",jLabel194,frameWidth,frameHeight);
-      setLabel("da_device 11",jLabel195,frameWidth,frameHeight);
-      setLabel("da_device 12",jLabel196,frameWidth,frameHeight);
-      setLabel("da_device 13",jLabel197,frameWidth,frameHeight);
-      setLabel("da_device 14",jLabel198,frameWidth,frameHeight);
-      setLabel("da_device 15",jLabel199,frameWidth,frameHeight);
-      setLabel("da_device 16",jLabel200,frameWidth,frameHeight);
-      setLabel("da_device 17",jLabel201,frameWidth,frameHeight);
-      setLabel("da_device 18",jLabel202,frameWidth,frameHeight);
-      setLabel("da_device 19",jLabel203,frameWidth,frameHeight);
-      setLabel("da_device 20",jLabel204,frameWidth,frameHeight);
-      setLabel("da_device 21",jLabel205,frameWidth,frameHeight);
-      setLabel("da_device 22",jLabel206,frameWidth,frameHeight);
-      setLabel("da_device 23",jLabel207,frameWidth,frameHeight);
-      setLabel("da_device 24",jLabel208,frameWidth,frameHeight);
-      setLabel("da_device 25",jLabel209,frameWidth,frameHeight);
-      setLabel("da_device 26",jLabel210,frameWidth,frameHeight);
-      setLabel("da_device 27",jLabel211,frameWidth,frameHeight);
-      setLabel("da_device 28",jLabel212,frameWidth,frameHeight);
-      setLabel("da_device 29",jLabel213,frameWidth,frameHeight);
-      setLabel("da_device 30",jLabel214,frameWidth,frameHeight);
-      setLabel("da_device 31",jLabel215,frameWidth,frameHeight);
-      setLabel("da_device 32",jLabel216,frameWidth,frameHeight);
-      setLabel("da_dataname 01",jLabel35,frameWidth,frameHeight);
-      setLabel("da_dataname 02",jLabel217,frameWidth,frameHeight);
-      setLabel("da_dataname 03",jLabel218,frameWidth,frameHeight);
-      setLabel("da_dataname 04",jLabel219,frameWidth,frameHeight);
-      setLabel("da_dataname 05",jLabel220,frameWidth,frameHeight);
-      setLabel("da_dataname 06",jLabel221,frameWidth,frameHeight);
-      setLabel("da_dataname 07",jLabel222,frameWidth,frameHeight);
-      setLabel("da_dataname 08",jLabel223,frameWidth,frameHeight);
-      setLabel("da_dataname 09",jLabel224,frameWidth,frameHeight);
-      setLabel("da_dataname 10",jLabel225,frameWidth,frameHeight);
-      setLabel("da_dataname 11",jLabel226,frameWidth,frameHeight);
-      setLabel("da_dataname 12",jLabel227,frameWidth,frameHeight);
-      setLabel("da_dataname 13",jLabel228,frameWidth,frameHeight);
-      setLabel("da_dataname 14",jLabel229,frameWidth,frameHeight);
-      setLabel("da_dataname 15",jLabel230,frameWidth,frameHeight);
-      setLabel("da_dataname 16",jLabel231,frameWidth,frameHeight);
-      setLabel("da_dataname 17",jLabel232,frameWidth,frameHeight);
-      setLabel("da_dataname 18",jLabel233,frameWidth,frameHeight);
-      setLabel("da_dataname 19",jLabel234,frameWidth,frameHeight);
-      setLabel("da_dataname 20",jLabel235,frameWidth,frameHeight);
-      setLabel("da_dataname 21",jLabel236,frameWidth,frameHeight);
-      setLabel("da_dataname 22",jLabel237,frameWidth,frameHeight);
-      setLabel("da_dataname 23",jLabel238,frameWidth,frameHeight);
-      setLabel("da_dataname 24",jLabel239,frameWidth,frameHeight);
-      setLabel("da_dataname 25",jLabel240,frameWidth,frameHeight);
-      setLabel("da_dataname 26",jLabel241,frameWidth,frameHeight);
-      setLabel("da_dataname 27",jLabel242,frameWidth,frameHeight);
-      setLabel("da_dataname 28",jLabel243,frameWidth,frameHeight);
-      setLabel("da_dataname 29",jLabel244,frameWidth,frameHeight);
-      setLabel("da_dataname 30",jLabel245,frameWidth,frameHeight);
-      setLabel("da_dataname 31",jLabel246,frameWidth,frameHeight);
-      setLabel("da_dataname 32",jLabel247,frameWidth,frameHeight);
-      setLabel("da_dataname 33",jLabel248,frameWidth,frameHeight);
-      setLabel("da_dataname 34",jLabel249,frameWidth,frameHeight);
-      setLabel("da_dataname 35",jLabel250,frameWidth,frameHeight);
-      setLabel("da_dataname 36",jLabel251,frameWidth,frameHeight);
-      setLabel("da_dataname 37",jLabel252,frameWidth,frameHeight);
-      setLabel("da_dataname 38",jLabel253,frameWidth,frameHeight);
-      setLabel("da_dataname 39",jLabel254,frameWidth,frameHeight);
-      setLabel("da_dataname 40",jLabel255,frameWidth,frameHeight);
-      setLabel("da_dataname 41",jLabel256,frameWidth,frameHeight);
-      setLabel("da_dataname 42",jLabel257,frameWidth,frameHeight);
-      setLabel("da_dataname 43",jLabel258,frameWidth,frameHeight);
-      setLabel("da_dataname 44",jLabel259,frameWidth,frameHeight);
-      setLabel("da_dataname 45",jLabel260,frameWidth,frameHeight);
-      setLabel("da_dataname 46",jLabel261,frameWidth,frameHeight);
-      setLabel("da_dataname 47",jLabel262,frameWidth,frameHeight);
-      setLabel("da_dataname 48",jLabel263,frameWidth,frameHeight);
-      setLabel("da_datavalue 01",jLabel30,frameWidth,frameHeight);
-      setLabel("da_datavalue 02",jLabel264,frameWidth,frameHeight);
-      setLabel("da_datavalue 03",jLabel265,frameWidth,frameHeight);
-      setLabel("da_datavalue 04",jLabel266,frameWidth,frameHeight);
-      setLabel("da_datavalue 05",jLabel267,frameWidth,frameHeight);
-      setLabel("da_datavalue 06",jLabel268,frameWidth,frameHeight);
-      setLabel("da_datavalue 07",jLabel269,frameWidth,frameHeight);
-      setLabel("da_datavalue 08",jLabel270,frameWidth,frameHeight);
-      setLabel("da_datavalue 09",jLabel271,frameWidth,frameHeight);
-      setLabel("da_datavalue 10",jLabel272,frameWidth,frameHeight);
-      setLabel("da_datavalue 11",jLabel273,frameWidth,frameHeight);
-      setLabel("da_datavalue 12",jLabel274,frameWidth,frameHeight);
-      setLabel("da_datavalue 13",jLabel275,frameWidth,frameHeight);
-      setLabel("da_datavalue 14",jLabel276,frameWidth,frameHeight);
-      setLabel("da_datavalue 15",jLabel277,frameWidth,frameHeight);
-      setLabel("da_datavalue 16",jLabel278,frameWidth,frameHeight);
-      setLabel("da_datavalue 17",jLabel279,frameWidth,frameHeight);
-      setLabel("da_datavalue 18",jLabel280,frameWidth,frameHeight);
-      setLabel("da_datavalue 19",jLabel281,frameWidth,frameHeight);
-      setLabel("da_datavalue 20",jLabel282,frameWidth,frameHeight);
-      setLabel("da_datavalue 21",jLabel283,frameWidth,frameHeight);
-      setLabel("da_datavalue 22",jLabel284,frameWidth,frameHeight);
-      setLabel("da_datavalue 23",jLabel285,frameWidth,frameHeight);
-      setLabel("da_datavalue 24",jLabel286,frameWidth,frameHeight);
-      setLabel("da_datavalue 25",jLabel287,frameWidth,frameHeight);
-      setLabel("da_datavalue 26",jLabel288,frameWidth,frameHeight);
-      setLabel("da_datavalue 27",jLabel289,frameWidth,frameHeight);
-      setLabel("da_datavalue 28",jLabel290,frameWidth,frameHeight);
-      setLabel("da_datavalue 29",jLabel291,frameWidth,frameHeight);
-      setLabel("da_datavalue 30",jLabel292,frameWidth,frameHeight);
-      setLabel("da_datavalue 31",jLabel293,frameWidth,frameHeight);
-      setLabel("da_datavalue 32",jLabel294,frameWidth,frameHeight);
-      setLabel("da_datavalue 33",jLabel295,frameWidth,frameHeight);
-      setLabel("da_datavalue 34",jLabel296,frameWidth,frameHeight);
-      setLabel("da_datavalue 35",jLabel297,frameWidth,frameHeight);
-      setLabel("da_datavalue 36",jLabel298,frameWidth,frameHeight);
-      setLabel("da_datavalue 37",jLabel299,frameWidth,frameHeight);
-      setLabel("da_datavalue 38",jLabel300,frameWidth,frameHeight);
-      setLabel("da_datavalue 39",jLabel301,frameWidth,frameHeight);
-      setLabel("da_datavalue 40",jLabel302,frameWidth,frameHeight);
-      setLabel("da_datavalue 41",jLabel303,frameWidth,frameHeight);
-      setLabel("da_datavalue 42",jLabel304,frameWidth,frameHeight);
-      setLabel("da_datavalue 43",jLabel305,frameWidth,frameHeight);
-      setLabel("da_datavalue 44",jLabel306,frameWidth,frameHeight);
-      setLabel("da_datavalue 45",jLabel307,frameWidth,frameHeight);
-      setLabel("da_datavalue 46",jLabel308,frameWidth,frameHeight);
-      setLabel("da_datavalue 47",jLabel309,frameWidth,frameHeight);
-      setLabel("da_datavalue 48",jLabel310,frameWidth,frameHeight);
+      setLabel("da_station 01",da_station_01,frameWidth,frameHeight);
+      setLabel("da_station 02",da_station_02,frameWidth,frameHeight);
+      setLabel("da_station 03",da_station_03,frameWidth,frameHeight);
+      setLabel("da_station 04",da_station_04,frameWidth,frameHeight);
+      setLabel("da_station 05",da_station_05,frameWidth,frameHeight);
+      setLabel("da_station 06",da_station_06,frameWidth,frameHeight);
+      setLabel("da_station 07",da_station_07,frameWidth,frameHeight);
+      setLabel("da_station 08",da_station_08,frameWidth,frameHeight);
+      setLabel("da_station 09",da_station_09,frameWidth,frameHeight);
+      setLabel("da_station 10",da_station_10,frameWidth,frameHeight);
+      setLabel("da_station 11",da_station_11,frameWidth,frameHeight);
+      setLabel("da_station 12",da_station_12,frameWidth,frameHeight);
+      setLabel("da_station 13",da_station_13,frameWidth,frameHeight);
+      setLabel("da_station 14",da_station_14,frameWidth,frameHeight);
+      setLabel("da_station 15",da_station_15,frameWidth,frameHeight);
+      setLabel("da_station 16",da_station_16,frameWidth,frameHeight);
+      setLabel("da_device 01",da_device_01,frameWidth,frameHeight);
+      setLabel("da_device 02",da_device_02,frameWidth,frameHeight);
+      setLabel("da_device 03",da_device_03,frameWidth,frameHeight);
+      setLabel("da_device 04",da_device_04,frameWidth,frameHeight);
+      setLabel("da_device 05",da_device_05,frameWidth,frameHeight);
+      setLabel("da_device 06",da_device_06,frameWidth,frameHeight);
+      setLabel("da_device 07",da_device_07,frameWidth,frameHeight);
+      setLabel("da_device 08",da_device_08,frameWidth,frameHeight);
+      setLabel("da_device 09",da_device_09,frameWidth,frameHeight);
+      setLabel("da_device 10",da_device_10,frameWidth,frameHeight);
+      setLabel("da_device 11",da_device_11,frameWidth,frameHeight);
+      setLabel("da_device 12",da_device_12,frameWidth,frameHeight);
+      setLabel("da_device 13",da_device_13,frameWidth,frameHeight);
+      setLabel("da_device 14",da_device_14,frameWidth,frameHeight);
+      setLabel("da_device 15",da_device_15,frameWidth,frameHeight);
+      setLabel("da_device 16",da_device_16,frameWidth,frameHeight);
+      setLabel("da_device 17",da_device_17,frameWidth,frameHeight);
+      setLabel("da_device 18",da_device_18,frameWidth,frameHeight);
+      setLabel("da_device 19",da_device_19,frameWidth,frameHeight);
+      setLabel("da_device 20",da_device_20,frameWidth,frameHeight);
+      setLabel("da_device 21",da_device_21,frameWidth,frameHeight);
+      setLabel("da_device 22",da_device_22,frameWidth,frameHeight);
+      setLabel("da_device 23",da_device_23,frameWidth,frameHeight);
+      setLabel("da_device 24",da_device_24,frameWidth,frameHeight);
+      setLabel("da_device 25",da_device_25,frameWidth,frameHeight);
+      setLabel("da_device 26",da_device_26,frameWidth,frameHeight);
+      setLabel("da_device 27",da_device_27,frameWidth,frameHeight);
+      setLabel("da_device 28",da_device_28,frameWidth,frameHeight);
+      setLabel("da_device 29",da_device_29,frameWidth,frameHeight);
+      setLabel("da_device 30",da_device_30,frameWidth,frameHeight);
+      setLabel("da_device 31",da_device_31,frameWidth,frameHeight);
+      setLabel("da_device 32",da_device_32,frameWidth,frameHeight);
+      setLabel("da_dataname 01",da_dataname_01,frameWidth,frameHeight);
+      setLabel("da_dataname 02",da_dataname_02,frameWidth,frameHeight);
+      setLabel("da_dataname 03",da_dataname_03,frameWidth,frameHeight);
+      setLabel("da_dataname 04",da_dataname_04,frameWidth,frameHeight);
+      setLabel("da_dataname 05",da_dataname_05,frameWidth,frameHeight);
+      setLabel("da_dataname 06",da_dataname_06,frameWidth,frameHeight);
+      setLabel("da_dataname 07",da_dataname_07,frameWidth,frameHeight);
+      setLabel("da_dataname 08",da_dataname_08,frameWidth,frameHeight);
+      setLabel("da_dataname 09",da_dataname_09,frameWidth,frameHeight);
+      setLabel("da_dataname 10",da_dataname_10,frameWidth,frameHeight);
+      setLabel("da_dataname 11",da_dataname_11,frameWidth,frameHeight);
+      setLabel("da_dataname 12",da_dataname_12,frameWidth,frameHeight);
+      setLabel("da_dataname 13",da_dataname_13,frameWidth,frameHeight);
+      setLabel("da_dataname 14",da_dataname_14,frameWidth,frameHeight);
+      setLabel("da_dataname 15",da_dataname_15,frameWidth,frameHeight);
+      setLabel("da_dataname 16",da_dataname_16,frameWidth,frameHeight);
+      setLabel("da_dataname 17",da_dataname_17,frameWidth,frameHeight);
+      setLabel("da_dataname 18",da_dataname_18,frameWidth,frameHeight);
+      setLabel("da_dataname 19",da_dataname_19,frameWidth,frameHeight);
+      setLabel("da_dataname 20",da_dataname_20,frameWidth,frameHeight);
+      setLabel("da_dataname 21",da_dataname_21,frameWidth,frameHeight);
+      setLabel("da_dataname 22",da_dataname_22,frameWidth,frameHeight);
+      setLabel("da_dataname 23",da_dataname_23,frameWidth,frameHeight);
+      setLabel("da_dataname 24",da_dataname_24,frameWidth,frameHeight);
+      setLabel("da_dataname 25",da_dataname_25,frameWidth,frameHeight);
+      setLabel("da_dataname 26",da_dataname_26,frameWidth,frameHeight);
+      setLabel("da_dataname 27",da_dataname_27,frameWidth,frameHeight);
+      setLabel("da_dataname 28",da_dataname_28,frameWidth,frameHeight);
+      setLabel("da_dataname 29",da_dataname_29,frameWidth,frameHeight);
+      setLabel("da_dataname 30",da_dataname_30,frameWidth,frameHeight);
+      setLabel("da_dataname 31",da_dataname_31,frameWidth,frameHeight);
+      setLabel("da_dataname 32",da_dataname_32,frameWidth,frameHeight);
+      setLabel("da_dataname 33",da_dataname_33,frameWidth,frameHeight);
+      setLabel("da_dataname 34",da_dataname_34,frameWidth,frameHeight);
+      setLabel("da_dataname 35",da_dataname_35,frameWidth,frameHeight);
+      setLabel("da_dataname 36",da_dataname_36,frameWidth,frameHeight);
+      setLabel("da_dataname 37",da_dataname_37,frameWidth,frameHeight);
+      setLabel("da_dataname 38",da_dataname_38,frameWidth,frameHeight);
+      setLabel("da_dataname 39",da_dataname_39,frameWidth,frameHeight);
+      setLabel("da_dataname 40",da_dataname_40,frameWidth,frameHeight);
+      setLabel("da_dataname 41",da_dataname_41,frameWidth,frameHeight);
+      setLabel("da_dataname 42",da_dataname_42,frameWidth,frameHeight);
+      setLabel("da_dataname 43",da_dataname_43,frameWidth,frameHeight);
+      setLabel("da_dataname 44",da_dataname_44,frameWidth,frameHeight);
+      setLabel("da_dataname 45",da_dataname_45,frameWidth,frameHeight);
+      setLabel("da_dataname 46",da_dataname_46,frameWidth,frameHeight);
+      setLabel("da_dataname 47",da_dataname_47,frameWidth,frameHeight);
+      setLabel("da_dataname 48",da_dataname_48,frameWidth,frameHeight);
+      setLabel("da_datavalue 01",da_datavalue_01,frameWidth,frameHeight);
+      setLabel("da_datavalue 02",da_datavalue_02,frameWidth,frameHeight);
+      setLabel("da_datavalue 03",da_datavalue_03,frameWidth,frameHeight);
+      setLabel("da_datavalue 04",da_datavalue_04,frameWidth,frameHeight);
+      setLabel("da_datavalue 05",da_datavalue_05,frameWidth,frameHeight);
+      setLabel("da_datavalue 06",da_datavalue_06,frameWidth,frameHeight);
+      setLabel("da_datavalue 07",da_datavalue_07,frameWidth,frameHeight);
+      setLabel("da_datavalue 08",da_datavalue_08,frameWidth,frameHeight);
+      setLabel("da_datavalue 09",da_datavalue_09,frameWidth,frameHeight);
+      setLabel("da_datavalue 10",da_datavalue_10,frameWidth,frameHeight);
+      setLabel("da_datavalue 11",da_datavalue_11,frameWidth,frameHeight);
+      setLabel("da_datavalue 12",da_datavalue_12,frameWidth,frameHeight);
+      setLabel("da_datavalue 13",da_datavalue_13,frameWidth,frameHeight);
+      setLabel("da_datavalue 14",da_datavalue_14,frameWidth,frameHeight);
+      setLabel("da_datavalue 15",da_datavalue_15,frameWidth,frameHeight);
+      setLabel("da_datavalue 16",da_datavalue_16,frameWidth,frameHeight);
+      setLabel("da_datavalue 17",da_datavalue_17,frameWidth,frameHeight);
+      setLabel("da_datavalue 18",da_datavalue_18,frameWidth,frameHeight);
+      setLabel("da_datavalue 19",da_datavalue_19,frameWidth,frameHeight);
+      setLabel("da_datavalue 20",da_datavalue_20,frameWidth,frameHeight);
+      setLabel("da_datavalue 21",da_datavalue_21,frameWidth,frameHeight);
+      setLabel("da_datavalue 22",da_datavalue_22,frameWidth,frameHeight);
+      setLabel("da_datavalue 23",da_datavalue_23,frameWidth,frameHeight);
+      setLabel("da_datavalue 24",da_datavalue_24,frameWidth,frameHeight);
+      setLabel("da_datavalue 25",da_datavalue_25,frameWidth,frameHeight);
+      setLabel("da_datavalue 26",da_datavalue_26,frameWidth,frameHeight);
+      setLabel("da_datavalue 27",da_datavalue_27,frameWidth,frameHeight);
+      setLabel("da_datavalue 28",da_datavalue_28,frameWidth,frameHeight);
+      setLabel("da_datavalue 29",da_datavalue_29,frameWidth,frameHeight);
+      setLabel("da_datavalue 30",da_datavalue_30,frameWidth,frameHeight);
+      setLabel("da_datavalue 31",da_datavalue_31,frameWidth,frameHeight);
+      setLabel("da_datavalue 32",da_datavalue_32,frameWidth,frameHeight);
+      setLabel("da_datavalue 33",da_datavalue_33,frameWidth,frameHeight);
+      setLabel("da_datavalue 34",da_datavalue_34,frameWidth,frameHeight);
+      setLabel("da_datavalue 35",da_datavalue_35,frameWidth,frameHeight);
+      setLabel("da_datavalue 36",da_datavalue_36,frameWidth,frameHeight);
+      setLabel("da_datavalue 37",da_datavalue_37,frameWidth,frameHeight);
+      setLabel("da_datavalue 38",da_datavalue_38,frameWidth,frameHeight);
+      setLabel("da_datavalue 39",da_datavalue_39,frameWidth,frameHeight);
+      setLabel("da_datavalue 40",da_datavalue_40,frameWidth,frameHeight);
+      setLabel("da_datavalue 41",da_datavalue_41,frameWidth,frameHeight);
+      setLabel("da_datavalue 42",da_datavalue_42,frameWidth,frameHeight);
+      setLabel("da_datavalue 43",da_datavalue_43,frameWidth,frameHeight);
+      setLabel("da_datavalue 44",da_datavalue_44,frameWidth,frameHeight);
+      setLabel("da_datavalue 45",da_datavalue_45,frameWidth,frameHeight);
+      setLabel("da_datavalue 46",da_datavalue_46,frameWidth,frameHeight);
+      setLabel("da_datavalue 47",da_datavalue_47,frameWidth,frameHeight);
+      setLabel("da_datavalue 48",da_datavalue_48,frameWidth,frameHeight);
    }
    void setLabel(String key,JLabel label,int frameWidth,int frameHeight){
      String info[];
@@ -4805,8 +4865,8 @@ public void doLayout(){
            Font font=label.getFont();
            if(info[1].trim().length()>0) label.setText(info[1]);
            label.setFont(getFont(font,font.getSize(),info[8],info[9],info[11].equalsIgnoreCase("b"),info[12].equalsIgnoreCase("i")));
-           label.setBackground((info.length>7 && info[7].length()>0 && wn.isNumeric(info[7]))? new Color(Integer.parseInt(info[7])):label.getBackground());
-           label.setForeground((info.length>10 && info[10].length()>0 && wn.isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):label.getForeground());
+           label.setBackground((info.length>7 && info[7].length()>0 && isNumeric(info[7]))? new Color(Integer.parseInt(info[7])):label.getBackground());
+           label.setForeground((info.length>10 && info[10].length()>0 && isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):label.getForeground());
          } else label.setVisible(false);
        } else if(currentUI.size()>0) sysLog("Warning: label key '"+key+"' not found.");
    }
@@ -4865,7 +4925,7 @@ public void doLayout(){
             break;
         }
         input = h + "." + input.substring(3, 5) + input.substring(6, 8);
-        if (wn.isNumeric(input)) {
+        if (isNumeric(input)) {
           rtn = Double.parseDouble(input) * (-1.0);
         } else {
           System.out.println("NumberFormatException, input= " + input);
@@ -4873,7 +4933,7 @@ public void doLayout(){
         }
       } else {
         input = input.substring(0, 2) + "." + input.substring(3, 5) + input.substring(6, 8);
-        if (wn.isNumeric(input)) {
+        if (isNumeric(input)) {
           rtn = Double.parseDouble(input);
         } else {
           System.out.println("NumberFormatException, input= " + input);
@@ -4907,7 +4967,7 @@ public void doLayout(){
             break;
         }
         input = h + "." + input.substring(3, 5) + input.substring(6, 8);
-        if (wn.isNumeric(input)) {
+        if (isNumeric(input)) {
           rtn = Double.parseDouble(input) * (-1.0);
         } else {
           System.out.println("NumberFormatException, input= " + input);
@@ -4915,7 +4975,7 @@ public void doLayout(){
         }
       } else {
         input = input.substring(0, 2) + "." + input.substring(3, 5) + input.substring(6, 8);
-        if (wn.isNumeric(input)) {
+        if (isNumeric(input)) {
           rtn = Double.parseDouble(input);
         } else {
           System.out.println("NumberFormatException, input= " + input);
@@ -4948,161 +5008,162 @@ public void doLayout(){
         buttonGroup9 = new javax.swing.ButtonGroup();
         buttonGroup2 = new javax.swing.ButtonGroup();
         buttonGroup3 = new javax.swing.ButtonGroup();
+        buttonGroup6 = new javax.swing.ButtonGroup();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         stationList = new javax.swing.JList(stationListModel);
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
-        jPanel18 = new javax.swing.JPanel();
-        jPanel19 = new javax.swing.JPanel();
-        jLabel30 = new javax.swing.JLabel();
-        jLabel34 = new javax.swing.JLabel();
-        jLabel35 = new javax.swing.JLabel();
-        jLabel20 = new javax.swing.JLabel();
-        jLabel85 = new javax.swing.JLabel();
-        jLabel168 = new javax.swing.JLabel();
-        jLabel173 = new javax.swing.JLabel();
-        jLabel174 = new javax.swing.JLabel();
-        jLabel175 = new javax.swing.JLabel();
-        jLabel176 = new javax.swing.JLabel();
-        jLabel177 = new javax.swing.JLabel();
-        jLabel178 = new javax.swing.JLabel();
-        jLabel179 = new javax.swing.JLabel();
-        jLabel180 = new javax.swing.JLabel();
-        jLabel181 = new javax.swing.JLabel();
-        jLabel182 = new javax.swing.JLabel();
-        jLabel183 = new javax.swing.JLabel();
-        jLabel184 = new javax.swing.JLabel();
-        jLabel185 = new javax.swing.JLabel();
-        jLabel186 = new javax.swing.JLabel();
-        jLabel187 = new javax.swing.JLabel();
-        jLabel188 = new javax.swing.JLabel();
-        jLabel189 = new javax.swing.JLabel();
-        jLabel190 = new javax.swing.JLabel();
-        jLabel191 = new javax.swing.JLabel();
-        jLabel192 = new javax.swing.JLabel();
-        jLabel193 = new javax.swing.JLabel();
-        jLabel194 = new javax.swing.JLabel();
-        jLabel195 = new javax.swing.JLabel();
-        jLabel196 = new javax.swing.JLabel();
-        jLabel197 = new javax.swing.JLabel();
-        jLabel198 = new javax.swing.JLabel();
-        jLabel199 = new javax.swing.JLabel();
-        jLabel200 = new javax.swing.JLabel();
-        jLabel201 = new javax.swing.JLabel();
-        jLabel202 = new javax.swing.JLabel();
-        jLabel203 = new javax.swing.JLabel();
-        jLabel204 = new javax.swing.JLabel();
-        jLabel205 = new javax.swing.JLabel();
-        jLabel206 = new javax.swing.JLabel();
-        jLabel207 = new javax.swing.JLabel();
-        jLabel208 = new javax.swing.JLabel();
-        jLabel209 = new javax.swing.JLabel();
-        jLabel210 = new javax.swing.JLabel();
-        jLabel211 = new javax.swing.JLabel();
-        jLabel212 = new javax.swing.JLabel();
-        jLabel213 = new javax.swing.JLabel();
-        jLabel214 = new javax.swing.JLabel();
-        jLabel215 = new javax.swing.JLabel();
-        jLabel216 = new javax.swing.JLabel();
-        jLabel217 = new javax.swing.JLabel();
-        jLabel218 = new javax.swing.JLabel();
-        jLabel219 = new javax.swing.JLabel();
-        jLabel220 = new javax.swing.JLabel();
-        jLabel221 = new javax.swing.JLabel();
-        jLabel222 = new javax.swing.JLabel();
-        jLabel223 = new javax.swing.JLabel();
-        jLabel224 = new javax.swing.JLabel();
-        jLabel225 = new javax.swing.JLabel();
-        jLabel226 = new javax.swing.JLabel();
-        jLabel227 = new javax.swing.JLabel();
-        jLabel228 = new javax.swing.JLabel();
-        jLabel229 = new javax.swing.JLabel();
-        jLabel230 = new javax.swing.JLabel();
-        jLabel231 = new javax.swing.JLabel();
-        jLabel232 = new javax.swing.JLabel();
-        jLabel233 = new javax.swing.JLabel();
-        jLabel234 = new javax.swing.JLabel();
-        jLabel235 = new javax.swing.JLabel();
-        jLabel236 = new javax.swing.JLabel();
-        jLabel237 = new javax.swing.JLabel();
-        jLabel238 = new javax.swing.JLabel();
-        jLabel239 = new javax.swing.JLabel();
-        jLabel240 = new javax.swing.JLabel();
-        jLabel241 = new javax.swing.JLabel();
-        jLabel242 = new javax.swing.JLabel();
-        jLabel243 = new javax.swing.JLabel();
-        jLabel244 = new javax.swing.JLabel();
-        jLabel245 = new javax.swing.JLabel();
-        jLabel246 = new javax.swing.JLabel();
-        jLabel247 = new javax.swing.JLabel();
-        jLabel248 = new javax.swing.JLabel();
-        jLabel249 = new javax.swing.JLabel();
-        jLabel250 = new javax.swing.JLabel();
-        jLabel251 = new javax.swing.JLabel();
-        jLabel252 = new javax.swing.JLabel();
-        jLabel253 = new javax.swing.JLabel();
-        jLabel254 = new javax.swing.JLabel();
-        jLabel255 = new javax.swing.JLabel();
-        jLabel256 = new javax.swing.JLabel();
-        jLabel257 = new javax.swing.JLabel();
-        jLabel258 = new javax.swing.JLabel();
-        jLabel259 = new javax.swing.JLabel();
-        jLabel260 = new javax.swing.JLabel();
-        jLabel261 = new javax.swing.JLabel();
-        jLabel262 = new javax.swing.JLabel();
-        jLabel263 = new javax.swing.JLabel();
-        jLabel264 = new javax.swing.JLabel();
-        jLabel265 = new javax.swing.JLabel();
-        jLabel266 = new javax.swing.JLabel();
-        jLabel267 = new javax.swing.JLabel();
-        jLabel268 = new javax.swing.JLabel();
-        jLabel269 = new javax.swing.JLabel();
-        jLabel270 = new javax.swing.JLabel();
-        jLabel271 = new javax.swing.JLabel();
-        jLabel272 = new javax.swing.JLabel();
-        jLabel273 = new javax.swing.JLabel();
-        jLabel274 = new javax.swing.JLabel();
-        jLabel275 = new javax.swing.JLabel();
-        jLabel276 = new javax.swing.JLabel();
-        jLabel277 = new javax.swing.JLabel();
-        jLabel278 = new javax.swing.JLabel();
-        jLabel279 = new javax.swing.JLabel();
-        jLabel280 = new javax.swing.JLabel();
-        jLabel281 = new javax.swing.JLabel();
-        jLabel282 = new javax.swing.JLabel();
-        jLabel283 = new javax.swing.JLabel();
-        jLabel284 = new javax.swing.JLabel();
-        jLabel285 = new javax.swing.JLabel();
-        jLabel286 = new javax.swing.JLabel();
-        jLabel287 = new javax.swing.JLabel();
-        jLabel288 = new javax.swing.JLabel();
-        jLabel289 = new javax.swing.JLabel();
-        jLabel290 = new javax.swing.JLabel();
-        jLabel291 = new javax.swing.JLabel();
-        jLabel292 = new javax.swing.JLabel();
-        jLabel293 = new javax.swing.JLabel();
-        jLabel294 = new javax.swing.JLabel();
-        jLabel295 = new javax.swing.JLabel();
-        jLabel296 = new javax.swing.JLabel();
-        jLabel297 = new javax.swing.JLabel();
-        jLabel298 = new javax.swing.JLabel();
-        jLabel299 = new javax.swing.JLabel();
-        jLabel300 = new javax.swing.JLabel();
-        jLabel301 = new javax.swing.JLabel();
-        jLabel302 = new javax.swing.JLabel();
-        jLabel303 = new javax.swing.JLabel();
-        jLabel304 = new javax.swing.JLabel();
-        jLabel305 = new javax.swing.JLabel();
-        jLabel306 = new javax.swing.JLabel();
-        jLabel307 = new javax.swing.JLabel();
-        jLabel308 = new javax.swing.JLabel();
-        jLabel309 = new javax.swing.JLabel();
-        jLabel310 = new javax.swing.JLabel();
+        deviceTable = new javax.swing.JTable();
+        chartPanel = new javax.swing.JPanel();
+        dataPanel = new javax.swing.JPanel();
+        da_datavalue_01 = new javax.swing.JLabel();
+        da_device_01 = new javax.swing.JLabel();
+        da_dataname_01 = new javax.swing.JLabel();
+        da_station_01 = new javax.swing.JLabel();
+        da_station_02 = new javax.swing.JLabel();
+        da_station_03 = new javax.swing.JLabel();
+        da_station_04 = new javax.swing.JLabel();
+        da_station_05 = new javax.swing.JLabel();
+        da_station_06 = new javax.swing.JLabel();
+        da_station_07 = new javax.swing.JLabel();
+        da_station_08 = new javax.swing.JLabel();
+        da_station_09 = new javax.swing.JLabel();
+        da_station_10 = new javax.swing.JLabel();
+        da_station_11 = new javax.swing.JLabel();
+        da_station_12 = new javax.swing.JLabel();
+        da_station_13 = new javax.swing.JLabel();
+        da_station_14 = new javax.swing.JLabel();
+        da_station_15 = new javax.swing.JLabel();
+        da_station_16 = new javax.swing.JLabel();
+        da_device_02 = new javax.swing.JLabel();
+        da_device_03 = new javax.swing.JLabel();
+        da_device_04 = new javax.swing.JLabel();
+        da_device_05 = new javax.swing.JLabel();
+        da_device_06 = new javax.swing.JLabel();
+        da_device_07 = new javax.swing.JLabel();
+        da_device_08 = new javax.swing.JLabel();
+        da_device_09 = new javax.swing.JLabel();
+        da_device_10 = new javax.swing.JLabel();
+        da_device_11 = new javax.swing.JLabel();
+        da_device_12 = new javax.swing.JLabel();
+        da_device_13 = new javax.swing.JLabel();
+        da_device_14 = new javax.swing.JLabel();
+        da_device_15 = new javax.swing.JLabel();
+        da_device_16 = new javax.swing.JLabel();
+        da_device_17 = new javax.swing.JLabel();
+        da_device_18 = new javax.swing.JLabel();
+        da_device_19 = new javax.swing.JLabel();
+        da_device_20 = new javax.swing.JLabel();
+        da_device_21 = new javax.swing.JLabel();
+        da_device_22 = new javax.swing.JLabel();
+        da_device_23 = new javax.swing.JLabel();
+        da_device_24 = new javax.swing.JLabel();
+        da_device_25 = new javax.swing.JLabel();
+        da_device_26 = new javax.swing.JLabel();
+        da_device_27 = new javax.swing.JLabel();
+        da_device_28 = new javax.swing.JLabel();
+        da_device_29 = new javax.swing.JLabel();
+        da_device_30 = new javax.swing.JLabel();
+        da_device_31 = new javax.swing.JLabel();
+        da_device_32 = new javax.swing.JLabel();
+        da_dataname_02 = new javax.swing.JLabel();
+        da_dataname_03 = new javax.swing.JLabel();
+        da_dataname_04 = new javax.swing.JLabel();
+        da_dataname_05 = new javax.swing.JLabel();
+        da_dataname_06 = new javax.swing.JLabel();
+        da_dataname_07 = new javax.swing.JLabel();
+        da_dataname_08 = new javax.swing.JLabel();
+        da_dataname_09 = new javax.swing.JLabel();
+        da_dataname_10 = new javax.swing.JLabel();
+        da_dataname_11 = new javax.swing.JLabel();
+        da_dataname_12 = new javax.swing.JLabel();
+        da_dataname_13 = new javax.swing.JLabel();
+        da_dataname_14 = new javax.swing.JLabel();
+        da_dataname_15 = new javax.swing.JLabel();
+        da_dataname_16 = new javax.swing.JLabel();
+        da_dataname_17 = new javax.swing.JLabel();
+        da_dataname_18 = new javax.swing.JLabel();
+        da_dataname_19 = new javax.swing.JLabel();
+        da_dataname_20 = new javax.swing.JLabel();
+        da_dataname_21 = new javax.swing.JLabel();
+        da_dataname_22 = new javax.swing.JLabel();
+        da_dataname_23 = new javax.swing.JLabel();
+        da_dataname_24 = new javax.swing.JLabel();
+        da_dataname_25 = new javax.swing.JLabel();
+        da_dataname_26 = new javax.swing.JLabel();
+        da_dataname_27 = new javax.swing.JLabel();
+        da_dataname_28 = new javax.swing.JLabel();
+        da_dataname_29 = new javax.swing.JLabel();
+        da_dataname_30 = new javax.swing.JLabel();
+        da_dataname_31 = new javax.swing.JLabel();
+        da_dataname_32 = new javax.swing.JLabel();
+        da_dataname_33 = new javax.swing.JLabel();
+        da_dataname_34 = new javax.swing.JLabel();
+        da_dataname_35 = new javax.swing.JLabel();
+        da_dataname_36 = new javax.swing.JLabel();
+        da_dataname_37 = new javax.swing.JLabel();
+        da_dataname_38 = new javax.swing.JLabel();
+        da_dataname_39 = new javax.swing.JLabel();
+        da_dataname_40 = new javax.swing.JLabel();
+        da_dataname_41 = new javax.swing.JLabel();
+        da_dataname_42 = new javax.swing.JLabel();
+        da_dataname_43 = new javax.swing.JLabel();
+        da_dataname_44 = new javax.swing.JLabel();
+        da_dataname_45 = new javax.swing.JLabel();
+        da_dataname_46 = new javax.swing.JLabel();
+        da_dataname_47 = new javax.swing.JLabel();
+        da_dataname_48 = new javax.swing.JLabel();
+        da_datavalue_02 = new javax.swing.JLabel();
+        da_datavalue_03 = new javax.swing.JLabel();
+        da_datavalue_04 = new javax.swing.JLabel();
+        da_datavalue_05 = new javax.swing.JLabel();
+        da_datavalue_06 = new javax.swing.JLabel();
+        da_datavalue_07 = new javax.swing.JLabel();
+        da_datavalue_08 = new javax.swing.JLabel();
+        da_datavalue_09 = new javax.swing.JLabel();
+        da_datavalue_10 = new javax.swing.JLabel();
+        da_datavalue_11 = new javax.swing.JLabel();
+        da_datavalue_12 = new javax.swing.JLabel();
+        da_datavalue_13 = new javax.swing.JLabel();
+        da_datavalue_14 = new javax.swing.JLabel();
+        da_datavalue_15 = new javax.swing.JLabel();
+        da_datavalue_16 = new javax.swing.JLabel();
+        da_datavalue_17 = new javax.swing.JLabel();
+        da_datavalue_18 = new javax.swing.JLabel();
+        da_datavalue_19 = new javax.swing.JLabel();
+        da_datavalue_20 = new javax.swing.JLabel();
+        da_datavalue_21 = new javax.swing.JLabel();
+        da_datavalue_22 = new javax.swing.JLabel();
+        da_datavalue_23 = new javax.swing.JLabel();
+        da_datavalue_24 = new javax.swing.JLabel();
+        da_datavalue_25 = new javax.swing.JLabel();
+        da_datavalue_26 = new javax.swing.JLabel();
+        da_datavalue_27 = new javax.swing.JLabel();
+        da_datavalue_28 = new javax.swing.JLabel();
+        da_datavalue_29 = new javax.swing.JLabel();
+        da_datavalue_30 = new javax.swing.JLabel();
+        da_datavalue_31 = new javax.swing.JLabel();
+        da_datavalue_32 = new javax.swing.JLabel();
+        da_datavalue_33 = new javax.swing.JLabel();
+        da_datavalue_34 = new javax.swing.JLabel();
+        da_datavalue_35 = new javax.swing.JLabel();
+        da_datavalue_36 = new javax.swing.JLabel();
+        da_datavalue_37 = new javax.swing.JLabel();
+        da_datavalue_38 = new javax.swing.JLabel();
+        da_datavalue_39 = new javax.swing.JLabel();
+        da_datavalue_40 = new javax.swing.JLabel();
+        da_datavalue_41 = new javax.swing.JLabel();
+        da_datavalue_42 = new javax.swing.JLabel();
+        da_datavalue_43 = new javax.swing.JLabel();
+        da_datavalue_44 = new javax.swing.JLabel();
+        da_datavalue_45 = new javax.swing.JLabel();
+        da_datavalue_46 = new javax.swing.JLabel();
+        da_datavalue_47 = new javax.swing.JLabel();
+        da_datavalue_48 = new javax.swing.JLabel();
         button02 = new javax.swing.JButton();
         btnStart = new javax.swing.JButton();
-        jLabel45 = new javax.swing.JLabel();
+        statusLabel = new javax.swing.JLabel();
         chartOptionPanel = new javax.swing.JPanel();
         jPanel43 = new javax.swing.JPanel();
         cbAutoAdjustY = new javax.swing.JCheckBox();
@@ -5114,11 +5175,11 @@ public void doLayout(){
         btnZoomIn = new javax.swing.JButton();
         btnZoomOut = new javax.swing.JButton();
         btnConnect = new javax.swing.JButton();
-        jLabel13 = new javax.swing.JLabel();
+        timeLabel = new javax.swing.JLabel();
         jPanel37 = new javax.swing.JPanel();
         jLabel58 = new javax.swing.JLabel();
         jLabel76 = new javax.swing.JLabel();
-        lightPanel2 = new ci.LightPanel();
+        lightPanel = new ci.LightPanel();
         button03 = new javax.swing.JButton();
         button04 = new javax.swing.JButton();
         button05 = new javax.swing.JButton();
@@ -5314,76 +5375,7 @@ public void doLayout(){
         jLabel24 = new javax.swing.JLabel();
         jPasswordField9 = new javax.swing.JPasswordField();
         btnApplySetting_accounts = new javax.swing.JButton();
-        UIPanel = new javax.swing.JPanel();
-        jTabbedPane4 = new javax.swing.JTabbedPane();
-        jPanel36 = new javax.swing.JPanel();
-        jPanel140 = new javax.swing.JPanel();
-        jButton57 = new javax.swing.JButton();
-        btnApplySetting_ui = new javax.swing.JButton();
-        jPanel144 = new javax.swing.JPanel();
-        jPanel141 = new javax.swing.JPanel();
-        jComboBox36 = new javax.swing.JComboBox();
-        jCheckBox37 = new javax.swing.JCheckBox();
-        jLabel31 = new javax.swing.JLabel();
-        jTextField3 = new javax.swing.JTextField();
-        jLabel46 = new javax.swing.JLabel();
-        jTextField5 = new javax.swing.JTextField();
-        jLabel47 = new javax.swing.JLabel();
-        jTextField9 = new javax.swing.JTextField();
-        jLabel54 = new javax.swing.JLabel();
-        jTextField10 = new javax.swing.JTextField();
-        jLabel55 = new javax.swing.JLabel();
-        jTextField61 = new javax.swing.JTextField();
-        jLabel56 = new javax.swing.JLabel();
-        jPanel143 = new javax.swing.JPanel();
-        jLabel57 = new javax.swing.JLabel();
-        jComboBox37 = new javax.swing.JComboBox();
-        jLabel72 = new javax.swing.JLabel();
-        jComboBox53 = new javax.swing.JComboBox();
-        jLabel73 = new javax.swing.JLabel();
-        jTextField73 = new javax.swing.JTextField();
-        jLabel311 = new javax.swing.JLabel();
-        jComboBox55 = new javax.swing.JComboBox();
-        jCheckBox3 = new javax.swing.JCheckBox();
-        jCheckBox46 = new javax.swing.JCheckBox();
-        jPanel145 = new javax.swing.JPanel();
-        jPanel110 = new javax.swing.JPanel();
-        jLabel147 = new javax.swing.JLabel();
-        jTextField45 = new javax.swing.JTextField();
-        jLabel8 = new javax.swing.JLabel();
-        jTextField11 = new javax.swing.JTextField();
-        jLabel75 = new javax.swing.JLabel();
-        jComboBox54 = new javax.swing.JComboBox();
-        jPanel146 = new javax.swing.JPanel();
-        jCheckBox38 = new javax.swing.JCheckBox();
-        jCheckBox44 = new javax.swing.JCheckBox();
-        jCheckBox45 = new javax.swing.JCheckBox();
-        jPanel147 = new javax.swing.JPanel();
-        jLabel97 = new javax.swing.JLabel();
-        jCheckBox43 = new javax.swing.JCheckBox();
-        jLabel105 = new javax.swing.JLabel();
-        jTextField74 = new javax.swing.JTextField();
-        jLabel107 = new javax.swing.JLabel();
-        jLabel108 = new javax.swing.JLabel();
-        jTextField75 = new javax.swing.JTextField();
-        jLabel139 = new javax.swing.JLabel();
-        jLabel140 = new javax.swing.JLabel();
-        jTextField76 = new javax.swing.JTextField();
-        jLabel156 = new javax.swing.JLabel();
-        jLabel141 = new javax.swing.JLabel();
-        jTextField77 = new javax.swing.JTextField();
-        jLabel154 = new javax.swing.JLabel();
-        jPanel39 = new javax.swing.JPanel();
-        jPanel41 = new javax.swing.JPanel();
-        jPanel40 = new javax.swing.JPanel();
-        jPanel123 = new javax.swing.JPanel();
-        jLabel137 = new javax.swing.JLabel();
-        byStation = new javax.swing.JRadioButton();
-        byDevice = new javax.swing.JRadioButton();
-        byModel = new javax.swing.JRadioButton();
-        byDataName = new javax.swing.JRadioButton();
-        byChartGroup = new javax.swing.JRadioButton();
-        chartGroupCB = new javax.swing.JComboBox();
+        uiPanel = new javax.swing.JPanel();
         jPanel109 = new javax.swing.JPanel();
         jPanel113 = new javax.swing.JPanel();
         jPanel115 = new javax.swing.JPanel();
@@ -5423,12 +5415,7 @@ public void doLayout(){
         sendBtn = new javax.swing.JButton();
         stopContinueSendBtn = new javax.swing.JButton();
         clearSendBtn = new javax.swing.JButton();
-        NodeMgntPanel = new javax.swing.JPanel();
-        btnApplySetting_node = new javax.swing.JButton();
-        jScrollPane15 = new javax.swing.JScrollPane();
-        jList9 = new javax.swing.JList(listModel9);
-        jScrollPane16 = new javax.swing.JScrollPane();
-        jList10 = new javax.swing.JList();
+        nodeMgntPanel = new javax.swing.JPanel();
         jPanel49 = new javax.swing.JPanel();
         jPanel71 = new javax.swing.JPanel();
         jScrollPane6 = new javax.swing.JScrollPane();
@@ -5679,7 +5666,7 @@ public void doLayout(){
         jPanel106 = new javax.swing.JPanel();
         jLabel143 = new javax.swing.JLabel();
         jLabel114 = new javax.swing.JLabel();
-        jComboBox35 = new javax.swing.JComboBox();
+        jLabel60 = new javax.swing.JLabel();
         jLabel138 = new javax.swing.JLabel();
         jTextField51 = new javax.swing.JTextField();
         jButton42 = new javax.swing.JButton();
@@ -5695,37 +5682,7 @@ public void doLayout(){
         jCheckBox13 = new javax.swing.JCheckBox();
         jPanel149 = new javax.swing.JPanel();
         jCheckBox14 = new javax.swing.JCheckBox();
-        jPanel51 = new javax.swing.JPanel();
-        jPanel92 = new javax.swing.JPanel();
-        jLabel169 = new javax.swing.JLabel();
-        jComboBox40 = new javax.swing.JComboBox();
-        jLabel170 = new javax.swing.JLabel();
-        jComboBox50 = new javax.swing.JComboBox();
-        jLabel171 = new javax.swing.JLabel();
-        jComboBox51 = new javax.swing.JComboBox();
-        jScrollPane10 = new javax.swing.JScrollPane();
-        curveList = new javax.swing.JList(curveListModel);
-        jLabel109 = new javax.swing.JLabel();
-        jPanel95 = new javax.swing.JPanel();
-        jButton38 = new javax.swing.JButton();
-        jButton39 = new javax.swing.JButton();
-        jButton40 = new javax.swing.JButton();
-        jPanel102 = new javax.swing.JPanel();
-        jLabel103 = new javax.swing.JLabel();
-        jComboBox33 = new javax.swing.JComboBox();
-        jButton46 = new javax.swing.JButton();
-        jButton47 = new javax.swing.JButton();
-        jPanel105 = new javax.swing.JPanel();
-        jLabel106 = new javax.swing.JLabel();
-        jComboBox34 = new javax.swing.JComboBox();
-        jLabel89 = new javax.swing.JLabel();
-        jLabel91 = new javax.swing.JLabel();
-        jLabel172 = new javax.swing.JLabel();
-        jComboBox52 = new javax.swing.JComboBox();
-        jPanel107 = new javax.swing.JPanel();
-        jLabel144 = new javax.swing.JLabel();
-        jLabel145 = new javax.swing.JLabel();
-        jComboBox38 = new javax.swing.JComboBox();
+        curvePanel = new javax.swing.JPanel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         fileUpLoadMenuItem = new javax.swing.JMenuItem();
@@ -5747,6 +5704,7 @@ public void doLayout(){
         toolMenuItem05 = new javax.swing.JMenuItem();
         jMenuItem6 = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
+        jMenuItem3 = new javax.swing.JMenuItem();
         jMenuItem8 = new javax.swing.JMenuItem();
         jMenuItem26 = new javax.swing.JMenuItem();
         jMenuItem27 = new javax.swing.JMenuItem();
@@ -5771,7 +5729,7 @@ public void doLayout(){
         jPanel1.setFont(jPanel1.getFont());
         jPanel1.setLayout(null);
 
-        jScrollPane2.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("CrInstrument.jScrollPane2.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP)); 
+        jScrollPane2.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 153)), bundle.getString("CrInstrument.jScrollPane2.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP)); 
         jScrollPane2.setFont(jScrollPane2.getFont());
 
         stationList.setFont(stationList.getFont());
@@ -5785,11 +5743,11 @@ public void doLayout(){
         jPanel1.add(jScrollPane2);
         jScrollPane2.setBounds(0, 10, 160, 180);
 
-        jScrollPane3.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("CrInstrument.jScrollPane3.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP)); 
+        jScrollPane3.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 153)), bundle.getString("CrInstrument.jScrollPane3.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP)); 
         jScrollPane3.setFont(jScrollPane3.getFont());
 
-        jTable2.setFont(jTable2.getFont());
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        deviceTable.setFont(deviceTable.getFont());
+        deviceTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null, null},
                 {null, null, null, null, null, null},
@@ -5800,897 +5758,897 @@ public void doLayout(){
                 "Device Name", "Model", "SN", "Data Name", "Value", "Alert"
             }
         ));
-        jTable2.setGridColor(new java.awt.Color(153, 153, 153));
-        jTable2.addMouseListener(new java.awt.event.MouseAdapter() {
+        deviceTable.setGridColor(new java.awt.Color(153, 153, 153));
+        deviceTable.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jTable2MouseClicked(evt);
+                deviceTableMouseClicked(evt);
             }
             public void mouseReleased(java.awt.event.MouseEvent evt) {
-                jTable2MouseReleased(evt);
+                deviceTableMouseReleased(evt);
             }
         });
-        jScrollPane3.setViewportView(jTable2);
+        jScrollPane3.setViewportView(deviceTable);
 
         jPanel1.add(jScrollPane3);
         jScrollPane3.setBounds(170, 10, 380, 300);
 
-        jPanel18.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel18.setBorder(javax.swing.BorderFactory.createTitledBorder(null, bundle.getString("CrInstrument.jPanel18.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP)); 
-        jPanel18.setFont(jPanel18.getFont());
-        jPanel18.setLayout(null);
-        jPanel1.add(jPanel18);
-        jPanel18.setBounds(560, 10, 440, 460);
-
-        jPanel19.setBackground(new java.awt.Color(0, 0, 0));
-        jPanel19.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)), bundle.getString("CrInstrument.jPanel19.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(255, 255, 255))); 
-        jPanel19.setLayout(null);
-
-        jLabel30.setFont(jLabel30.getFont().deriveFont(jLabel30.getFont().getStyle() | java.awt.Font.BOLD, jLabel30.getFont().getSize()+36));
-        jLabel30.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel30.setText(bundle.getString("CrInstrument.jLabel30.text")); 
-        jPanel19.add(jLabel30);
-        jLabel30.setBounds(60, 150, 300, 60);
-
-        jLabel34.setFont(jLabel34.getFont().deriveFont(jLabel34.getFont().getStyle() | java.awt.Font.BOLD, jLabel34.getFont().getSize()+6));
-        jLabel34.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel34.setText(bundle.getString("CrInstrument.jLabel34.text")); 
-        jPanel19.add(jLabel34);
-        jLabel34.setBounds(20, 60, 320, 30);
-
-        jLabel35.setFont(jLabel35.getFont().deriveFont(jLabel35.getFont().getStyle() | java.awt.Font.BOLD, jLabel35.getFont().getSize()+6));
-        jLabel35.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel35.setText(bundle.getString("CrInstrument.jLabel35.text")); 
-        jPanel19.add(jLabel35);
-        jLabel35.setBounds(20, 110, 320, 30);
-
-        jLabel20.setFont(jLabel20.getFont().deriveFont(jLabel20.getFont().getStyle() | java.awt.Font.BOLD, jLabel20.getFont().getSize()+6));
-        jLabel20.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel20.setText(bundle.getString("CrInstrument.jLabel20.text")); 
-        jPanel19.add(jLabel20);
-        jLabel20.setBounds(20, 30, 280, 20);
-
-        jLabel85.setFont(jLabel85.getFont().deriveFont(jLabel85.getFont().getStyle() | java.awt.Font.BOLD, jLabel85.getFont().getSize()+6));
-        jLabel85.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel85.setText(bundle.getString("CrInstrument.jLabel85.text")); 
-        jPanel19.add(jLabel85);
-        jLabel85.setBounds(20, 30, 280, 20);
-
-        jLabel168.setFont(jLabel168.getFont().deriveFont(jLabel168.getFont().getStyle() | java.awt.Font.BOLD, jLabel168.getFont().getSize()+6));
-        jLabel168.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel168.setText(bundle.getString("CrInstrument.jLabel168.text")); 
-        jPanel19.add(jLabel168);
-        jLabel168.setBounds(20, 30, 280, 20);
-
-        jLabel173.setFont(jLabel173.getFont().deriveFont(jLabel173.getFont().getStyle() | java.awt.Font.BOLD, jLabel173.getFont().getSize()+6));
-        jLabel173.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel173.setText(bundle.getString("CrInstrument.jLabel173.text")); 
-        jPanel19.add(jLabel173);
-        jLabel173.setBounds(20, 30, 280, 20);
-
-        jLabel174.setFont(jLabel174.getFont().deriveFont(jLabel174.getFont().getStyle() | java.awt.Font.BOLD, jLabel174.getFont().getSize()+6));
-        jLabel174.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel174.setText(bundle.getString("CrInstrument.jLabel174.text")); 
-        jPanel19.add(jLabel174);
-        jLabel174.setBounds(20, 30, 280, 20);
-
-        jLabel175.setFont(jLabel175.getFont().deriveFont(jLabel175.getFont().getStyle() | java.awt.Font.BOLD, jLabel175.getFont().getSize()+6));
-        jLabel175.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel175.setText(bundle.getString("CrInstrument.jLabel175.text")); 
-        jPanel19.add(jLabel175);
-        jLabel175.setBounds(20, 30, 280, 20);
-
-        jLabel176.setFont(jLabel176.getFont().deriveFont(jLabel176.getFont().getStyle() | java.awt.Font.BOLD, jLabel176.getFont().getSize()+6));
-        jLabel176.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel176.setText(bundle.getString("CrInstrument.jLabel176.text")); 
-        jPanel19.add(jLabel176);
-        jLabel176.setBounds(20, 30, 280, 20);
-
-        jLabel177.setFont(jLabel177.getFont().deriveFont(jLabel177.getFont().getStyle() | java.awt.Font.BOLD, jLabel177.getFont().getSize()+6));
-        jLabel177.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel177.setText(bundle.getString("CrInstrument.jLabel177.text")); 
-        jPanel19.add(jLabel177);
-        jLabel177.setBounds(20, 30, 280, 20);
-
-        jLabel178.setFont(jLabel178.getFont().deriveFont(jLabel178.getFont().getStyle() | java.awt.Font.BOLD, jLabel178.getFont().getSize()+6));
-        jLabel178.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel178.setText(bundle.getString("CrInstrument.jLabel178.text")); 
-        jPanel19.add(jLabel178);
-        jLabel178.setBounds(20, 30, 280, 20);
-
-        jLabel179.setFont(jLabel179.getFont().deriveFont(jLabel179.getFont().getStyle() | java.awt.Font.BOLD, jLabel179.getFont().getSize()+6));
-        jLabel179.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel179.setText(bundle.getString("CrInstrument.jLabel179.text")); 
-        jPanel19.add(jLabel179);
-        jLabel179.setBounds(20, 30, 280, 20);
-
-        jLabel180.setFont(jLabel180.getFont().deriveFont(jLabel180.getFont().getStyle() | java.awt.Font.BOLD, jLabel180.getFont().getSize()+6));
-        jLabel180.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel180.setText(bundle.getString("CrInstrument.jLabel180.text")); 
-        jPanel19.add(jLabel180);
-        jLabel180.setBounds(20, 30, 280, 20);
-
-        jLabel181.setFont(jLabel181.getFont().deriveFont(jLabel181.getFont().getStyle() | java.awt.Font.BOLD, jLabel181.getFont().getSize()+6));
-        jLabel181.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel181.setText(bundle.getString("CrInstrument.jLabel181.text")); 
-        jPanel19.add(jLabel181);
-        jLabel181.setBounds(20, 30, 280, 20);
-
-        jLabel182.setFont(jLabel182.getFont().deriveFont(jLabel182.getFont().getStyle() | java.awt.Font.BOLD, jLabel182.getFont().getSize()+6));
-        jLabel182.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel182.setText(bundle.getString("CrInstrument.jLabel182.text")); 
-        jPanel19.add(jLabel182);
-        jLabel182.setBounds(20, 30, 280, 20);
-
-        jLabel183.setFont(jLabel183.getFont().deriveFont(jLabel183.getFont().getStyle() | java.awt.Font.BOLD, jLabel183.getFont().getSize()+6));
-        jLabel183.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel183.setText(bundle.getString("CrInstrument.jLabel183.text")); 
-        jPanel19.add(jLabel183);
-        jLabel183.setBounds(20, 30, 280, 20);
-
-        jLabel184.setFont(jLabel184.getFont().deriveFont(jLabel184.getFont().getStyle() | java.awt.Font.BOLD, jLabel184.getFont().getSize()+6));
-        jLabel184.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel184.setText(bundle.getString("CrInstrument.jLabel184.text")); 
-        jPanel19.add(jLabel184);
-        jLabel184.setBounds(20, 30, 280, 20);
-
-        jLabel185.setFont(jLabel185.getFont().deriveFont(jLabel185.getFont().getStyle() | java.awt.Font.BOLD, jLabel185.getFont().getSize()+6));
-        jLabel185.setForeground(new java.awt.Color(153, 255, 255));
-        jLabel185.setText(bundle.getString("CrInstrument.jLabel185.text")); 
-        jPanel19.add(jLabel185);
-        jLabel185.setBounds(20, 30, 280, 20);
-
-        jLabel186.setFont(jLabel186.getFont().deriveFont(jLabel186.getFont().getStyle() | java.awt.Font.BOLD, jLabel186.getFont().getSize()+6));
-        jLabel186.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel186.setText(bundle.getString("CrInstrument.jLabel186.text")); 
-        jPanel19.add(jLabel186);
-        jLabel186.setBounds(20, 60, 320, 30);
-
-        jLabel187.setFont(jLabel187.getFont().deriveFont(jLabel187.getFont().getStyle() | java.awt.Font.BOLD, jLabel187.getFont().getSize()+6));
-        jLabel187.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel187.setText(bundle.getString("CrInstrument.jLabel187.text")); 
-        jPanel19.add(jLabel187);
-        jLabel187.setBounds(20, 60, 320, 30);
-
-        jLabel188.setFont(jLabel188.getFont().deriveFont(jLabel188.getFont().getStyle() | java.awt.Font.BOLD, jLabel188.getFont().getSize()+6));
-        jLabel188.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel188.setText(bundle.getString("CrInstrument.jLabel188.text")); 
-        jPanel19.add(jLabel188);
-        jLabel188.setBounds(20, 60, 320, 30);
-
-        jLabel189.setFont(jLabel189.getFont().deriveFont(jLabel189.getFont().getStyle() | java.awt.Font.BOLD, jLabel189.getFont().getSize()+6));
-        jLabel189.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel189.setText(bundle.getString("CrInstrument.jLabel189.text")); 
-        jPanel19.add(jLabel189);
-        jLabel189.setBounds(20, 60, 320, 30);
-
-        jLabel190.setFont(jLabel190.getFont().deriveFont(jLabel190.getFont().getStyle() | java.awt.Font.BOLD, jLabel190.getFont().getSize()+6));
-        jLabel190.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel190.setText(bundle.getString("CrInstrument.jLabel190.text")); 
-        jPanel19.add(jLabel190);
-        jLabel190.setBounds(20, 60, 320, 30);
-
-        jLabel191.setFont(jLabel191.getFont().deriveFont(jLabel191.getFont().getStyle() | java.awt.Font.BOLD, jLabel191.getFont().getSize()+6));
-        jLabel191.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel191.setText(bundle.getString("CrInstrument.jLabel191.text")); 
-        jPanel19.add(jLabel191);
-        jLabel191.setBounds(20, 60, 320, 30);
-
-        jLabel192.setFont(jLabel192.getFont().deriveFont(jLabel192.getFont().getStyle() | java.awt.Font.BOLD, jLabel192.getFont().getSize()+6));
-        jLabel192.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel192.setText(bundle.getString("CrInstrument.jLabel192.text")); 
-        jPanel19.add(jLabel192);
-        jLabel192.setBounds(20, 60, 320, 30);
-
-        jLabel193.setFont(jLabel193.getFont().deriveFont(jLabel193.getFont().getStyle() | java.awt.Font.BOLD, jLabel193.getFont().getSize()+6));
-        jLabel193.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel193.setText(bundle.getString("CrInstrument.jLabel193.text")); 
-        jPanel19.add(jLabel193);
-        jLabel193.setBounds(20, 60, 320, 30);
-
-        jLabel194.setFont(jLabel194.getFont().deriveFont(jLabel194.getFont().getStyle() | java.awt.Font.BOLD, jLabel194.getFont().getSize()+6));
-        jLabel194.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel194.setText(bundle.getString("CrInstrument.jLabel194.text")); 
-        jPanel19.add(jLabel194);
-        jLabel194.setBounds(20, 60, 320, 30);
-
-        jLabel195.setFont(jLabel195.getFont().deriveFont(jLabel195.getFont().getStyle() | java.awt.Font.BOLD, jLabel195.getFont().getSize()+6));
-        jLabel195.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel195.setText(bundle.getString("CrInstrument.jLabel195.text")); 
-        jPanel19.add(jLabel195);
-        jLabel195.setBounds(20, 60, 320, 30);
-
-        jLabel196.setFont(jLabel196.getFont().deriveFont(jLabel196.getFont().getStyle() | java.awt.Font.BOLD, jLabel196.getFont().getSize()+6));
-        jLabel196.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel196.setText(bundle.getString("CrInstrument.jLabel196.text")); 
-        jPanel19.add(jLabel196);
-        jLabel196.setBounds(20, 60, 320, 30);
-
-        jLabel197.setFont(jLabel197.getFont().deriveFont(jLabel197.getFont().getStyle() | java.awt.Font.BOLD, jLabel197.getFont().getSize()+6));
-        jLabel197.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel197.setText(bundle.getString("CrInstrument.jLabel197.text")); 
-        jPanel19.add(jLabel197);
-        jLabel197.setBounds(20, 60, 320, 30);
-
-        jLabel198.setFont(jLabel198.getFont().deriveFont(jLabel198.getFont().getStyle() | java.awt.Font.BOLD, jLabel198.getFont().getSize()+6));
-        jLabel198.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel198.setText(bundle.getString("CrInstrument.jLabel198.text")); 
-        jPanel19.add(jLabel198);
-        jLabel198.setBounds(20, 60, 320, 30);
-
-        jLabel199.setFont(jLabel199.getFont().deriveFont(jLabel199.getFont().getStyle() | java.awt.Font.BOLD, jLabel199.getFont().getSize()+6));
-        jLabel199.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel199.setText(bundle.getString("CrInstrument.jLabel199.text")); 
-        jPanel19.add(jLabel199);
-        jLabel199.setBounds(20, 60, 320, 30);
-
-        jLabel200.setFont(jLabel200.getFont().deriveFont(jLabel200.getFont().getStyle() | java.awt.Font.BOLD, jLabel200.getFont().getSize()+6));
-        jLabel200.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel200.setText(bundle.getString("CrInstrument.jLabel200.text")); 
-        jPanel19.add(jLabel200);
-        jLabel200.setBounds(20, 60, 320, 30);
-
-        jLabel201.setFont(jLabel201.getFont().deriveFont(jLabel201.getFont().getStyle() | java.awt.Font.BOLD, jLabel201.getFont().getSize()+6));
-        jLabel201.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel201.setText(bundle.getString("CrInstrument.jLabel201.text")); 
-        jPanel19.add(jLabel201);
-        jLabel201.setBounds(20, 60, 320, 30);
-
-        jLabel202.setFont(jLabel202.getFont().deriveFont(jLabel202.getFont().getStyle() | java.awt.Font.BOLD, jLabel202.getFont().getSize()+6));
-        jLabel202.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel202.setText(bundle.getString("CrInstrument.jLabel202.text")); 
-        jPanel19.add(jLabel202);
-        jLabel202.setBounds(20, 60, 320, 30);
-
-        jLabel203.setFont(jLabel203.getFont().deriveFont(jLabel203.getFont().getStyle() | java.awt.Font.BOLD, jLabel203.getFont().getSize()+6));
-        jLabel203.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel203.setText(bundle.getString("CrInstrument.jLabel203.text")); 
-        jPanel19.add(jLabel203);
-        jLabel203.setBounds(20, 60, 320, 30);
-
-        jLabel204.setFont(jLabel204.getFont().deriveFont(jLabel204.getFont().getStyle() | java.awt.Font.BOLD, jLabel204.getFont().getSize()+6));
-        jLabel204.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel204.setText(bundle.getString("CrInstrument.jLabel204.text")); 
-        jPanel19.add(jLabel204);
-        jLabel204.setBounds(20, 60, 320, 30);
-
-        jLabel205.setFont(jLabel205.getFont().deriveFont(jLabel205.getFont().getStyle() | java.awt.Font.BOLD, jLabel205.getFont().getSize()+6));
-        jLabel205.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel205.setText(bundle.getString("CrInstrument.jLabel205.text")); 
-        jPanel19.add(jLabel205);
-        jLabel205.setBounds(20, 60, 320, 30);
-
-        jLabel206.setFont(jLabel206.getFont().deriveFont(jLabel206.getFont().getStyle() | java.awt.Font.BOLD, jLabel206.getFont().getSize()+6));
-        jLabel206.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel206.setText(bundle.getString("CrInstrument.jLabel206.text")); 
-        jPanel19.add(jLabel206);
-        jLabel206.setBounds(20, 60, 320, 30);
-
-        jLabel207.setFont(jLabel207.getFont().deriveFont(jLabel207.getFont().getStyle() | java.awt.Font.BOLD, jLabel207.getFont().getSize()+6));
-        jLabel207.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel207.setText(bundle.getString("CrInstrument.jLabel207.text")); 
-        jPanel19.add(jLabel207);
-        jLabel207.setBounds(20, 60, 320, 30);
-
-        jLabel208.setFont(jLabel208.getFont().deriveFont(jLabel208.getFont().getStyle() | java.awt.Font.BOLD, jLabel208.getFont().getSize()+6));
-        jLabel208.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel208.setText(bundle.getString("CrInstrument.jLabel208.text")); 
-        jPanel19.add(jLabel208);
-        jLabel208.setBounds(20, 60, 320, 30);
-
-        jLabel209.setFont(jLabel209.getFont().deriveFont(jLabel209.getFont().getStyle() | java.awt.Font.BOLD, jLabel209.getFont().getSize()+6));
-        jLabel209.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel209.setText(bundle.getString("CrInstrument.jLabel209.text")); 
-        jPanel19.add(jLabel209);
-        jLabel209.setBounds(20, 60, 320, 30);
-
-        jLabel210.setFont(jLabel210.getFont().deriveFont(jLabel210.getFont().getStyle() | java.awt.Font.BOLD, jLabel210.getFont().getSize()+6));
-        jLabel210.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel210.setText(bundle.getString("CrInstrument.jLabel210.text")); 
-        jPanel19.add(jLabel210);
-        jLabel210.setBounds(20, 60, 320, 30);
-
-        jLabel211.setFont(jLabel211.getFont().deriveFont(jLabel211.getFont().getStyle() | java.awt.Font.BOLD, jLabel211.getFont().getSize()+6));
-        jLabel211.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel211.setText(bundle.getString("CrInstrument.jLabel211.text")); 
-        jPanel19.add(jLabel211);
-        jLabel211.setBounds(20, 60, 320, 30);
-
-        jLabel212.setFont(jLabel212.getFont().deriveFont(jLabel212.getFont().getStyle() | java.awt.Font.BOLD, jLabel212.getFont().getSize()+6));
-        jLabel212.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel212.setText(bundle.getString("CrInstrument.jLabel212.text")); 
-        jPanel19.add(jLabel212);
-        jLabel212.setBounds(20, 60, 320, 30);
-
-        jLabel213.setFont(jLabel213.getFont().deriveFont(jLabel213.getFont().getStyle() | java.awt.Font.BOLD, jLabel213.getFont().getSize()+6));
-        jLabel213.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel213.setText(bundle.getString("CrInstrument.jLabel213.text")); 
-        jPanel19.add(jLabel213);
-        jLabel213.setBounds(20, 60, 320, 30);
-
-        jLabel214.setFont(jLabel214.getFont().deriveFont(jLabel214.getFont().getStyle() | java.awt.Font.BOLD, jLabel214.getFont().getSize()+6));
-        jLabel214.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel214.setText(bundle.getString("CrInstrument.jLabel214.text")); 
-        jPanel19.add(jLabel214);
-        jLabel214.setBounds(20, 60, 320, 30);
-
-        jLabel215.setFont(jLabel215.getFont().deriveFont(jLabel215.getFont().getStyle() | java.awt.Font.BOLD, jLabel215.getFont().getSize()+6));
-        jLabel215.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel215.setText(bundle.getString("CrInstrument.jLabel215.text")); 
-        jPanel19.add(jLabel215);
-        jLabel215.setBounds(20, 60, 320, 30);
-
-        jLabel216.setFont(jLabel216.getFont().deriveFont(jLabel216.getFont().getStyle() | java.awt.Font.BOLD, jLabel216.getFont().getSize()+6));
-        jLabel216.setForeground(new java.awt.Color(0, 255, 102));
-        jLabel216.setText(bundle.getString("CrInstrument.jLabel216.text")); 
-        jPanel19.add(jLabel216);
-        jLabel216.setBounds(20, 60, 320, 30);
-
-        jLabel217.setFont(jLabel217.getFont().deriveFont(jLabel217.getFont().getStyle() | java.awt.Font.BOLD, jLabel217.getFont().getSize()+6));
-        jLabel217.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel217.setText(bundle.getString("CrInstrument.jLabel217.text")); 
-        jPanel19.add(jLabel217);
-        jLabel217.setBounds(20, 110, 320, 30);
-
-        jLabel218.setFont(jLabel218.getFont().deriveFont(jLabel218.getFont().getStyle() | java.awt.Font.BOLD, jLabel218.getFont().getSize()+6));
-        jLabel218.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel218.setText(bundle.getString("CrInstrument.jLabel218.text")); 
-        jPanel19.add(jLabel218);
-        jLabel218.setBounds(20, 110, 320, 30);
-
-        jLabel219.setFont(jLabel219.getFont().deriveFont(jLabel219.getFont().getStyle() | java.awt.Font.BOLD, jLabel219.getFont().getSize()+6));
-        jLabel219.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel219.setText(bundle.getString("CrInstrument.jLabel219.text")); 
-        jPanel19.add(jLabel219);
-        jLabel219.setBounds(20, 110, 320, 30);
-
-        jLabel220.setFont(jLabel220.getFont().deriveFont(jLabel220.getFont().getStyle() | java.awt.Font.BOLD, jLabel220.getFont().getSize()+6));
-        jLabel220.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel220.setText(bundle.getString("CrInstrument.jLabel220.text")); 
-        jPanel19.add(jLabel220);
-        jLabel220.setBounds(20, 110, 320, 30);
-
-        jLabel221.setFont(jLabel221.getFont().deriveFont(jLabel221.getFont().getStyle() | java.awt.Font.BOLD, jLabel221.getFont().getSize()+6));
-        jLabel221.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel221.setText(bundle.getString("CrInstrument.jLabel221.text")); 
-        jPanel19.add(jLabel221);
-        jLabel221.setBounds(20, 110, 320, 30);
-
-        jLabel222.setFont(jLabel222.getFont().deriveFont(jLabel222.getFont().getStyle() | java.awt.Font.BOLD, jLabel222.getFont().getSize()+6));
-        jLabel222.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel222.setText(bundle.getString("CrInstrument.jLabel222.text")); 
-        jPanel19.add(jLabel222);
-        jLabel222.setBounds(20, 110, 320, 30);
-
-        jLabel223.setFont(jLabel223.getFont().deriveFont(jLabel223.getFont().getStyle() | java.awt.Font.BOLD, jLabel223.getFont().getSize()+6));
-        jLabel223.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel223.setText(bundle.getString("CrInstrument.jLabel223.text")); 
-        jPanel19.add(jLabel223);
-        jLabel223.setBounds(20, 110, 320, 30);
-
-        jLabel224.setFont(jLabel224.getFont().deriveFont(jLabel224.getFont().getStyle() | java.awt.Font.BOLD, jLabel224.getFont().getSize()+6));
-        jLabel224.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel224.setText(bundle.getString("CrInstrument.jLabel224.text")); 
-        jPanel19.add(jLabel224);
-        jLabel224.setBounds(20, 110, 320, 30);
-
-        jLabel225.setFont(jLabel225.getFont().deriveFont(jLabel225.getFont().getStyle() | java.awt.Font.BOLD, jLabel225.getFont().getSize()+6));
-        jLabel225.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel225.setText(bundle.getString("CrInstrument.jLabel225.text")); 
-        jPanel19.add(jLabel225);
-        jLabel225.setBounds(20, 110, 320, 30);
-
-        jLabel226.setFont(jLabel226.getFont().deriveFont(jLabel226.getFont().getStyle() | java.awt.Font.BOLD, jLabel226.getFont().getSize()+6));
-        jLabel226.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel226.setText(bundle.getString("CrInstrument.jLabel226.text")); 
-        jPanel19.add(jLabel226);
-        jLabel226.setBounds(20, 110, 320, 30);
-
-        jLabel227.setFont(jLabel227.getFont().deriveFont(jLabel227.getFont().getStyle() | java.awt.Font.BOLD, jLabel227.getFont().getSize()+6));
-        jLabel227.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel227.setText(bundle.getString("CrInstrument.jLabel227.text")); 
-        jPanel19.add(jLabel227);
-        jLabel227.setBounds(20, 110, 320, 30);
-
-        jLabel228.setFont(jLabel228.getFont().deriveFont(jLabel228.getFont().getStyle() | java.awt.Font.BOLD, jLabel228.getFont().getSize()+6));
-        jLabel228.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel228.setText(bundle.getString("CrInstrument.jLabel228.text")); 
-        jPanel19.add(jLabel228);
-        jLabel228.setBounds(20, 110, 320, 30);
-
-        jLabel229.setFont(jLabel229.getFont().deriveFont(jLabel229.getFont().getStyle() | java.awt.Font.BOLD, jLabel229.getFont().getSize()+6));
-        jLabel229.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel229.setText(bundle.getString("CrInstrument.jLabel229.text")); 
-        jPanel19.add(jLabel229);
-        jLabel229.setBounds(20, 110, 320, 30);
-
-        jLabel230.setFont(jLabel230.getFont().deriveFont(jLabel230.getFont().getStyle() | java.awt.Font.BOLD, jLabel230.getFont().getSize()+6));
-        jLabel230.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel230.setText(bundle.getString("CrInstrument.jLabel230.text")); 
-        jPanel19.add(jLabel230);
-        jLabel230.setBounds(20, 110, 320, 30);
-
-        jLabel231.setFont(jLabel231.getFont().deriveFont(jLabel231.getFont().getStyle() | java.awt.Font.BOLD, jLabel231.getFont().getSize()+6));
-        jLabel231.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel231.setText(bundle.getString("CrInstrument.jLabel231.text")); 
-        jPanel19.add(jLabel231);
-        jLabel231.setBounds(20, 110, 320, 30);
-
-        jLabel232.setFont(jLabel232.getFont().deriveFont(jLabel232.getFont().getStyle() | java.awt.Font.BOLD, jLabel232.getFont().getSize()+6));
-        jLabel232.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel232.setText(bundle.getString("CrInstrument.jLabel232.text")); 
-        jPanel19.add(jLabel232);
-        jLabel232.setBounds(20, 110, 320, 30);
-
-        jLabel233.setFont(jLabel233.getFont().deriveFont(jLabel233.getFont().getStyle() | java.awt.Font.BOLD, jLabel233.getFont().getSize()+6));
-        jLabel233.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel233.setText(bundle.getString("CrInstrument.jLabel233.text")); 
-        jPanel19.add(jLabel233);
-        jLabel233.setBounds(20, 110, 320, 30);
-
-        jLabel234.setFont(jLabel234.getFont().deriveFont(jLabel234.getFont().getStyle() | java.awt.Font.BOLD, jLabel234.getFont().getSize()+6));
-        jLabel234.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel234.setText(bundle.getString("CrInstrument.jLabel234.text")); 
-        jPanel19.add(jLabel234);
-        jLabel234.setBounds(20, 110, 320, 30);
-
-        jLabel235.setFont(jLabel235.getFont().deriveFont(jLabel235.getFont().getStyle() | java.awt.Font.BOLD, jLabel235.getFont().getSize()+6));
-        jLabel235.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel235.setText(bundle.getString("CrInstrument.jLabel235.text")); 
-        jPanel19.add(jLabel235);
-        jLabel235.setBounds(20, 110, 320, 30);
-
-        jLabel236.setFont(jLabel236.getFont().deriveFont(jLabel236.getFont().getStyle() | java.awt.Font.BOLD, jLabel236.getFont().getSize()+6));
-        jLabel236.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel236.setText(bundle.getString("CrInstrument.jLabel236.text")); 
-        jPanel19.add(jLabel236);
-        jLabel236.setBounds(20, 110, 320, 30);
-
-        jLabel237.setFont(jLabel237.getFont().deriveFont(jLabel237.getFont().getStyle() | java.awt.Font.BOLD, jLabel237.getFont().getSize()+6));
-        jLabel237.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel237.setText(bundle.getString("CrInstrument.jLabel237.text")); 
-        jPanel19.add(jLabel237);
-        jLabel237.setBounds(20, 110, 320, 30);
-
-        jLabel238.setFont(jLabel238.getFont().deriveFont(jLabel238.getFont().getStyle() | java.awt.Font.BOLD, jLabel238.getFont().getSize()+6));
-        jLabel238.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel238.setText(bundle.getString("CrInstrument.jLabel238.text")); 
-        jPanel19.add(jLabel238);
-        jLabel238.setBounds(20, 110, 320, 30);
-
-        jLabel239.setFont(jLabel239.getFont().deriveFont(jLabel239.getFont().getStyle() | java.awt.Font.BOLD, jLabel239.getFont().getSize()+6));
-        jLabel239.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel239.setText(bundle.getString("CrInstrument.jLabel239.text")); 
-        jPanel19.add(jLabel239);
-        jLabel239.setBounds(20, 110, 320, 30);
-
-        jLabel240.setFont(jLabel240.getFont().deriveFont(jLabel240.getFont().getStyle() | java.awt.Font.BOLD, jLabel240.getFont().getSize()+6));
-        jLabel240.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel240.setText(bundle.getString("CrInstrument.jLabel240.text")); 
-        jPanel19.add(jLabel240);
-        jLabel240.setBounds(20, 110, 320, 30);
-
-        jLabel241.setFont(jLabel241.getFont().deriveFont(jLabel241.getFont().getStyle() | java.awt.Font.BOLD, jLabel241.getFont().getSize()+6));
-        jLabel241.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel241.setText(bundle.getString("CrInstrument.jLabel241.text")); 
-        jPanel19.add(jLabel241);
-        jLabel241.setBounds(20, 110, 320, 30);
-
-        jLabel242.setFont(jLabel242.getFont().deriveFont(jLabel242.getFont().getStyle() | java.awt.Font.BOLD, jLabel242.getFont().getSize()+6));
-        jLabel242.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel242.setText(bundle.getString("CrInstrument.jLabel242.text")); 
-        jPanel19.add(jLabel242);
-        jLabel242.setBounds(20, 110, 320, 30);
-
-        jLabel243.setFont(jLabel243.getFont().deriveFont(jLabel243.getFont().getStyle() | java.awt.Font.BOLD, jLabel243.getFont().getSize()+6));
-        jLabel243.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel243.setText(bundle.getString("CrInstrument.jLabel243.text")); 
-        jPanel19.add(jLabel243);
-        jLabel243.setBounds(20, 110, 320, 30);
-
-        jLabel244.setFont(jLabel244.getFont().deriveFont(jLabel244.getFont().getStyle() | java.awt.Font.BOLD, jLabel244.getFont().getSize()+6));
-        jLabel244.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel244.setText(bundle.getString("CrInstrument.jLabel244.text")); 
-        jPanel19.add(jLabel244);
-        jLabel244.setBounds(20, 110, 320, 30);
-
-        jLabel245.setFont(jLabel245.getFont().deriveFont(jLabel245.getFont().getStyle() | java.awt.Font.BOLD, jLabel245.getFont().getSize()+6));
-        jLabel245.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel245.setText(bundle.getString("CrInstrument.jLabel245.text")); 
-        jPanel19.add(jLabel245);
-        jLabel245.setBounds(20, 110, 320, 30);
-
-        jLabel246.setFont(jLabel246.getFont().deriveFont(jLabel246.getFont().getStyle() | java.awt.Font.BOLD, jLabel246.getFont().getSize()+6));
-        jLabel246.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel246.setText(bundle.getString("CrInstrument.jLabel246.text")); 
-        jPanel19.add(jLabel246);
-        jLabel246.setBounds(20, 110, 320, 30);
-
-        jLabel247.setFont(jLabel247.getFont().deriveFont(jLabel247.getFont().getStyle() | java.awt.Font.BOLD, jLabel247.getFont().getSize()+6));
-        jLabel247.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel247.setText(bundle.getString("CrInstrument.jLabel247.text")); 
-        jPanel19.add(jLabel247);
-        jLabel247.setBounds(20, 110, 320, 30);
-
-        jLabel248.setFont(jLabel248.getFont().deriveFont(jLabel248.getFont().getStyle() | java.awt.Font.BOLD, jLabel248.getFont().getSize()+6));
-        jLabel248.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel248.setText(bundle.getString("CrInstrument.jLabel248.text")); 
-        jPanel19.add(jLabel248);
-        jLabel248.setBounds(20, 110, 320, 30);
-
-        jLabel249.setFont(jLabel249.getFont().deriveFont(jLabel249.getFont().getStyle() | java.awt.Font.BOLD, jLabel249.getFont().getSize()+6));
-        jLabel249.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel249.setText(bundle.getString("CrInstrument.jLabel249.text")); 
-        jPanel19.add(jLabel249);
-        jLabel249.setBounds(20, 110, 320, 30);
-
-        jLabel250.setFont(jLabel250.getFont().deriveFont(jLabel250.getFont().getStyle() | java.awt.Font.BOLD, jLabel250.getFont().getSize()+6));
-        jLabel250.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel250.setText(bundle.getString("CrInstrument.jLabel250.text")); 
-        jPanel19.add(jLabel250);
-        jLabel250.setBounds(20, 110, 320, 30);
-
-        jLabel251.setFont(jLabel251.getFont().deriveFont(jLabel251.getFont().getStyle() | java.awt.Font.BOLD, jLabel251.getFont().getSize()+6));
-        jLabel251.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel251.setText(bundle.getString("CrInstrument.jLabel251.text")); 
-        jPanel19.add(jLabel251);
-        jLabel251.setBounds(20, 110, 320, 30);
-
-        jLabel252.setFont(jLabel252.getFont().deriveFont(jLabel252.getFont().getStyle() | java.awt.Font.BOLD, jLabel252.getFont().getSize()+6));
-        jLabel252.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel252.setText(bundle.getString("CrInstrument.jLabel252.text")); 
-        jPanel19.add(jLabel252);
-        jLabel252.setBounds(20, 110, 320, 30);
-
-        jLabel253.setFont(jLabel253.getFont().deriveFont(jLabel253.getFont().getStyle() | java.awt.Font.BOLD, jLabel253.getFont().getSize()+6));
-        jLabel253.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel253.setText(bundle.getString("CrInstrument.jLabel253.text")); 
-        jPanel19.add(jLabel253);
-        jLabel253.setBounds(20, 110, 320, 30);
-
-        jLabel254.setFont(jLabel254.getFont().deriveFont(jLabel254.getFont().getStyle() | java.awt.Font.BOLD, jLabel254.getFont().getSize()+6));
-        jLabel254.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel254.setText(bundle.getString("CrInstrument.jLabel254.text")); 
-        jPanel19.add(jLabel254);
-        jLabel254.setBounds(20, 110, 320, 30);
-
-        jLabel255.setFont(jLabel255.getFont().deriveFont(jLabel255.getFont().getStyle() | java.awt.Font.BOLD, jLabel255.getFont().getSize()+6));
-        jLabel255.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel255.setText(bundle.getString("CrInstrument.jLabel255.text")); 
-        jPanel19.add(jLabel255);
-        jLabel255.setBounds(20, 110, 320, 30);
-
-        jLabel256.setFont(jLabel256.getFont().deriveFont(jLabel256.getFont().getStyle() | java.awt.Font.BOLD, jLabel256.getFont().getSize()+6));
-        jLabel256.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel256.setText(bundle.getString("CrInstrument.jLabel256.text")); 
-        jPanel19.add(jLabel256);
-        jLabel256.setBounds(20, 110, 320, 30);
-
-        jLabel257.setFont(jLabel257.getFont().deriveFont(jLabel257.getFont().getStyle() | java.awt.Font.BOLD, jLabel257.getFont().getSize()+6));
-        jLabel257.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel257.setText(bundle.getString("CrInstrument.jLabel257.text")); 
-        jPanel19.add(jLabel257);
-        jLabel257.setBounds(20, 110, 320, 30);
-
-        jLabel258.setFont(jLabel258.getFont().deriveFont(jLabel258.getFont().getStyle() | java.awt.Font.BOLD, jLabel258.getFont().getSize()+6));
-        jLabel258.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel258.setText(bundle.getString("CrInstrument.jLabel258.text")); 
-        jPanel19.add(jLabel258);
-        jLabel258.setBounds(20, 110, 320, 30);
-
-        jLabel259.setFont(jLabel259.getFont().deriveFont(jLabel259.getFont().getStyle() | java.awt.Font.BOLD, jLabel259.getFont().getSize()+6));
-        jLabel259.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel259.setText(bundle.getString("CrInstrument.jLabel259.text")); 
-        jPanel19.add(jLabel259);
-        jLabel259.setBounds(20, 110, 320, 30);
-
-        jLabel260.setFont(jLabel260.getFont().deriveFont(jLabel260.getFont().getStyle() | java.awt.Font.BOLD, jLabel260.getFont().getSize()+6));
-        jLabel260.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel260.setText(bundle.getString("CrInstrument.jLabel260.text")); 
-        jPanel19.add(jLabel260);
-        jLabel260.setBounds(20, 110, 320, 30);
-
-        jLabel261.setFont(jLabel261.getFont().deriveFont(jLabel261.getFont().getStyle() | java.awt.Font.BOLD, jLabel261.getFont().getSize()+6));
-        jLabel261.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel261.setText(bundle.getString("CrInstrument.jLabel261.text")); 
-        jPanel19.add(jLabel261);
-        jLabel261.setBounds(20, 110, 320, 30);
-
-        jLabel262.setFont(jLabel262.getFont().deriveFont(jLabel262.getFont().getStyle() | java.awt.Font.BOLD, jLabel262.getFont().getSize()+6));
-        jLabel262.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel262.setText(bundle.getString("CrInstrument.jLabel262.text")); 
-        jPanel19.add(jLabel262);
-        jLabel262.setBounds(20, 110, 320, 30);
-
-        jLabel263.setFont(jLabel263.getFont().deriveFont(jLabel263.getFont().getStyle() | java.awt.Font.BOLD, jLabel263.getFont().getSize()+6));
-        jLabel263.setForeground(new java.awt.Color(255, 255, 51));
-        jLabel263.setText(bundle.getString("CrInstrument.jLabel263.text")); 
-        jPanel19.add(jLabel263);
-        jLabel263.setBounds(20, 110, 320, 30);
-
-        jLabel264.setFont(jLabel264.getFont().deriveFont(jLabel264.getFont().getStyle() | java.awt.Font.BOLD, jLabel264.getFont().getSize()+36));
-        jLabel264.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel264.setText(bundle.getString("CrInstrument.jLabel264.text")); 
-        jPanel19.add(jLabel264);
-        jLabel264.setBounds(60, 150, 300, 60);
-
-        jLabel265.setFont(jLabel265.getFont().deriveFont(jLabel265.getFont().getStyle() | java.awt.Font.BOLD, jLabel265.getFont().getSize()+36));
-        jLabel265.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel265.setText(bundle.getString("CrInstrument.jLabel265.text")); 
-        jPanel19.add(jLabel265);
-        jLabel265.setBounds(60, 150, 300, 60);
-
-        jLabel266.setFont(jLabel266.getFont().deriveFont(jLabel266.getFont().getStyle() | java.awt.Font.BOLD, jLabel266.getFont().getSize()+36));
-        jLabel266.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel266.setText(bundle.getString("CrInstrument.jLabel266.text")); 
-        jPanel19.add(jLabel266);
-        jLabel266.setBounds(60, 150, 300, 60);
-
-        jLabel267.setFont(jLabel267.getFont().deriveFont(jLabel267.getFont().getStyle() | java.awt.Font.BOLD, jLabel267.getFont().getSize()+36));
-        jLabel267.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel267.setText(bundle.getString("CrInstrument.jLabel267.text")); 
-        jPanel19.add(jLabel267);
-        jLabel267.setBounds(60, 150, 300, 60);
-
-        jLabel268.setFont(jLabel268.getFont().deriveFont(jLabel268.getFont().getStyle() | java.awt.Font.BOLD, jLabel268.getFont().getSize()+36));
-        jLabel268.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel268.setText(bundle.getString("CrInstrument.jLabel268.text")); 
-        jPanel19.add(jLabel268);
-        jLabel268.setBounds(60, 150, 300, 60);
-
-        jLabel269.setFont(jLabel269.getFont().deriveFont(jLabel269.getFont().getStyle() | java.awt.Font.BOLD, jLabel269.getFont().getSize()+36));
-        jLabel269.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel269.setText(bundle.getString("CrInstrument.jLabel269.text")); 
-        jPanel19.add(jLabel269);
-        jLabel269.setBounds(60, 150, 300, 60);
-
-        jLabel270.setFont(jLabel270.getFont().deriveFont(jLabel270.getFont().getStyle() | java.awt.Font.BOLD, jLabel270.getFont().getSize()+36));
-        jLabel270.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel270.setText(bundle.getString("CrInstrument.jLabel270.text")); 
-        jPanel19.add(jLabel270);
-        jLabel270.setBounds(60, 150, 300, 60);
-
-        jLabel271.setFont(jLabel271.getFont().deriveFont(jLabel271.getFont().getStyle() | java.awt.Font.BOLD, jLabel271.getFont().getSize()+36));
-        jLabel271.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel271.setText(bundle.getString("CrInstrument.jLabel271.text")); 
-        jPanel19.add(jLabel271);
-        jLabel271.setBounds(60, 150, 300, 60);
-
-        jLabel272.setFont(jLabel272.getFont().deriveFont(jLabel272.getFont().getStyle() | java.awt.Font.BOLD, jLabel272.getFont().getSize()+36));
-        jLabel272.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel272.setText(bundle.getString("CrInstrument.jLabel272.text")); 
-        jPanel19.add(jLabel272);
-        jLabel272.setBounds(60, 150, 300, 60);
-
-        jLabel273.setFont(jLabel273.getFont().deriveFont(jLabel273.getFont().getStyle() | java.awt.Font.BOLD, jLabel273.getFont().getSize()+36));
-        jLabel273.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel273.setText(bundle.getString("CrInstrument.jLabel273.text")); 
-        jPanel19.add(jLabel273);
-        jLabel273.setBounds(60, 150, 300, 60);
-
-        jLabel274.setFont(jLabel274.getFont().deriveFont(jLabel274.getFont().getStyle() | java.awt.Font.BOLD, jLabel274.getFont().getSize()+36));
-        jLabel274.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel274.setText(bundle.getString("CrInstrument.jLabel274.text")); 
-        jPanel19.add(jLabel274);
-        jLabel274.setBounds(60, 150, 300, 60);
-
-        jLabel275.setFont(jLabel275.getFont().deriveFont(jLabel275.getFont().getStyle() | java.awt.Font.BOLD, jLabel275.getFont().getSize()+36));
-        jLabel275.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel275.setText(bundle.getString("CrInstrument.jLabel275.text")); 
-        jPanel19.add(jLabel275);
-        jLabel275.setBounds(60, 150, 300, 60);
-
-        jLabel276.setFont(jLabel276.getFont().deriveFont(jLabel276.getFont().getStyle() | java.awt.Font.BOLD, jLabel276.getFont().getSize()+36));
-        jLabel276.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel276.setText(bundle.getString("CrInstrument.jLabel276.text")); 
-        jPanel19.add(jLabel276);
-        jLabel276.setBounds(60, 150, 300, 60);
-
-        jLabel277.setFont(jLabel277.getFont().deriveFont(jLabel277.getFont().getStyle() | java.awt.Font.BOLD, jLabel277.getFont().getSize()+36));
-        jLabel277.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel277.setText(bundle.getString("CrInstrument.jLabel277.text")); 
-        jPanel19.add(jLabel277);
-        jLabel277.setBounds(60, 150, 300, 60);
-
-        jLabel278.setFont(jLabel278.getFont().deriveFont(jLabel278.getFont().getStyle() | java.awt.Font.BOLD, jLabel278.getFont().getSize()+36));
-        jLabel278.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel278.setText(bundle.getString("CrInstrument.jLabel278.text")); 
-        jPanel19.add(jLabel278);
-        jLabel278.setBounds(60, 150, 300, 60);
-
-        jLabel279.setFont(jLabel279.getFont().deriveFont(jLabel279.getFont().getStyle() | java.awt.Font.BOLD, jLabel279.getFont().getSize()+36));
-        jLabel279.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel279.setText(bundle.getString("CrInstrument.jLabel279.text")); 
-        jPanel19.add(jLabel279);
-        jLabel279.setBounds(60, 150, 300, 60);
-
-        jLabel280.setFont(jLabel280.getFont().deriveFont(jLabel280.getFont().getStyle() | java.awt.Font.BOLD, jLabel280.getFont().getSize()+36));
-        jLabel280.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel280.setText(bundle.getString("CrInstrument.jLabel280.text")); 
-        jPanel19.add(jLabel280);
-        jLabel280.setBounds(60, 150, 300, 60);
-
-        jLabel281.setFont(jLabel281.getFont().deriveFont(jLabel281.getFont().getStyle() | java.awt.Font.BOLD, jLabel281.getFont().getSize()+36));
-        jLabel281.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel281.setText(bundle.getString("CrInstrument.jLabel281.text")); 
-        jPanel19.add(jLabel281);
-        jLabel281.setBounds(60, 150, 300, 60);
-
-        jLabel282.setFont(jLabel282.getFont().deriveFont(jLabel282.getFont().getStyle() | java.awt.Font.BOLD, jLabel282.getFont().getSize()+36));
-        jLabel282.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel282.setText(bundle.getString("CrInstrument.jLabel282.text")); 
-        jPanel19.add(jLabel282);
-        jLabel282.setBounds(60, 150, 300, 60);
-
-        jLabel283.setFont(jLabel283.getFont().deriveFont(jLabel283.getFont().getStyle() | java.awt.Font.BOLD, jLabel283.getFont().getSize()+36));
-        jLabel283.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel283.setText(bundle.getString("CrInstrument.jLabel283.text")); 
-        jPanel19.add(jLabel283);
-        jLabel283.setBounds(60, 150, 300, 60);
-
-        jLabel284.setFont(jLabel284.getFont().deriveFont(jLabel284.getFont().getStyle() | java.awt.Font.BOLD, jLabel284.getFont().getSize()+36));
-        jLabel284.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel284.setText(bundle.getString("CrInstrument.jLabel284.text")); 
-        jPanel19.add(jLabel284);
-        jLabel284.setBounds(60, 150, 300, 60);
-
-        jLabel285.setFont(jLabel285.getFont().deriveFont(jLabel285.getFont().getStyle() | java.awt.Font.BOLD, jLabel285.getFont().getSize()+36));
-        jLabel285.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel285.setText(bundle.getString("CrInstrument.jLabel285.text")); 
-        jPanel19.add(jLabel285);
-        jLabel285.setBounds(60, 150, 300, 60);
-
-        jLabel286.setFont(jLabel286.getFont().deriveFont(jLabel286.getFont().getStyle() | java.awt.Font.BOLD, jLabel286.getFont().getSize()+36));
-        jLabel286.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel286.setText(bundle.getString("CrInstrument.jLabel286.text")); 
-        jPanel19.add(jLabel286);
-        jLabel286.setBounds(60, 150, 300, 60);
-
-        jLabel287.setFont(jLabel287.getFont().deriveFont(jLabel287.getFont().getStyle() | java.awt.Font.BOLD, jLabel287.getFont().getSize()+36));
-        jLabel287.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel287.setText(bundle.getString("CrInstrument.jLabel287.text")); 
-        jPanel19.add(jLabel287);
-        jLabel287.setBounds(60, 150, 300, 60);
-
-        jLabel288.setFont(jLabel288.getFont().deriveFont(jLabel288.getFont().getStyle() | java.awt.Font.BOLD, jLabel288.getFont().getSize()+36));
-        jLabel288.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel288.setText(bundle.getString("CrInstrument.jLabel288.text")); 
-        jPanel19.add(jLabel288);
-        jLabel288.setBounds(60, 150, 300, 60);
-
-        jLabel289.setFont(jLabel289.getFont().deriveFont(jLabel289.getFont().getStyle() | java.awt.Font.BOLD, jLabel289.getFont().getSize()+36));
-        jLabel289.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel289.setText(bundle.getString("CrInstrument.jLabel289.text")); 
-        jPanel19.add(jLabel289);
-        jLabel289.setBounds(60, 150, 300, 60);
-
-        jLabel290.setFont(jLabel290.getFont().deriveFont(jLabel290.getFont().getStyle() | java.awt.Font.BOLD, jLabel290.getFont().getSize()+36));
-        jLabel290.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel290.setText(bundle.getString("CrInstrument.jLabel290.text")); 
-        jPanel19.add(jLabel290);
-        jLabel290.setBounds(60, 150, 300, 60);
-
-        jLabel291.setFont(jLabel291.getFont().deriveFont(jLabel291.getFont().getStyle() | java.awt.Font.BOLD, jLabel291.getFont().getSize()+36));
-        jLabel291.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel291.setText(bundle.getString("CrInstrument.jLabel291.text")); 
-        jPanel19.add(jLabel291);
-        jLabel291.setBounds(60, 150, 300, 60);
-
-        jLabel292.setFont(jLabel292.getFont().deriveFont(jLabel292.getFont().getStyle() | java.awt.Font.BOLD, jLabel292.getFont().getSize()+36));
-        jLabel292.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel292.setText(bundle.getString("CrInstrument.jLabel292.text")); 
-        jPanel19.add(jLabel292);
-        jLabel292.setBounds(60, 150, 300, 60);
-
-        jLabel293.setFont(jLabel293.getFont().deriveFont(jLabel293.getFont().getStyle() | java.awt.Font.BOLD, jLabel293.getFont().getSize()+36));
-        jLabel293.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel293.setText(bundle.getString("CrInstrument.jLabel293.text")); 
-        jPanel19.add(jLabel293);
-        jLabel293.setBounds(60, 150, 300, 60);
-
-        jLabel294.setFont(jLabel294.getFont().deriveFont(jLabel294.getFont().getStyle() | java.awt.Font.BOLD, jLabel294.getFont().getSize()+36));
-        jLabel294.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel294.setText(bundle.getString("CrInstrument.jLabel294.text")); 
-        jPanel19.add(jLabel294);
-        jLabel294.setBounds(60, 150, 300, 60);
-
-        jLabel295.setFont(jLabel295.getFont().deriveFont(jLabel295.getFont().getStyle() | java.awt.Font.BOLD, jLabel295.getFont().getSize()+36));
-        jLabel295.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel295.setText(bundle.getString("CrInstrument.jLabel295.text")); 
-        jPanel19.add(jLabel295);
-        jLabel295.setBounds(60, 150, 300, 60);
-
-        jLabel296.setFont(jLabel296.getFont().deriveFont(jLabel296.getFont().getStyle() | java.awt.Font.BOLD, jLabel296.getFont().getSize()+36));
-        jLabel296.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel296.setText(bundle.getString("CrInstrument.jLabel296.text")); 
-        jPanel19.add(jLabel296);
-        jLabel296.setBounds(60, 150, 300, 60);
-
-        jLabel297.setFont(jLabel297.getFont().deriveFont(jLabel297.getFont().getStyle() | java.awt.Font.BOLD, jLabel297.getFont().getSize()+36));
-        jLabel297.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel297.setText(bundle.getString("CrInstrument.jLabel297.text")); 
-        jPanel19.add(jLabel297);
-        jLabel297.setBounds(60, 150, 300, 60);
-
-        jLabel298.setFont(jLabel298.getFont().deriveFont(jLabel298.getFont().getStyle() | java.awt.Font.BOLD, jLabel298.getFont().getSize()+36));
-        jLabel298.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel298.setText(bundle.getString("CrInstrument.jLabel298.text")); 
-        jPanel19.add(jLabel298);
-        jLabel298.setBounds(60, 150, 300, 60);
-
-        jLabel299.setFont(jLabel299.getFont().deriveFont(jLabel299.getFont().getStyle() | java.awt.Font.BOLD, jLabel299.getFont().getSize()+36));
-        jLabel299.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel299.setText(bundle.getString("CrInstrument.jLabel299.text")); 
-        jPanel19.add(jLabel299);
-        jLabel299.setBounds(60, 150, 300, 60);
-
-        jLabel300.setFont(jLabel300.getFont().deriveFont(jLabel300.getFont().getStyle() | java.awt.Font.BOLD, jLabel300.getFont().getSize()+36));
-        jLabel300.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel300.setText(bundle.getString("CrInstrument.jLabel300.text")); 
-        jPanel19.add(jLabel300);
-        jLabel300.setBounds(60, 150, 300, 60);
-
-        jLabel301.setFont(jLabel301.getFont().deriveFont(jLabel301.getFont().getStyle() | java.awt.Font.BOLD, jLabel301.getFont().getSize()+36));
-        jLabel301.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel301.setText(bundle.getString("CrInstrument.jLabel301.text")); 
-        jPanel19.add(jLabel301);
-        jLabel301.setBounds(60, 150, 300, 60);
-
-        jLabel302.setFont(jLabel302.getFont().deriveFont(jLabel302.getFont().getStyle() | java.awt.Font.BOLD, jLabel302.getFont().getSize()+36));
-        jLabel302.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel302.setText(bundle.getString("CrInstrument.jLabel302.text")); 
-        jPanel19.add(jLabel302);
-        jLabel302.setBounds(60, 150, 300, 60);
-
-        jLabel303.setFont(jLabel303.getFont().deriveFont(jLabel303.getFont().getStyle() | java.awt.Font.BOLD, jLabel303.getFont().getSize()+36));
-        jLabel303.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel303.setText(bundle.getString("CrInstrument.jLabel303.text")); 
-        jPanel19.add(jLabel303);
-        jLabel303.setBounds(60, 150, 300, 60);
-
-        jLabel304.setFont(jLabel304.getFont().deriveFont(jLabel304.getFont().getStyle() | java.awt.Font.BOLD, jLabel304.getFont().getSize()+36));
-        jLabel304.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel304.setText(bundle.getString("CrInstrument.jLabel304.text")); 
-        jPanel19.add(jLabel304);
-        jLabel304.setBounds(60, 150, 300, 60);
-
-        jLabel305.setFont(jLabel305.getFont().deriveFont(jLabel305.getFont().getStyle() | java.awt.Font.BOLD, jLabel305.getFont().getSize()+36));
-        jLabel305.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel305.setText(bundle.getString("CrInstrument.jLabel305.text")); 
-        jPanel19.add(jLabel305);
-        jLabel305.setBounds(60, 150, 300, 60);
-
-        jLabel306.setFont(jLabel306.getFont().deriveFont(jLabel306.getFont().getStyle() | java.awt.Font.BOLD, jLabel306.getFont().getSize()+36));
-        jLabel306.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel306.setText(bundle.getString("CrInstrument.jLabel306.text")); 
-        jPanel19.add(jLabel306);
-        jLabel306.setBounds(60, 150, 300, 60);
-
-        jLabel307.setFont(jLabel307.getFont().deriveFont(jLabel307.getFont().getStyle() | java.awt.Font.BOLD, jLabel307.getFont().getSize()+36));
-        jLabel307.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel307.setText(bundle.getString("CrInstrument.jLabel307.text")); 
-        jPanel19.add(jLabel307);
-        jLabel307.setBounds(60, 150, 300, 60);
-
-        jLabel308.setFont(jLabel308.getFont().deriveFont(jLabel308.getFont().getStyle() | java.awt.Font.BOLD, jLabel308.getFont().getSize()+36));
-        jLabel308.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel308.setText(bundle.getString("CrInstrument.jLabel308.text")); 
-        jPanel19.add(jLabel308);
-        jLabel308.setBounds(60, 150, 300, 60);
-
-        jLabel309.setFont(jLabel309.getFont().deriveFont(jLabel309.getFont().getStyle() | java.awt.Font.BOLD, jLabel309.getFont().getSize()+36));
-        jLabel309.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel309.setText(bundle.getString("CrInstrument.jLabel309.text")); 
-        jPanel19.add(jLabel309);
-        jLabel309.setBounds(60, 150, 300, 60);
-
-        jLabel310.setFont(jLabel310.getFont().deriveFont(jLabel310.getFont().getStyle() | java.awt.Font.BOLD, jLabel310.getFont().getSize()+36));
-        jLabel310.setForeground(new java.awt.Color(255, 0, 51));
-        jLabel310.setText(bundle.getString("CrInstrument.jLabel310.text")); 
-        jPanel19.add(jLabel310);
-        jLabel310.setBounds(60, 150, 300, 60);
-
-        jPanel1.add(jPanel19);
-        jPanel19.setBounds(170, 330, 380, 280);
+        chartPanel.setBackground(new java.awt.Color(255, 255, 255));
+        chartPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)), bundle.getString("CrInstrument.chartPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP)); 
+        chartPanel.setFont(chartPanel.getFont());
+        chartPanel.setLayout(null);
+        jPanel1.add(chartPanel);
+        chartPanel.setBounds(560, 10, 440, 460);
+
+        dataPanel.setBackground(new java.awt.Color(0, 0, 0));
+        dataPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 255)), bundle.getString("CrInstrument.dataPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(255, 255, 255))); 
+        dataPanel.setLayout(null);
+
+        da_datavalue_01.setFont(da_datavalue_01.getFont().deriveFont(da_datavalue_01.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_01.getFont().getSize()+36));
+        da_datavalue_01.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_01.setText(bundle.getString("CrInstrument.da_datavalue_01.text")); 
+        dataPanel.add(da_datavalue_01);
+        da_datavalue_01.setBounds(60, 150, 300, 60);
+
+        da_device_01.setFont(da_device_01.getFont().deriveFont(da_device_01.getFont().getStyle() | java.awt.Font.BOLD, da_device_01.getFont().getSize()+6));
+        da_device_01.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_01.setText(bundle.getString("CrInstrument.da_device_01.text")); 
+        dataPanel.add(da_device_01);
+        da_device_01.setBounds(20, 60, 320, 30);
+
+        da_dataname_01.setFont(da_dataname_01.getFont().deriveFont(da_dataname_01.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_01.getFont().getSize()+6));
+        da_dataname_01.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_01.setText(bundle.getString("CrInstrument.da_dataname_01.text")); 
+        dataPanel.add(da_dataname_01);
+        da_dataname_01.setBounds(20, 110, 320, 30);
+
+        da_station_01.setFont(da_station_01.getFont().deriveFont(da_station_01.getFont().getStyle() | java.awt.Font.BOLD, da_station_01.getFont().getSize()+6));
+        da_station_01.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_01.setText(bundle.getString("CrInstrument.da_station_01.text")); 
+        dataPanel.add(da_station_01);
+        da_station_01.setBounds(20, 30, 280, 20);
+
+        da_station_02.setFont(da_station_02.getFont().deriveFont(da_station_02.getFont().getStyle() | java.awt.Font.BOLD, da_station_02.getFont().getSize()+6));
+        da_station_02.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_02.setText(bundle.getString("CrInstrument.da_station_02.text")); 
+        dataPanel.add(da_station_02);
+        da_station_02.setBounds(20, 30, 280, 20);
+
+        da_station_03.setFont(da_station_03.getFont().deriveFont(da_station_03.getFont().getStyle() | java.awt.Font.BOLD, da_station_03.getFont().getSize()+6));
+        da_station_03.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_03.setText(bundle.getString("CrInstrument.da_station_03.text")); 
+        dataPanel.add(da_station_03);
+        da_station_03.setBounds(20, 30, 280, 20);
+
+        da_station_04.setFont(da_station_04.getFont().deriveFont(da_station_04.getFont().getStyle() | java.awt.Font.BOLD, da_station_04.getFont().getSize()+6));
+        da_station_04.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_04.setText(bundle.getString("CrInstrument.da_station_04.text")); 
+        dataPanel.add(da_station_04);
+        da_station_04.setBounds(20, 30, 280, 20);
+
+        da_station_05.setFont(da_station_05.getFont().deriveFont(da_station_05.getFont().getStyle() | java.awt.Font.BOLD, da_station_05.getFont().getSize()+6));
+        da_station_05.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_05.setText(bundle.getString("CrInstrument.da_station_05.text")); 
+        dataPanel.add(da_station_05);
+        da_station_05.setBounds(20, 30, 280, 20);
+
+        da_station_06.setFont(da_station_06.getFont().deriveFont(da_station_06.getFont().getStyle() | java.awt.Font.BOLD, da_station_06.getFont().getSize()+6));
+        da_station_06.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_06.setText(bundle.getString("CrInstrument.da_station_06.text")); 
+        dataPanel.add(da_station_06);
+        da_station_06.setBounds(20, 30, 280, 20);
+
+        da_station_07.setFont(da_station_07.getFont().deriveFont(da_station_07.getFont().getStyle() | java.awt.Font.BOLD, da_station_07.getFont().getSize()+6));
+        da_station_07.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_07.setText(bundle.getString("CrInstrument.da_station_07.text")); 
+        dataPanel.add(da_station_07);
+        da_station_07.setBounds(20, 30, 280, 20);
+
+        da_station_08.setFont(da_station_08.getFont().deriveFont(da_station_08.getFont().getStyle() | java.awt.Font.BOLD, da_station_08.getFont().getSize()+6));
+        da_station_08.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_08.setText(bundle.getString("CrInstrument.da_station_08.text")); 
+        dataPanel.add(da_station_08);
+        da_station_08.setBounds(20, 30, 280, 20);
+
+        da_station_09.setFont(da_station_09.getFont().deriveFont(da_station_09.getFont().getStyle() | java.awt.Font.BOLD, da_station_09.getFont().getSize()+6));
+        da_station_09.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_09.setText(bundle.getString("CrInstrument.da_station_09.text")); 
+        dataPanel.add(da_station_09);
+        da_station_09.setBounds(20, 30, 280, 20);
+
+        da_station_10.setFont(da_station_10.getFont().deriveFont(da_station_10.getFont().getStyle() | java.awt.Font.BOLD, da_station_10.getFont().getSize()+6));
+        da_station_10.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_10.setText(bundle.getString("CrInstrument.da_station_10.text")); 
+        dataPanel.add(da_station_10);
+        da_station_10.setBounds(20, 30, 280, 20);
+
+        da_station_11.setFont(da_station_11.getFont().deriveFont(da_station_11.getFont().getStyle() | java.awt.Font.BOLD, da_station_11.getFont().getSize()+6));
+        da_station_11.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_11.setText(bundle.getString("CrInstrument.da_station_11.text")); 
+        dataPanel.add(da_station_11);
+        da_station_11.setBounds(20, 30, 280, 20);
+
+        da_station_12.setFont(da_station_12.getFont().deriveFont(da_station_12.getFont().getStyle() | java.awt.Font.BOLD, da_station_12.getFont().getSize()+6));
+        da_station_12.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_12.setText(bundle.getString("CrInstrument.da_station_12.text")); 
+        dataPanel.add(da_station_12);
+        da_station_12.setBounds(20, 30, 280, 20);
+
+        da_station_13.setFont(da_station_13.getFont().deriveFont(da_station_13.getFont().getStyle() | java.awt.Font.BOLD, da_station_13.getFont().getSize()+6));
+        da_station_13.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_13.setText(bundle.getString("CrInstrument.da_station_13.text")); 
+        dataPanel.add(da_station_13);
+        da_station_13.setBounds(20, 30, 280, 20);
+
+        da_station_14.setFont(da_station_14.getFont().deriveFont(da_station_14.getFont().getStyle() | java.awt.Font.BOLD, da_station_14.getFont().getSize()+6));
+        da_station_14.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_14.setText(bundle.getString("CrInstrument.da_station_14.text")); 
+        dataPanel.add(da_station_14);
+        da_station_14.setBounds(20, 30, 280, 20);
+
+        da_station_15.setFont(da_station_15.getFont().deriveFont(da_station_15.getFont().getStyle() | java.awt.Font.BOLD, da_station_15.getFont().getSize()+6));
+        da_station_15.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_15.setText(bundle.getString("CrInstrument.da_station_15.text")); 
+        dataPanel.add(da_station_15);
+        da_station_15.setBounds(20, 30, 280, 20);
+
+        da_station_16.setFont(da_station_16.getFont().deriveFont(da_station_16.getFont().getStyle() | java.awt.Font.BOLD, da_station_16.getFont().getSize()+6));
+        da_station_16.setForeground(new java.awt.Color(153, 255, 255));
+        da_station_16.setText(bundle.getString("CrInstrument.da_station_16.text")); 
+        dataPanel.add(da_station_16);
+        da_station_16.setBounds(20, 30, 280, 20);
+
+        da_device_02.setFont(da_device_02.getFont().deriveFont(da_device_02.getFont().getStyle() | java.awt.Font.BOLD, da_device_02.getFont().getSize()+6));
+        da_device_02.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_02.setText(bundle.getString("CrInstrument.da_device_02.text")); 
+        dataPanel.add(da_device_02);
+        da_device_02.setBounds(20, 60, 320, 30);
+
+        da_device_03.setFont(da_device_03.getFont().deriveFont(da_device_03.getFont().getStyle() | java.awt.Font.BOLD, da_device_03.getFont().getSize()+6));
+        da_device_03.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_03.setText(bundle.getString("CrInstrument.da_device_03.text")); 
+        dataPanel.add(da_device_03);
+        da_device_03.setBounds(20, 60, 320, 30);
+
+        da_device_04.setFont(da_device_04.getFont().deriveFont(da_device_04.getFont().getStyle() | java.awt.Font.BOLD, da_device_04.getFont().getSize()+6));
+        da_device_04.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_04.setText(bundle.getString("CrInstrument.da_device_04.text")); 
+        dataPanel.add(da_device_04);
+        da_device_04.setBounds(20, 60, 320, 30);
+
+        da_device_05.setFont(da_device_05.getFont().deriveFont(da_device_05.getFont().getStyle() | java.awt.Font.BOLD, da_device_05.getFont().getSize()+6));
+        da_device_05.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_05.setText(bundle.getString("CrInstrument.da_device_05.text")); 
+        dataPanel.add(da_device_05);
+        da_device_05.setBounds(20, 60, 320, 30);
+
+        da_device_06.setFont(da_device_06.getFont().deriveFont(da_device_06.getFont().getStyle() | java.awt.Font.BOLD, da_device_06.getFont().getSize()+6));
+        da_device_06.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_06.setText(bundle.getString("CrInstrument.da_device_06.text")); 
+        dataPanel.add(da_device_06);
+        da_device_06.setBounds(20, 60, 320, 30);
+
+        da_device_07.setFont(da_device_07.getFont().deriveFont(da_device_07.getFont().getStyle() | java.awt.Font.BOLD, da_device_07.getFont().getSize()+6));
+        da_device_07.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_07.setText(bundle.getString("CrInstrument.da_device_07.text")); 
+        dataPanel.add(da_device_07);
+        da_device_07.setBounds(20, 60, 320, 30);
+
+        da_device_08.setFont(da_device_08.getFont().deriveFont(da_device_08.getFont().getStyle() | java.awt.Font.BOLD, da_device_08.getFont().getSize()+6));
+        da_device_08.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_08.setText(bundle.getString("CrInstrument.da_device_08.text")); 
+        dataPanel.add(da_device_08);
+        da_device_08.setBounds(20, 60, 320, 30);
+
+        da_device_09.setFont(da_device_09.getFont().deriveFont(da_device_09.getFont().getStyle() | java.awt.Font.BOLD, da_device_09.getFont().getSize()+6));
+        da_device_09.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_09.setText(bundle.getString("CrInstrument.da_device_09.text")); 
+        dataPanel.add(da_device_09);
+        da_device_09.setBounds(20, 60, 320, 30);
+
+        da_device_10.setFont(da_device_10.getFont().deriveFont(da_device_10.getFont().getStyle() | java.awt.Font.BOLD, da_device_10.getFont().getSize()+6));
+        da_device_10.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_10.setText(bundle.getString("CrInstrument.da_device_10.text")); 
+        dataPanel.add(da_device_10);
+        da_device_10.setBounds(20, 60, 320, 30);
+
+        da_device_11.setFont(da_device_11.getFont().deriveFont(da_device_11.getFont().getStyle() | java.awt.Font.BOLD, da_device_11.getFont().getSize()+6));
+        da_device_11.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_11.setText(bundle.getString("CrInstrument.da_device_11.text")); 
+        dataPanel.add(da_device_11);
+        da_device_11.setBounds(20, 60, 320, 30);
+
+        da_device_12.setFont(da_device_12.getFont().deriveFont(da_device_12.getFont().getStyle() | java.awt.Font.BOLD, da_device_12.getFont().getSize()+6));
+        da_device_12.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_12.setText(bundle.getString("CrInstrument.da_device_12.text")); 
+        dataPanel.add(da_device_12);
+        da_device_12.setBounds(20, 60, 320, 30);
+
+        da_device_13.setFont(da_device_13.getFont().deriveFont(da_device_13.getFont().getStyle() | java.awt.Font.BOLD, da_device_13.getFont().getSize()+6));
+        da_device_13.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_13.setText(bundle.getString("CrInstrument.da_device_13.text")); 
+        dataPanel.add(da_device_13);
+        da_device_13.setBounds(20, 60, 320, 30);
+
+        da_device_14.setFont(da_device_14.getFont().deriveFont(da_device_14.getFont().getStyle() | java.awt.Font.BOLD, da_device_14.getFont().getSize()+6));
+        da_device_14.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_14.setText(bundle.getString("CrInstrument.da_device_14.text")); 
+        dataPanel.add(da_device_14);
+        da_device_14.setBounds(20, 60, 320, 30);
+
+        da_device_15.setFont(da_device_15.getFont().deriveFont(da_device_15.getFont().getStyle() | java.awt.Font.BOLD, da_device_15.getFont().getSize()+6));
+        da_device_15.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_15.setText(bundle.getString("CrInstrument.da_device_15.text")); 
+        dataPanel.add(da_device_15);
+        da_device_15.setBounds(20, 60, 320, 30);
+
+        da_device_16.setFont(da_device_16.getFont().deriveFont(da_device_16.getFont().getStyle() | java.awt.Font.BOLD, da_device_16.getFont().getSize()+6));
+        da_device_16.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_16.setText(bundle.getString("CrInstrument.da_device_16.text")); 
+        dataPanel.add(da_device_16);
+        da_device_16.setBounds(20, 60, 320, 30);
+
+        da_device_17.setFont(da_device_17.getFont().deriveFont(da_device_17.getFont().getStyle() | java.awt.Font.BOLD, da_device_17.getFont().getSize()+6));
+        da_device_17.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_17.setText(bundle.getString("CrInstrument.da_device_17.text")); 
+        dataPanel.add(da_device_17);
+        da_device_17.setBounds(20, 60, 320, 30);
+
+        da_device_18.setFont(da_device_18.getFont().deriveFont(da_device_18.getFont().getStyle() | java.awt.Font.BOLD, da_device_18.getFont().getSize()+6));
+        da_device_18.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_18.setText(bundle.getString("CrInstrument.da_device_18.text")); 
+        dataPanel.add(da_device_18);
+        da_device_18.setBounds(20, 60, 320, 30);
+
+        da_device_19.setFont(da_device_19.getFont().deriveFont(da_device_19.getFont().getStyle() | java.awt.Font.BOLD, da_device_19.getFont().getSize()+6));
+        da_device_19.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_19.setText(bundle.getString("CrInstrument.da_device_19.text")); 
+        dataPanel.add(da_device_19);
+        da_device_19.setBounds(20, 60, 320, 30);
+
+        da_device_20.setFont(da_device_20.getFont().deriveFont(da_device_20.getFont().getStyle() | java.awt.Font.BOLD, da_device_20.getFont().getSize()+6));
+        da_device_20.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_20.setText(bundle.getString("CrInstrument.da_device_20.text")); 
+        dataPanel.add(da_device_20);
+        da_device_20.setBounds(20, 60, 320, 30);
+
+        da_device_21.setFont(da_device_21.getFont().deriveFont(da_device_21.getFont().getStyle() | java.awt.Font.BOLD, da_device_21.getFont().getSize()+6));
+        da_device_21.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_21.setText(bundle.getString("CrInstrument.da_device_21.text")); 
+        dataPanel.add(da_device_21);
+        da_device_21.setBounds(20, 60, 320, 30);
+
+        da_device_22.setFont(da_device_22.getFont().deriveFont(da_device_22.getFont().getStyle() | java.awt.Font.BOLD, da_device_22.getFont().getSize()+6));
+        da_device_22.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_22.setText(bundle.getString("CrInstrument.da_device_22.text")); 
+        dataPanel.add(da_device_22);
+        da_device_22.setBounds(20, 60, 320, 30);
+
+        da_device_23.setFont(da_device_23.getFont().deriveFont(da_device_23.getFont().getStyle() | java.awt.Font.BOLD, da_device_23.getFont().getSize()+6));
+        da_device_23.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_23.setText(bundle.getString("CrInstrument.da_device_23.text")); 
+        dataPanel.add(da_device_23);
+        da_device_23.setBounds(20, 60, 320, 30);
+
+        da_device_24.setFont(da_device_24.getFont().deriveFont(da_device_24.getFont().getStyle() | java.awt.Font.BOLD, da_device_24.getFont().getSize()+6));
+        da_device_24.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_24.setText(bundle.getString("CrInstrument.da_device_24.text")); 
+        dataPanel.add(da_device_24);
+        da_device_24.setBounds(20, 60, 320, 30);
+
+        da_device_25.setFont(da_device_25.getFont().deriveFont(da_device_25.getFont().getStyle() | java.awt.Font.BOLD, da_device_25.getFont().getSize()+6));
+        da_device_25.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_25.setText(bundle.getString("CrInstrument.da_device_25.text")); 
+        dataPanel.add(da_device_25);
+        da_device_25.setBounds(20, 60, 320, 30);
+
+        da_device_26.setFont(da_device_26.getFont().deriveFont(da_device_26.getFont().getStyle() | java.awt.Font.BOLD, da_device_26.getFont().getSize()+6));
+        da_device_26.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_26.setText(bundle.getString("CrInstrument.da_device_26.text")); 
+        dataPanel.add(da_device_26);
+        da_device_26.setBounds(20, 60, 320, 30);
+
+        da_device_27.setFont(da_device_27.getFont().deriveFont(da_device_27.getFont().getStyle() | java.awt.Font.BOLD, da_device_27.getFont().getSize()+6));
+        da_device_27.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_27.setText(bundle.getString("CrInstrument.da_device_27.text")); 
+        dataPanel.add(da_device_27);
+        da_device_27.setBounds(20, 60, 320, 30);
+
+        da_device_28.setFont(da_device_28.getFont().deriveFont(da_device_28.getFont().getStyle() | java.awt.Font.BOLD, da_device_28.getFont().getSize()+6));
+        da_device_28.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_28.setText(bundle.getString("CrInstrument.da_device_28.text")); 
+        dataPanel.add(da_device_28);
+        da_device_28.setBounds(20, 60, 320, 30);
+
+        da_device_29.setFont(da_device_29.getFont().deriveFont(da_device_29.getFont().getStyle() | java.awt.Font.BOLD, da_device_29.getFont().getSize()+6));
+        da_device_29.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_29.setText(bundle.getString("CrInstrument.da_device_29.text")); 
+        dataPanel.add(da_device_29);
+        da_device_29.setBounds(20, 60, 320, 30);
+
+        da_device_30.setFont(da_device_30.getFont().deriveFont(da_device_30.getFont().getStyle() | java.awt.Font.BOLD, da_device_30.getFont().getSize()+6));
+        da_device_30.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_30.setText(bundle.getString("CrInstrument.da_device_30.text")); 
+        dataPanel.add(da_device_30);
+        da_device_30.setBounds(20, 60, 320, 30);
+
+        da_device_31.setFont(da_device_31.getFont().deriveFont(da_device_31.getFont().getStyle() | java.awt.Font.BOLD, da_device_31.getFont().getSize()+6));
+        da_device_31.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_31.setText(bundle.getString("CrInstrument.da_device_31.text")); 
+        dataPanel.add(da_device_31);
+        da_device_31.setBounds(20, 60, 320, 30);
+
+        da_device_32.setFont(da_device_32.getFont().deriveFont(da_device_32.getFont().getStyle() | java.awt.Font.BOLD, da_device_32.getFont().getSize()+6));
+        da_device_32.setForeground(new java.awt.Color(0, 255, 102));
+        da_device_32.setText(bundle.getString("CrInstrument.da_device_32.text")); 
+        dataPanel.add(da_device_32);
+        da_device_32.setBounds(20, 60, 320, 30);
+
+        da_dataname_02.setFont(da_dataname_02.getFont().deriveFont(da_dataname_02.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_02.getFont().getSize()+6));
+        da_dataname_02.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_02.setText(bundle.getString("CrInstrument.da_dataname_02.text")); 
+        dataPanel.add(da_dataname_02);
+        da_dataname_02.setBounds(20, 110, 320, 30);
+
+        da_dataname_03.setFont(da_dataname_03.getFont().deriveFont(da_dataname_03.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_03.getFont().getSize()+6));
+        da_dataname_03.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_03.setText(bundle.getString("CrInstrument.da_dataname_03.text")); 
+        dataPanel.add(da_dataname_03);
+        da_dataname_03.setBounds(20, 110, 320, 30);
+
+        da_dataname_04.setFont(da_dataname_04.getFont().deriveFont(da_dataname_04.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_04.getFont().getSize()+6));
+        da_dataname_04.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_04.setText(bundle.getString("CrInstrument.da_dataname_04.text")); 
+        dataPanel.add(da_dataname_04);
+        da_dataname_04.setBounds(20, 110, 320, 30);
+
+        da_dataname_05.setFont(da_dataname_05.getFont().deriveFont(da_dataname_05.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_05.getFont().getSize()+6));
+        da_dataname_05.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_05.setText(bundle.getString("CrInstrument.da_dataname_05.text")); 
+        dataPanel.add(da_dataname_05);
+        da_dataname_05.setBounds(20, 110, 320, 30);
+
+        da_dataname_06.setFont(da_dataname_06.getFont().deriveFont(da_dataname_06.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_06.getFont().getSize()+6));
+        da_dataname_06.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_06.setText(bundle.getString("CrInstrument.da_dataname_06.text")); 
+        dataPanel.add(da_dataname_06);
+        da_dataname_06.setBounds(20, 110, 320, 30);
+
+        da_dataname_07.setFont(da_dataname_07.getFont().deriveFont(da_dataname_07.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_07.getFont().getSize()+6));
+        da_dataname_07.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_07.setText(bundle.getString("CrInstrument.da_dataname_07.text")); 
+        dataPanel.add(da_dataname_07);
+        da_dataname_07.setBounds(20, 110, 320, 30);
+
+        da_dataname_08.setFont(da_dataname_08.getFont().deriveFont(da_dataname_08.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_08.getFont().getSize()+6));
+        da_dataname_08.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_08.setText(bundle.getString("CrInstrument.da_dataname_08.text")); 
+        dataPanel.add(da_dataname_08);
+        da_dataname_08.setBounds(20, 110, 320, 30);
+
+        da_dataname_09.setFont(da_dataname_09.getFont().deriveFont(da_dataname_09.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_09.getFont().getSize()+6));
+        da_dataname_09.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_09.setText(bundle.getString("CrInstrument.da_dataname_09.text")); 
+        dataPanel.add(da_dataname_09);
+        da_dataname_09.setBounds(20, 110, 320, 30);
+
+        da_dataname_10.setFont(da_dataname_10.getFont().deriveFont(da_dataname_10.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_10.getFont().getSize()+6));
+        da_dataname_10.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_10.setText(bundle.getString("CrInstrument.da_dataname_10.text")); 
+        dataPanel.add(da_dataname_10);
+        da_dataname_10.setBounds(20, 110, 320, 30);
+
+        da_dataname_11.setFont(da_dataname_11.getFont().deriveFont(da_dataname_11.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_11.getFont().getSize()+6));
+        da_dataname_11.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_11.setText(bundle.getString("CrInstrument.da_dataname_11.text")); 
+        dataPanel.add(da_dataname_11);
+        da_dataname_11.setBounds(20, 110, 320, 30);
+
+        da_dataname_12.setFont(da_dataname_12.getFont().deriveFont(da_dataname_12.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_12.getFont().getSize()+6));
+        da_dataname_12.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_12.setText(bundle.getString("CrInstrument.da_dataname_12.text")); 
+        dataPanel.add(da_dataname_12);
+        da_dataname_12.setBounds(20, 110, 320, 30);
+
+        da_dataname_13.setFont(da_dataname_13.getFont().deriveFont(da_dataname_13.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_13.getFont().getSize()+6));
+        da_dataname_13.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_13.setText(bundle.getString("CrInstrument.da_dataname_13.text")); 
+        dataPanel.add(da_dataname_13);
+        da_dataname_13.setBounds(20, 110, 320, 30);
+
+        da_dataname_14.setFont(da_dataname_14.getFont().deriveFont(da_dataname_14.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_14.getFont().getSize()+6));
+        da_dataname_14.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_14.setText(bundle.getString("CrInstrument.da_dataname_14.text")); 
+        dataPanel.add(da_dataname_14);
+        da_dataname_14.setBounds(20, 110, 320, 30);
+
+        da_dataname_15.setFont(da_dataname_15.getFont().deriveFont(da_dataname_15.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_15.getFont().getSize()+6));
+        da_dataname_15.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_15.setText(bundle.getString("CrInstrument.da_dataname_15.text")); 
+        dataPanel.add(da_dataname_15);
+        da_dataname_15.setBounds(20, 110, 320, 30);
+
+        da_dataname_16.setFont(da_dataname_16.getFont().deriveFont(da_dataname_16.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_16.getFont().getSize()+6));
+        da_dataname_16.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_16.setText(bundle.getString("CrInstrument.da_dataname_16.text")); 
+        dataPanel.add(da_dataname_16);
+        da_dataname_16.setBounds(20, 110, 320, 30);
+
+        da_dataname_17.setFont(da_dataname_17.getFont().deriveFont(da_dataname_17.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_17.getFont().getSize()+6));
+        da_dataname_17.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_17.setText(bundle.getString("CrInstrument.da_dataname_17.text")); 
+        dataPanel.add(da_dataname_17);
+        da_dataname_17.setBounds(20, 110, 320, 30);
+
+        da_dataname_18.setFont(da_dataname_18.getFont().deriveFont(da_dataname_18.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_18.getFont().getSize()+6));
+        da_dataname_18.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_18.setText(bundle.getString("CrInstrument.da_dataname_18.text")); 
+        dataPanel.add(da_dataname_18);
+        da_dataname_18.setBounds(20, 110, 320, 30);
+
+        da_dataname_19.setFont(da_dataname_19.getFont().deriveFont(da_dataname_19.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_19.getFont().getSize()+6));
+        da_dataname_19.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_19.setText(bundle.getString("CrInstrument.da_dataname_19.text")); 
+        dataPanel.add(da_dataname_19);
+        da_dataname_19.setBounds(20, 110, 320, 30);
+
+        da_dataname_20.setFont(da_dataname_20.getFont().deriveFont(da_dataname_20.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_20.getFont().getSize()+6));
+        da_dataname_20.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_20.setText(bundle.getString("CrInstrument.da_dataname_20.text")); 
+        dataPanel.add(da_dataname_20);
+        da_dataname_20.setBounds(20, 110, 320, 30);
+
+        da_dataname_21.setFont(da_dataname_21.getFont().deriveFont(da_dataname_21.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_21.getFont().getSize()+6));
+        da_dataname_21.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_21.setText(bundle.getString("CrInstrument.da_dataname_21.text")); 
+        dataPanel.add(da_dataname_21);
+        da_dataname_21.setBounds(20, 110, 320, 30);
+
+        da_dataname_22.setFont(da_dataname_22.getFont().deriveFont(da_dataname_22.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_22.getFont().getSize()+6));
+        da_dataname_22.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_22.setText(bundle.getString("CrInstrument.da_dataname_22.text")); 
+        dataPanel.add(da_dataname_22);
+        da_dataname_22.setBounds(20, 110, 320, 30);
+
+        da_dataname_23.setFont(da_dataname_23.getFont().deriveFont(da_dataname_23.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_23.getFont().getSize()+6));
+        da_dataname_23.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_23.setText(bundle.getString("CrInstrument.da_dataname_23.text")); 
+        dataPanel.add(da_dataname_23);
+        da_dataname_23.setBounds(20, 110, 320, 30);
+
+        da_dataname_24.setFont(da_dataname_24.getFont().deriveFont(da_dataname_24.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_24.getFont().getSize()+6));
+        da_dataname_24.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_24.setText(bundle.getString("CrInstrument.da_dataname_24.text")); 
+        dataPanel.add(da_dataname_24);
+        da_dataname_24.setBounds(20, 110, 320, 30);
+
+        da_dataname_25.setFont(da_dataname_25.getFont().deriveFont(da_dataname_25.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_25.getFont().getSize()+6));
+        da_dataname_25.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_25.setText(bundle.getString("CrInstrument.da_dataname_25.text")); 
+        dataPanel.add(da_dataname_25);
+        da_dataname_25.setBounds(20, 110, 320, 30);
+
+        da_dataname_26.setFont(da_dataname_26.getFont().deriveFont(da_dataname_26.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_26.getFont().getSize()+6));
+        da_dataname_26.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_26.setText(bundle.getString("CrInstrument.da_dataname_26.text")); 
+        dataPanel.add(da_dataname_26);
+        da_dataname_26.setBounds(20, 110, 320, 30);
+
+        da_dataname_27.setFont(da_dataname_27.getFont().deriveFont(da_dataname_27.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_27.getFont().getSize()+6));
+        da_dataname_27.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_27.setText(bundle.getString("CrInstrument.da_dataname_27.text")); 
+        dataPanel.add(da_dataname_27);
+        da_dataname_27.setBounds(20, 110, 320, 30);
+
+        da_dataname_28.setFont(da_dataname_28.getFont().deriveFont(da_dataname_28.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_28.getFont().getSize()+6));
+        da_dataname_28.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_28.setText(bundle.getString("CrInstrument.da_dataname_28.text")); 
+        dataPanel.add(da_dataname_28);
+        da_dataname_28.setBounds(20, 110, 320, 30);
+
+        da_dataname_29.setFont(da_dataname_29.getFont().deriveFont(da_dataname_29.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_29.getFont().getSize()+6));
+        da_dataname_29.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_29.setText(bundle.getString("CrInstrument.da_dataname_29.text")); 
+        dataPanel.add(da_dataname_29);
+        da_dataname_29.setBounds(20, 110, 320, 30);
+
+        da_dataname_30.setFont(da_dataname_30.getFont().deriveFont(da_dataname_30.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_30.getFont().getSize()+6));
+        da_dataname_30.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_30.setText(bundle.getString("CrInstrument.da_dataname_30.text")); 
+        dataPanel.add(da_dataname_30);
+        da_dataname_30.setBounds(20, 110, 320, 30);
+
+        da_dataname_31.setFont(da_dataname_31.getFont().deriveFont(da_dataname_31.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_31.getFont().getSize()+6));
+        da_dataname_31.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_31.setText(bundle.getString("CrInstrument.da_dataname_31.text")); 
+        dataPanel.add(da_dataname_31);
+        da_dataname_31.setBounds(20, 110, 320, 30);
+
+        da_dataname_32.setFont(da_dataname_32.getFont().deriveFont(da_dataname_32.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_32.getFont().getSize()+6));
+        da_dataname_32.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_32.setText(bundle.getString("CrInstrument.da_dataname_32.text")); 
+        dataPanel.add(da_dataname_32);
+        da_dataname_32.setBounds(20, 110, 320, 30);
+
+        da_dataname_33.setFont(da_dataname_33.getFont().deriveFont(da_dataname_33.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_33.getFont().getSize()+6));
+        da_dataname_33.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_33.setText(bundle.getString("CrInstrument.da_dataname_33.text")); 
+        dataPanel.add(da_dataname_33);
+        da_dataname_33.setBounds(20, 110, 320, 30);
+
+        da_dataname_34.setFont(da_dataname_34.getFont().deriveFont(da_dataname_34.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_34.getFont().getSize()+6));
+        da_dataname_34.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_34.setText(bundle.getString("CrInstrument.da_dataname_34.text")); 
+        dataPanel.add(da_dataname_34);
+        da_dataname_34.setBounds(20, 110, 320, 30);
+
+        da_dataname_35.setFont(da_dataname_35.getFont().deriveFont(da_dataname_35.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_35.getFont().getSize()+6));
+        da_dataname_35.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_35.setText(bundle.getString("CrInstrument.da_dataname_35.text")); 
+        dataPanel.add(da_dataname_35);
+        da_dataname_35.setBounds(20, 110, 320, 30);
+
+        da_dataname_36.setFont(da_dataname_36.getFont().deriveFont(da_dataname_36.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_36.getFont().getSize()+6));
+        da_dataname_36.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_36.setText(bundle.getString("CrInstrument.da_dataname_36.text")); 
+        dataPanel.add(da_dataname_36);
+        da_dataname_36.setBounds(20, 110, 320, 30);
+
+        da_dataname_37.setFont(da_dataname_37.getFont().deriveFont(da_dataname_37.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_37.getFont().getSize()+6));
+        da_dataname_37.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_37.setText(bundle.getString("CrInstrument.da_dataname_37.text")); 
+        dataPanel.add(da_dataname_37);
+        da_dataname_37.setBounds(20, 110, 320, 30);
+
+        da_dataname_38.setFont(da_dataname_38.getFont().deriveFont(da_dataname_38.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_38.getFont().getSize()+6));
+        da_dataname_38.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_38.setText(bundle.getString("CrInstrument.da_dataname_38.text")); 
+        dataPanel.add(da_dataname_38);
+        da_dataname_38.setBounds(20, 110, 320, 30);
+
+        da_dataname_39.setFont(da_dataname_39.getFont().deriveFont(da_dataname_39.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_39.getFont().getSize()+6));
+        da_dataname_39.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_39.setText(bundle.getString("CrInstrument.da_dataname_39.text")); 
+        dataPanel.add(da_dataname_39);
+        da_dataname_39.setBounds(20, 110, 320, 30);
+
+        da_dataname_40.setFont(da_dataname_40.getFont().deriveFont(da_dataname_40.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_40.getFont().getSize()+6));
+        da_dataname_40.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_40.setText(bundle.getString("CrInstrument.da_dataname_40.text")); 
+        dataPanel.add(da_dataname_40);
+        da_dataname_40.setBounds(20, 110, 320, 30);
+
+        da_dataname_41.setFont(da_dataname_41.getFont().deriveFont(da_dataname_41.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_41.getFont().getSize()+6));
+        da_dataname_41.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_41.setText(bundle.getString("CrInstrument.da_dataname_41.text")); 
+        dataPanel.add(da_dataname_41);
+        da_dataname_41.setBounds(20, 110, 320, 30);
+
+        da_dataname_42.setFont(da_dataname_42.getFont().deriveFont(da_dataname_42.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_42.getFont().getSize()+6));
+        da_dataname_42.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_42.setText(bundle.getString("CrInstrument.da_dataname_42.text")); 
+        dataPanel.add(da_dataname_42);
+        da_dataname_42.setBounds(20, 110, 320, 30);
+
+        da_dataname_43.setFont(da_dataname_43.getFont().deriveFont(da_dataname_43.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_43.getFont().getSize()+6));
+        da_dataname_43.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_43.setText(bundle.getString("CrInstrument.da_dataname_43.text")); 
+        dataPanel.add(da_dataname_43);
+        da_dataname_43.setBounds(20, 110, 320, 30);
+
+        da_dataname_44.setFont(da_dataname_44.getFont().deriveFont(da_dataname_44.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_44.getFont().getSize()+6));
+        da_dataname_44.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_44.setText(bundle.getString("CrInstrument.da_dataname_44.text")); 
+        dataPanel.add(da_dataname_44);
+        da_dataname_44.setBounds(20, 110, 320, 30);
+
+        da_dataname_45.setFont(da_dataname_45.getFont().deriveFont(da_dataname_45.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_45.getFont().getSize()+6));
+        da_dataname_45.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_45.setText(bundle.getString("CrInstrument.da_dataname_45.text")); 
+        dataPanel.add(da_dataname_45);
+        da_dataname_45.setBounds(20, 110, 320, 30);
+
+        da_dataname_46.setFont(da_dataname_46.getFont().deriveFont(da_dataname_46.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_46.getFont().getSize()+6));
+        da_dataname_46.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_46.setText(bundle.getString("CrInstrument.da_dataname_46.text")); 
+        dataPanel.add(da_dataname_46);
+        da_dataname_46.setBounds(20, 110, 320, 30);
+
+        da_dataname_47.setFont(da_dataname_47.getFont().deriveFont(da_dataname_47.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_47.getFont().getSize()+6));
+        da_dataname_47.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_47.setText(bundle.getString("CrInstrument.da_dataname_47.text")); 
+        dataPanel.add(da_dataname_47);
+        da_dataname_47.setBounds(20, 110, 320, 30);
+
+        da_dataname_48.setFont(da_dataname_48.getFont().deriveFont(da_dataname_48.getFont().getStyle() | java.awt.Font.BOLD, da_dataname_48.getFont().getSize()+6));
+        da_dataname_48.setForeground(new java.awt.Color(255, 255, 51));
+        da_dataname_48.setText(bundle.getString("CrInstrument.da_dataname_48.text")); 
+        dataPanel.add(da_dataname_48);
+        da_dataname_48.setBounds(20, 110, 320, 30);
+
+        da_datavalue_02.setFont(da_datavalue_02.getFont().deriveFont(da_datavalue_02.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_02.getFont().getSize()+36));
+        da_datavalue_02.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_02.setText(bundle.getString("CrInstrument.da_datavalue_02.text")); 
+        dataPanel.add(da_datavalue_02);
+        da_datavalue_02.setBounds(60, 150, 300, 60);
+
+        da_datavalue_03.setFont(da_datavalue_03.getFont().deriveFont(da_datavalue_03.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_03.getFont().getSize()+36));
+        da_datavalue_03.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_03.setText(bundle.getString("CrInstrument.da_datavalue_03.text")); 
+        dataPanel.add(da_datavalue_03);
+        da_datavalue_03.setBounds(60, 150, 300, 60);
+
+        da_datavalue_04.setFont(da_datavalue_04.getFont().deriveFont(da_datavalue_04.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_04.getFont().getSize()+36));
+        da_datavalue_04.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_04.setText(bundle.getString("CrInstrument.da_datavalue_04.text")); 
+        dataPanel.add(da_datavalue_04);
+        da_datavalue_04.setBounds(60, 150, 300, 60);
+
+        da_datavalue_05.setFont(da_datavalue_05.getFont().deriveFont(da_datavalue_05.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_05.getFont().getSize()+36));
+        da_datavalue_05.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_05.setText(bundle.getString("CrInstrument.da_datavalue_05.text")); 
+        dataPanel.add(da_datavalue_05);
+        da_datavalue_05.setBounds(60, 150, 300, 60);
+
+        da_datavalue_06.setFont(da_datavalue_06.getFont().deriveFont(da_datavalue_06.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_06.getFont().getSize()+36));
+        da_datavalue_06.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_06.setText(bundle.getString("CrInstrument.da_datavalue_06.text")); 
+        dataPanel.add(da_datavalue_06);
+        da_datavalue_06.setBounds(60, 150, 300, 60);
+
+        da_datavalue_07.setFont(da_datavalue_07.getFont().deriveFont(da_datavalue_07.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_07.getFont().getSize()+36));
+        da_datavalue_07.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_07.setText(bundle.getString("CrInstrument.da_datavalue_07.text")); 
+        dataPanel.add(da_datavalue_07);
+        da_datavalue_07.setBounds(60, 150, 300, 60);
+
+        da_datavalue_08.setFont(da_datavalue_08.getFont().deriveFont(da_datavalue_08.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_08.getFont().getSize()+36));
+        da_datavalue_08.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_08.setText(bundle.getString("CrInstrument.da_datavalue_08.text")); 
+        dataPanel.add(da_datavalue_08);
+        da_datavalue_08.setBounds(60, 150, 300, 60);
+
+        da_datavalue_09.setFont(da_datavalue_09.getFont().deriveFont(da_datavalue_09.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_09.getFont().getSize()+36));
+        da_datavalue_09.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_09.setText(bundle.getString("CrInstrument.da_datavalue_09.text")); 
+        dataPanel.add(da_datavalue_09);
+        da_datavalue_09.setBounds(60, 150, 300, 60);
+
+        da_datavalue_10.setFont(da_datavalue_10.getFont().deriveFont(da_datavalue_10.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_10.getFont().getSize()+36));
+        da_datavalue_10.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_10.setText(bundle.getString("CrInstrument.da_datavalue_10.text")); 
+        dataPanel.add(da_datavalue_10);
+        da_datavalue_10.setBounds(60, 150, 300, 60);
+
+        da_datavalue_11.setFont(da_datavalue_11.getFont().deriveFont(da_datavalue_11.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_11.getFont().getSize()+36));
+        da_datavalue_11.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_11.setText(bundle.getString("CrInstrument.da_datavalue_11.text")); 
+        dataPanel.add(da_datavalue_11);
+        da_datavalue_11.setBounds(60, 150, 300, 60);
+
+        da_datavalue_12.setFont(da_datavalue_12.getFont().deriveFont(da_datavalue_12.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_12.getFont().getSize()+36));
+        da_datavalue_12.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_12.setText(bundle.getString("CrInstrument.da_datavalue_12.text")); 
+        dataPanel.add(da_datavalue_12);
+        da_datavalue_12.setBounds(60, 150, 300, 60);
+
+        da_datavalue_13.setFont(da_datavalue_13.getFont().deriveFont(da_datavalue_13.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_13.getFont().getSize()+36));
+        da_datavalue_13.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_13.setText(bundle.getString("CrInstrument.da_datavalue_13.text")); 
+        dataPanel.add(da_datavalue_13);
+        da_datavalue_13.setBounds(60, 150, 300, 60);
+
+        da_datavalue_14.setFont(da_datavalue_14.getFont().deriveFont(da_datavalue_14.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_14.getFont().getSize()+36));
+        da_datavalue_14.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_14.setText(bundle.getString("CrInstrument.da_datavalue_14.text")); 
+        dataPanel.add(da_datavalue_14);
+        da_datavalue_14.setBounds(60, 150, 300, 60);
+
+        da_datavalue_15.setFont(da_datavalue_15.getFont().deriveFont(da_datavalue_15.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_15.getFont().getSize()+36));
+        da_datavalue_15.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_15.setText(bundle.getString("CrInstrument.da_datavalue_15.text")); 
+        dataPanel.add(da_datavalue_15);
+        da_datavalue_15.setBounds(60, 150, 300, 60);
+
+        da_datavalue_16.setFont(da_datavalue_16.getFont().deriveFont(da_datavalue_16.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_16.getFont().getSize()+36));
+        da_datavalue_16.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_16.setText(bundle.getString("CrInstrument.da_datavalue_16.text")); 
+        dataPanel.add(da_datavalue_16);
+        da_datavalue_16.setBounds(60, 150, 300, 60);
+
+        da_datavalue_17.setFont(da_datavalue_17.getFont().deriveFont(da_datavalue_17.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_17.getFont().getSize()+36));
+        da_datavalue_17.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_17.setText(bundle.getString("CrInstrument.da_datavalue_17.text")); 
+        dataPanel.add(da_datavalue_17);
+        da_datavalue_17.setBounds(60, 150, 300, 60);
+
+        da_datavalue_18.setFont(da_datavalue_18.getFont().deriveFont(da_datavalue_18.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_18.getFont().getSize()+36));
+        da_datavalue_18.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_18.setText(bundle.getString("CrInstrument.da_datavalue_18.text")); 
+        dataPanel.add(da_datavalue_18);
+        da_datavalue_18.setBounds(60, 150, 300, 60);
+
+        da_datavalue_19.setFont(da_datavalue_19.getFont().deriveFont(da_datavalue_19.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_19.getFont().getSize()+36));
+        da_datavalue_19.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_19.setText(bundle.getString("CrInstrument.da_datavalue_19.text")); 
+        dataPanel.add(da_datavalue_19);
+        da_datavalue_19.setBounds(60, 150, 300, 60);
+
+        da_datavalue_20.setFont(da_datavalue_20.getFont().deriveFont(da_datavalue_20.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_20.getFont().getSize()+36));
+        da_datavalue_20.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_20.setText(bundle.getString("CrInstrument.da_datavalue_20.text")); 
+        dataPanel.add(da_datavalue_20);
+        da_datavalue_20.setBounds(60, 150, 300, 60);
+
+        da_datavalue_21.setFont(da_datavalue_21.getFont().deriveFont(da_datavalue_21.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_21.getFont().getSize()+36));
+        da_datavalue_21.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_21.setText(bundle.getString("CrInstrument.da_datavalue_21.text")); 
+        dataPanel.add(da_datavalue_21);
+        da_datavalue_21.setBounds(60, 150, 300, 60);
+
+        da_datavalue_22.setFont(da_datavalue_22.getFont().deriveFont(da_datavalue_22.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_22.getFont().getSize()+36));
+        da_datavalue_22.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_22.setText(bundle.getString("CrInstrument.da_datavalue_22.text")); 
+        dataPanel.add(da_datavalue_22);
+        da_datavalue_22.setBounds(60, 150, 300, 60);
+
+        da_datavalue_23.setFont(da_datavalue_23.getFont().deriveFont(da_datavalue_23.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_23.getFont().getSize()+36));
+        da_datavalue_23.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_23.setText(bundle.getString("CrInstrument.da_datavalue_23.text")); 
+        dataPanel.add(da_datavalue_23);
+        da_datavalue_23.setBounds(60, 150, 300, 60);
+
+        da_datavalue_24.setFont(da_datavalue_24.getFont().deriveFont(da_datavalue_24.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_24.getFont().getSize()+36));
+        da_datavalue_24.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_24.setText(bundle.getString("CrInstrument.da_datavalue_24.text")); 
+        dataPanel.add(da_datavalue_24);
+        da_datavalue_24.setBounds(60, 150, 300, 60);
+
+        da_datavalue_25.setFont(da_datavalue_25.getFont().deriveFont(da_datavalue_25.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_25.getFont().getSize()+36));
+        da_datavalue_25.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_25.setText(bundle.getString("CrInstrument.da_datavalue_25.text")); 
+        dataPanel.add(da_datavalue_25);
+        da_datavalue_25.setBounds(60, 150, 300, 60);
+
+        da_datavalue_26.setFont(da_datavalue_26.getFont().deriveFont(da_datavalue_26.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_26.getFont().getSize()+36));
+        da_datavalue_26.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_26.setText(bundle.getString("CrInstrument.da_datavalue_26.text")); 
+        dataPanel.add(da_datavalue_26);
+        da_datavalue_26.setBounds(60, 150, 300, 60);
+
+        da_datavalue_27.setFont(da_datavalue_27.getFont().deriveFont(da_datavalue_27.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_27.getFont().getSize()+36));
+        da_datavalue_27.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_27.setText(bundle.getString("CrInstrument.da_datavalue_27.text")); 
+        dataPanel.add(da_datavalue_27);
+        da_datavalue_27.setBounds(60, 150, 300, 60);
+
+        da_datavalue_28.setFont(da_datavalue_28.getFont().deriveFont(da_datavalue_28.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_28.getFont().getSize()+36));
+        da_datavalue_28.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_28.setText(bundle.getString("CrInstrument.da_datavalue_28.text")); 
+        dataPanel.add(da_datavalue_28);
+        da_datavalue_28.setBounds(60, 150, 300, 60);
+
+        da_datavalue_29.setFont(da_datavalue_29.getFont().deriveFont(da_datavalue_29.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_29.getFont().getSize()+36));
+        da_datavalue_29.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_29.setText(bundle.getString("CrInstrument.da_datavalue_29.text")); 
+        dataPanel.add(da_datavalue_29);
+        da_datavalue_29.setBounds(60, 150, 300, 60);
+
+        da_datavalue_30.setFont(da_datavalue_30.getFont().deriveFont(da_datavalue_30.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_30.getFont().getSize()+36));
+        da_datavalue_30.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_30.setText(bundle.getString("CrInstrument.da_datavalue_30.text")); 
+        dataPanel.add(da_datavalue_30);
+        da_datavalue_30.setBounds(60, 150, 300, 60);
+
+        da_datavalue_31.setFont(da_datavalue_31.getFont().deriveFont(da_datavalue_31.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_31.getFont().getSize()+36));
+        da_datavalue_31.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_31.setText(bundle.getString("CrInstrument.da_datavalue_31.text")); 
+        dataPanel.add(da_datavalue_31);
+        da_datavalue_31.setBounds(60, 150, 300, 60);
+
+        da_datavalue_32.setFont(da_datavalue_32.getFont().deriveFont(da_datavalue_32.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_32.getFont().getSize()+36));
+        da_datavalue_32.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_32.setText(bundle.getString("CrInstrument.da_datavalue_32.text")); 
+        dataPanel.add(da_datavalue_32);
+        da_datavalue_32.setBounds(60, 150, 300, 60);
+
+        da_datavalue_33.setFont(da_datavalue_33.getFont().deriveFont(da_datavalue_33.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_33.getFont().getSize()+36));
+        da_datavalue_33.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_33.setText(bundle.getString("CrInstrument.da_datavalue_33.text")); 
+        dataPanel.add(da_datavalue_33);
+        da_datavalue_33.setBounds(60, 150, 300, 60);
+
+        da_datavalue_34.setFont(da_datavalue_34.getFont().deriveFont(da_datavalue_34.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_34.getFont().getSize()+36));
+        da_datavalue_34.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_34.setText(bundle.getString("CrInstrument.da_datavalue_34.text")); 
+        dataPanel.add(da_datavalue_34);
+        da_datavalue_34.setBounds(60, 150, 300, 60);
+
+        da_datavalue_35.setFont(da_datavalue_35.getFont().deriveFont(da_datavalue_35.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_35.getFont().getSize()+36));
+        da_datavalue_35.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_35.setText(bundle.getString("CrInstrument.da_datavalue_35.text")); 
+        dataPanel.add(da_datavalue_35);
+        da_datavalue_35.setBounds(60, 150, 300, 60);
+
+        da_datavalue_36.setFont(da_datavalue_36.getFont().deriveFont(da_datavalue_36.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_36.getFont().getSize()+36));
+        da_datavalue_36.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_36.setText(bundle.getString("CrInstrument.da_datavalue_36.text")); 
+        dataPanel.add(da_datavalue_36);
+        da_datavalue_36.setBounds(60, 150, 300, 60);
+
+        da_datavalue_37.setFont(da_datavalue_37.getFont().deriveFont(da_datavalue_37.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_37.getFont().getSize()+36));
+        da_datavalue_37.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_37.setText(bundle.getString("CrInstrument.da_datavalue_37.text")); 
+        dataPanel.add(da_datavalue_37);
+        da_datavalue_37.setBounds(60, 150, 300, 60);
+
+        da_datavalue_38.setFont(da_datavalue_38.getFont().deriveFont(da_datavalue_38.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_38.getFont().getSize()+36));
+        da_datavalue_38.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_38.setText(bundle.getString("CrInstrument.da_datavalue_38.text")); 
+        dataPanel.add(da_datavalue_38);
+        da_datavalue_38.setBounds(60, 150, 300, 60);
+
+        da_datavalue_39.setFont(da_datavalue_39.getFont().deriveFont(da_datavalue_39.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_39.getFont().getSize()+36));
+        da_datavalue_39.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_39.setText(bundle.getString("CrInstrument.da_datavalue_39.text")); 
+        dataPanel.add(da_datavalue_39);
+        da_datavalue_39.setBounds(60, 150, 300, 60);
+
+        da_datavalue_40.setFont(da_datavalue_40.getFont().deriveFont(da_datavalue_40.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_40.getFont().getSize()+36));
+        da_datavalue_40.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_40.setText(bundle.getString("CrInstrument.da_datavalue_40.text")); 
+        dataPanel.add(da_datavalue_40);
+        da_datavalue_40.setBounds(60, 150, 300, 60);
+
+        da_datavalue_41.setFont(da_datavalue_41.getFont().deriveFont(da_datavalue_41.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_41.getFont().getSize()+36));
+        da_datavalue_41.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_41.setText(bundle.getString("CrInstrument.da_datavalue_41.text")); 
+        dataPanel.add(da_datavalue_41);
+        da_datavalue_41.setBounds(60, 150, 300, 60);
+
+        da_datavalue_42.setFont(da_datavalue_42.getFont().deriveFont(da_datavalue_42.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_42.getFont().getSize()+36));
+        da_datavalue_42.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_42.setText(bundle.getString("CrInstrument.da_datavalue_42.text")); 
+        dataPanel.add(da_datavalue_42);
+        da_datavalue_42.setBounds(60, 150, 300, 60);
+
+        da_datavalue_43.setFont(da_datavalue_43.getFont().deriveFont(da_datavalue_43.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_43.getFont().getSize()+36));
+        da_datavalue_43.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_43.setText(bundle.getString("CrInstrument.da_datavalue_43.text")); 
+        dataPanel.add(da_datavalue_43);
+        da_datavalue_43.setBounds(60, 150, 300, 60);
+
+        da_datavalue_44.setFont(da_datavalue_44.getFont().deriveFont(da_datavalue_44.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_44.getFont().getSize()+36));
+        da_datavalue_44.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_44.setText(bundle.getString("CrInstrument.da_datavalue_44.text")); 
+        dataPanel.add(da_datavalue_44);
+        da_datavalue_44.setBounds(60, 150, 300, 60);
+
+        da_datavalue_45.setFont(da_datavalue_45.getFont().deriveFont(da_datavalue_45.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_45.getFont().getSize()+36));
+        da_datavalue_45.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_45.setText(bundle.getString("CrInstrument.da_datavalue_45.text")); 
+        dataPanel.add(da_datavalue_45);
+        da_datavalue_45.setBounds(60, 150, 300, 60);
+
+        da_datavalue_46.setFont(da_datavalue_46.getFont().deriveFont(da_datavalue_46.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_46.getFont().getSize()+36));
+        da_datavalue_46.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_46.setText(bundle.getString("CrInstrument.da_datavalue_46.text")); 
+        dataPanel.add(da_datavalue_46);
+        da_datavalue_46.setBounds(60, 150, 300, 60);
+
+        da_datavalue_47.setFont(da_datavalue_47.getFont().deriveFont(da_datavalue_47.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_47.getFont().getSize()+36));
+        da_datavalue_47.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_47.setText(bundle.getString("CrInstrument.da_datavalue_47.text")); 
+        dataPanel.add(da_datavalue_47);
+        da_datavalue_47.setBounds(60, 150, 300, 60);
+
+        da_datavalue_48.setFont(da_datavalue_48.getFont().deriveFont(da_datavalue_48.getFont().getStyle() | java.awt.Font.BOLD, da_datavalue_48.getFont().getSize()+36));
+        da_datavalue_48.setForeground(new java.awt.Color(255, 0, 51));
+        da_datavalue_48.setText(bundle.getString("CrInstrument.da_datavalue_48.text")); 
+        dataPanel.add(da_datavalue_48);
+        da_datavalue_48.setBounds(60, 150, 300, 60);
+
+        jPanel1.add(dataPanel);
+        dataPanel.setBounds(170, 330, 380, 280);
 
         button02.setFont(button02.getFont().deriveFont(button02.getFont().getStyle() | java.awt.Font.BOLD));
         button02.setText(bundle.getString("CrInstrument.button02.text")); 
@@ -6712,10 +6670,10 @@ public void doLayout(){
         jPanel1.add(btnStart);
         btnStart.setBounds(20, 460, 120, 40);
 
-        jLabel45.setFont(new java.awt.Font("Arial", 1, 12)); 
-        jLabel45.setText(bundle.getString("CrInstrument.jLabel45.text")); 
-        jPanel1.add(jLabel45);
-        jLabel45.setBounds(30, 520, 130, 20);
+        statusLabel.setFont(new java.awt.Font("Arial", 1, 12)); 
+        statusLabel.setText(bundle.getString("CrInstrument.statusLabel.text")); 
+        jPanel1.add(statusLabel);
+        statusLabel.setBounds(30, 520, 130, 20);
 
         chartOptionPanel.setBackground(new java.awt.Color(255, 255, 255));
         chartOptionPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(51, 51, 51), 1, true), bundle.getString("CrInstrument.chartOptionPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(51, 51, 51))); 
@@ -6800,10 +6758,10 @@ public void doLayout(){
         jPanel1.add(btnConnect);
         btnConnect.setBounds(20, 360, 120, 40);
 
-        jLabel13.setFont(new java.awt.Font("Arial", 1, 12)); 
-        jLabel13.setText(bundle.getString("CrInstrument.jLabel13.text")); 
-        jPanel1.add(jLabel13);
-        jLabel13.setBounds(20, 320, 120, 15);
+        timeLabel.setFont(new java.awt.Font("Arial", 1, 12)); 
+        timeLabel.setText(bundle.getString("CrInstrument.timeLabel.text")); 
+        jPanel1.add(timeLabel);
+        timeLabel.setBounds(20, 320, 120, 15);
 
         jPanel37.setBackground(new java.awt.Color(255, 255, 255));
         jPanel37.setLayout(new java.awt.GridLayout(2, 1));
@@ -6817,19 +6775,19 @@ public void doLayout(){
         jPanel1.add(jPanel37);
         jPanel37.setBounds(10, 200, 140, 50);
 
-        javax.swing.GroupLayout lightPanel2Layout = new javax.swing.GroupLayout(lightPanel2);
-        lightPanel2.setLayout(lightPanel2Layout);
-        lightPanel2Layout.setHorizontalGroup(
-            lightPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        javax.swing.GroupLayout lightPanelLayout = new javax.swing.GroupLayout(lightPanel);
+        lightPanel.setLayout(lightPanelLayout);
+        lightPanelLayout.setHorizontalGroup(
+            lightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 120, Short.MAX_VALUE)
         );
-        lightPanel2Layout.setVerticalGroup(
-            lightPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+        lightPanelLayout.setVerticalGroup(
+            lightPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 50, Short.MAX_VALUE)
         );
 
-        jPanel1.add(lightPanel2);
-        lightPanel2.setBounds(30, 550, 120, 50);
+        jPanel1.add(lightPanel);
+        lightPanel.setBounds(30, 550, 120, 50);
 
         button03.setFont(button03.getFont());
         button03.setText(bundle.getString("CrInstrument.button03.text")); 
@@ -7604,6 +7562,7 @@ public void doLayout(){
         jPanel28.setOpaque(false);
         jPanel28.setLayout(null);
 
+        jButton7.setFont(jButton7.getFont());
         jButton7.setText(bundle.getString("CrInstrument.jButton7.text")); 
         jButton7.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -7616,6 +7575,7 @@ public void doLayout(){
         jPanel29.setOpaque(false);
         jPanel29.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
+        jLabel11.setFont(jLabel11.getFont());
         jLabel11.setText(bundle.getString("CrInstrument.jLabel11.text")); 
         jPanel29.add(jLabel11);
 
@@ -7629,6 +7589,7 @@ public void doLayout(){
         jPanel30.setOpaque(false);
         jPanel30.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
+        jLabel36.setFont(jLabel36.getFont());
         jLabel36.setText(bundle.getString("CrInstrument.jLabel36.text")); 
         jPanel30.add(jLabel36);
 
@@ -7642,6 +7603,7 @@ public void doLayout(){
         jPanel31.setOpaque(false);
         jPanel31.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
+        jLabel37.setFont(jLabel37.getFont());
         jLabel37.setText(bundle.getString("CrInstrument.jLabel37.text")); 
         jPanel31.add(jLabel37);
 
@@ -7997,353 +7959,8 @@ public void doLayout(){
 
         jTabbedPane3.addTab(bundle.getString("CrInstrument.jPanel44.TabConstraints.tabTitle"), jPanel44); 
 
-        UIPanel.setLayout(new java.awt.BorderLayout());
-
-        jTabbedPane4.setFont(jTabbedPane4.getFont());
-
-        jPanel36.setFont(jPanel36.getFont());
-        jPanel36.setLayout(null);
-
-        jPanel140.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 204, 204)));
-        jPanel140.setLayout(new java.awt.BorderLayout());
-        jPanel36.add(jPanel140);
-        jPanel140.setBounds(30, 20, 460, 250);
-
-        jButton57.setFont(jButton57.getFont().deriveFont(jButton57.getFont().getSize()+12f));
-        jButton57.setText(bundle.getString("CrInstrument.jButton57.text")); 
-        jButton57.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton57ActionPerformed(evt);
-            }
-        });
-        jPanel36.add(jButton57);
-        jButton57.setBounds(720, 30, 260, 60);
-
-        btnApplySetting_ui.setFont(btnApplySetting_ui.getFont().deriveFont(btnApplySetting_ui.getFont().getSize()+12f));
-        btnApplySetting_ui.setText(bundle.getString("CrInstrument.btnApplySetting_ui.text")); 
-        btnApplySetting_ui.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnApplySetting_uiActionPerformed(evt);
-            }
-        });
-        jPanel36.add(btnApplySetting_ui);
-        btnApplySetting_ui.setBounds(720, 120, 260, 50);
-
-        jPanel144.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 255)), bundle.getString("CrInstrument.jPanel144.border.title"))); 
-        jPanel144.setFont(jPanel144.getFont());
-        jPanel144.setLayout(null);
-
-        jPanel141.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jComboBox36.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jPanel141.add(jComboBox36);
-
-        jCheckBox37.setFont(jCheckBox37.getFont());
-        jCheckBox37.setText(bundle.getString("CrInstrument.jCheckBox37.text")); 
-        jPanel141.add(jCheckBox37);
-
-        jLabel31.setFont(jLabel31.getFont());
-        jLabel31.setText(bundle.getString("CrInstrument.jLabel31.text")); 
-        jPanel141.add(jLabel31);
-
-        jTextField3.setText(bundle.getString("CrInstrument.jTextField3.text")); 
-        jTextField3.setPreferredSize(new java.awt.Dimension(156, 25));
-        jPanel141.add(jTextField3);
-
-        jLabel46.setFont(jLabel46.getFont());
-        jLabel46.setText(bundle.getString("CrInstrument.jLabel46.text")); 
-        jPanel141.add(jLabel46);
-
-        jTextField5.setText(bundle.getString("CrInstrument.jTextField5.text")); 
-        jTextField5.setPreferredSize(new java.awt.Dimension(56, 25));
-        jPanel141.add(jTextField5);
-
-        jLabel47.setText(bundle.getString("CrInstrument.jLabel47.text")); 
-        jPanel141.add(jLabel47);
-
-        jTextField9.setText(bundle.getString("CrInstrument.jTextField9.text")); 
-        jTextField9.setPreferredSize(new java.awt.Dimension(56, 25));
-        jPanel141.add(jTextField9);
-
-        jLabel54.setFont(jLabel54.getFont());
-        jLabel54.setText(bundle.getString("CrInstrument.jLabel54.text")); 
-        jPanel141.add(jLabel54);
-
-        jTextField10.setText(bundle.getString("CrInstrument.jTextField10.text")); 
-        jTextField10.setPreferredSize(new java.awt.Dimension(56, 25));
-        jPanel141.add(jTextField10);
-
-        jLabel55.setFont(jLabel55.getFont());
-        jLabel55.setText(bundle.getString("CrInstrument.jLabel55.text")); 
-        jPanel141.add(jLabel55);
-
-        jTextField61.setText(bundle.getString("CrInstrument.jTextField61.text")); 
-        jTextField61.setPreferredSize(new java.awt.Dimension(56, 25));
-        jPanel141.add(jTextField61);
-
-        jLabel56.setText(bundle.getString("CrInstrument.jLabel56.text")); 
-        jPanel141.add(jLabel56);
-
-        jPanel144.add(jPanel141);
-        jPanel141.setBounds(20, 20, 910, 40);
-
-        jPanel143.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel57.setFont(jLabel57.getFont());
-        jLabel57.setText(bundle.getString("CrInstrument.jLabel57.text")); 
-        jPanel143.add(jLabel57);
-
-        jComboBox37.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jPanel143.add(jComboBox37);
-
-        jLabel72.setFont(jLabel72.getFont());
-        jLabel72.setText(bundle.getString("CrInstrument.jLabel72.text")); 
-        jPanel143.add(jLabel72);
-
-        jComboBox53.setEditable(true);
-        jComboBox53.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jPanel143.add(jComboBox53);
-
-        jLabel73.setFont(jLabel73.getFont());
-        jLabel73.setText(bundle.getString("CrInstrument.jLabel73.text")); 
-        jPanel143.add(jLabel73);
-
-        jTextField73.setText(bundle.getString("CrInstrument.jTextField73.text")); 
-        jTextField73.setPreferredSize(new java.awt.Dimension(56, 21));
-        jPanel143.add(jTextField73);
-
-        jLabel311.setFont(jLabel311.getFont());
-        jLabel311.setText(bundle.getString("CrInstrument.jLabel311.text")); 
-        jPanel143.add(jLabel311);
-
-        jComboBox55.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jPanel143.add(jComboBox55);
-
-        jCheckBox3.setFont(jCheckBox3.getFont());
-        jCheckBox3.setText(bundle.getString("CrInstrument.jCheckBox3.text")); 
-        jPanel143.add(jCheckBox3);
-
-        jCheckBox46.setFont(jCheckBox46.getFont());
-        jCheckBox46.setText(bundle.getString("CrInstrument.jCheckBox46.text")); 
-        jPanel143.add(jCheckBox46);
-
-        jPanel144.add(jPanel143);
-        jPanel143.setBounds(90, 70, 820, 40);
-
-        jPanel36.add(jPanel144);
-        jPanel144.setBounds(30, 430, 940, 120);
-
-        jPanel145.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 204)), bundle.getString("CrInstrument.jPanel145.border.title"))); 
-        jPanel145.setFont(jPanel145.getFont());
-        jPanel145.setLayout(null);
-
-        jPanel110.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel147.setFont(jLabel147.getFont());
-        jLabel147.setText(bundle.getString("CrInstrument.jLabel147.text")); 
-        jPanel110.add(jLabel147);
-
-        jTextField45.setText(bundle.getString("CrInstrument.jTextField45.text")); 
-        jTextField45.setPreferredSize(new java.awt.Dimension(306, 21));
-        jPanel110.add(jTextField45);
-
-        jLabel8.setText(bundle.getString("CrInstrument.jLabel8.text")); 
-        jPanel110.add(jLabel8);
-
-        jTextField11.setText(bundle.getString("CrInstrument.jTextField11.text")); 
-        jTextField11.setPreferredSize(new java.awt.Dimension(106, 21));
-        jPanel110.add(jTextField11);
-
-        jLabel75.setFont(jLabel75.getFont());
-        jLabel75.setText(bundle.getString("CrInstrument.jLabel75.text")); 
-        jPanel110.add(jLabel75);
-
-        jComboBox54.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-        jPanel110.add(jComboBox54);
-
-        jPanel145.add(jPanel110);
-        jPanel110.setBounds(20, 20, 890, 30);
-
-        jPanel146.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jCheckBox38.setFont(jCheckBox38.getFont());
-        jCheckBox38.setText(bundle.getString("CrInstrument.jCheckBox38.text")); 
-        jPanel146.add(jCheckBox38);
-
-        jCheckBox44.setFont(jCheckBox44.getFont());
-        jCheckBox44.setText(bundle.getString("CrInstrument.jCheckBox44.text")); 
-        jPanel146.add(jCheckBox44);
-
-        jCheckBox45.setFont(jCheckBox45.getFont());
-        jCheckBox45.setText(bundle.getString("CrInstrument.jCheckBox45.text")); 
-        jPanel146.add(jCheckBox45);
-
-        jPanel145.add(jPanel146);
-        jPanel146.setBounds(20, 60, 530, 30);
-
-        jPanel147.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel97.setFont(jLabel97.getFont());
-        jLabel97.setText(bundle.getString("CrInstrument.jLabel97.text")); 
-        jPanel147.add(jLabel97);
-
-        jCheckBox43.setFont(jCheckBox43.getFont());
-        jCheckBox43.setText(bundle.getString("CrInstrument.jCheckBox43.text")); 
-        jPanel147.add(jCheckBox43);
-
-        jLabel105.setText(bundle.getString("CrInstrument.jLabel105.text")); 
-        jPanel147.add(jLabel105);
-
-        jTextField74.setText(bundle.getString("CrInstrument.jTextField74.text")); 
-        jTextField74.setPreferredSize(new java.awt.Dimension(56, 21));
-        jPanel147.add(jTextField74);
-
-        jLabel107.setText(bundle.getString("CrInstrument.jLabel107.text")); 
-        jPanel147.add(jLabel107);
-
-        jLabel108.setText(bundle.getString("CrInstrument.jLabel108.text")); 
-        jPanel147.add(jLabel108);
-
-        jTextField75.setText(bundle.getString("CrInstrument.jTextField75.text")); 
-        jTextField75.setPreferredSize(new java.awt.Dimension(56, 21));
-        jPanel147.add(jTextField75);
-
-        jLabel139.setText(bundle.getString("CrInstrument.jLabel139.text")); 
-        jPanel147.add(jLabel139);
-
-        jLabel140.setFont(jLabel140.getFont());
-        jLabel140.setText(bundle.getString("CrInstrument.jLabel140.text")); 
-        jPanel147.add(jLabel140);
-
-        jTextField76.setText(bundle.getString("CrInstrument.jTextField76.text")); 
-        jTextField76.setPreferredSize(new java.awt.Dimension(56, 21));
-        jPanel147.add(jTextField76);
-
-        jLabel156.setText(bundle.getString("CrInstrument.jLabel156.text")); 
-        jPanel147.add(jLabel156);
-
-        jLabel141.setFont(jLabel141.getFont());
-        jLabel141.setText(bundle.getString("CrInstrument.jLabel141.text")); 
-        jPanel147.add(jLabel141);
-
-        jTextField77.setText(bundle.getString("CrInstrument.jTextField77.text")); 
-        jTextField77.setPreferredSize(new java.awt.Dimension(56, 21));
-        jPanel147.add(jTextField77);
-
-        jLabel154.setText(bundle.getString("CrInstrument.jLabel154.text")); 
-        jPanel147.add(jLabel154);
-
-        jPanel145.add(jPanel147);
-        jPanel147.setBounds(20, 100, 690, 30);
-
-        jPanel36.add(jPanel145);
-        jPanel145.setBounds(30, 280, 940, 140);
-
-        jTabbedPane4.addTab(bundle.getString("CrInstrument.jPanel36.TabConstraints.tabTitle"), jPanel36); 
-
-        jPanel39.setFont(jPanel39.getFont());
-
-        javax.swing.GroupLayout jPanel39Layout = new javax.swing.GroupLayout(jPanel39);
-        jPanel39.setLayout(jPanel39Layout);
-        jPanel39Layout.setHorizontalGroup(
-            jPanel39Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1009, Short.MAX_VALUE)
-        );
-        jPanel39Layout.setVerticalGroup(
-            jPanel39Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 562, Short.MAX_VALUE)
-        );
-
-        jTabbedPane4.addTab(bundle.getString("CrInstrument.jPanel39.TabConstraints.tabTitle"), jPanel39); 
-
-        jPanel41.setFont(jPanel41.getFont());
-
-        javax.swing.GroupLayout jPanel41Layout = new javax.swing.GroupLayout(jPanel41);
-        jPanel41.setLayout(jPanel41Layout);
-        jPanel41Layout.setHorizontalGroup(
-            jPanel41Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1009, Short.MAX_VALUE)
-        );
-        jPanel41Layout.setVerticalGroup(
-            jPanel41Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 562, Short.MAX_VALUE)
-        );
-
-        jTabbedPane4.addTab(bundle.getString("CrInstrument.jPanel41.TabConstraints.tabTitle"), jPanel41); 
-
-        jPanel40.setFont(jPanel40.getFont());
-        jPanel40.setLayout(null);
-
-        jPanel123.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel137.setFont(jLabel137.getFont());
-        jLabel137.setText(bundle.getString("CrInstrument.jLabel137.text")); 
-        jPanel123.add(jLabel137);
-
-        buttonGroup7.add(byStation);
-        byStation.setFont(byStation.getFont());
-        byStation.setText(bundle.getString("CrInstrument.byStation.text")); 
-        byStation.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                byStationActionPerformed(evt);
-            }
-        });
-        jPanel123.add(byStation);
-
-        buttonGroup7.add(byDevice);
-        byDevice.setFont(byDevice.getFont());
-        byDevice.setText(bundle.getString("CrInstrument.byDevice.text")); 
-        byDevice.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                byDeviceActionPerformed(evt);
-            }
-        });
-        jPanel123.add(byDevice);
-
-        buttonGroup7.add(byModel);
-        byModel.setFont(byModel.getFont());
-        byModel.setText(bundle.getString("CrInstrument.byModel.text")); 
-        byModel.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                byModelActionPerformed(evt);
-            }
-        });
-        jPanel123.add(byModel);
-
-        buttonGroup7.add(byDataName);
-        byDataName.setFont(byDataName.getFont());
-        byDataName.setSelected(true);
-        byDataName.setText(bundle.getString("CrInstrument.byDataName.text")); 
-        jPanel123.add(byDataName);
-
-        buttonGroup7.add(byChartGroup);
-        byChartGroup.setFont(byChartGroup.getFont());
-        byChartGroup.setText(bundle.getString("CrInstrument.byChartGroup.text")); 
-        byChartGroup.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                byChartGroupActionPerformed(evt);
-            }
-        });
-        jPanel123.add(byChartGroup);
-
-        chartGroupCB.setEditable(true);
-        chartGroupCB.setFont(chartGroupCB.getFont());
-        chartGroupCB.setPreferredSize(new java.awt.Dimension(129, 21));
-        chartGroupCB.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                chartGroupCBItemStateChanged(evt);
-            }
-        });
-        jPanel123.add(chartGroupCB);
-
-        jPanel40.add(jPanel123);
-        jPanel123.setBounds(20, 60, 850, 40);
-
-        jTabbedPane4.addTab(bundle.getString("CrInstrument.jPanel40.TabConstraints.tabTitle"), jPanel40); 
-
-        UIPanel.add(jTabbedPane4, java.awt.BorderLayout.CENTER);
-
-        jTabbedPane3.addTab(bundle.getString("CrInstrument.UIPanel.TabConstraints.tabTitle"), UIPanel); 
+        uiPanel.setLayout(new java.awt.BorderLayout());
+        jTabbedPane3.addTab(bundle.getString("CrInstrument.uiPanel.TabConstraints.tabTitle"), uiPanel); 
 
         jPanel109.setLayout(new java.awt.BorderLayout());
 
@@ -8543,25 +8160,9 @@ public void doLayout(){
 
         jTabbedPane3.addTab(bundle.getString("CrInstrument.jPanel109.TabConstraints.tabTitle"), jPanel109); 
 
-        NodeMgntPanel.setFont(NodeMgntPanel.getFont());
-        NodeMgntPanel.setLayout(null);
-
-        btnApplySetting_node.setFont(btnApplySetting_node.getFont().deriveFont(btnApplySetting_node.getFont().getSize()+12f));
-        btnApplySetting_node.setText(bundle.getString("CrInstrument.btnApplySetting_node.text")); 
-        NodeMgntPanel.add(btnApplySetting_node);
-        btnApplySetting_node.setBounds(780, 70, 200, 60);
-
-        jScrollPane15.setViewportView(jList9);
-
-        NodeMgntPanel.add(jScrollPane15);
-        jScrollPane15.setBounds(40, 40, 80, 190);
-
-        jScrollPane16.setViewportView(jList10);
-
-        NodeMgntPanel.add(jScrollPane16);
-        jScrollPane16.setBounds(70, 380, 70, 160);
-
-        jTabbedPane3.addTab(bundle.getString("CrInstrument.NodeMgntPanel.TabConstraints.tabTitle"), NodeMgntPanel); 
+        nodeMgntPanel.setFont(nodeMgntPanel.getFont());
+        nodeMgntPanel.setLayout(new java.awt.BorderLayout());
+        jTabbedPane3.addTab(bundle.getString("CrInstrument.nodeMgntPanel.TabConstraints.tabTitle"), nodeMgntPanel); 
 
         jPanel49.setFont(jPanel49.getFont());
         jPanel49.setLayout(null);
@@ -9863,9 +9464,16 @@ public void doLayout(){
         jLabel114.setText(bundle.getString("CrInstrument.jLabel114.text")); 
         jPanel106.add(jLabel114);
 
-        jComboBox35.setModel(new javax.swing.DefaultComboBoxModel(colors));
-        jComboBox35.setRenderer(new MyCellRenderer());
-        jPanel106.add(jComboBox35);
+        jLabel60.setBackground(new java.awt.Color(255, 51, 51));
+        jLabel60.setText(bundle.getString("CrInstrument.jLabel60.text")); 
+        jLabel60.setOpaque(true);
+        jLabel60.setPreferredSize(new java.awt.Dimension(40, 25));
+        jLabel60.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel60MouseClicked(evt);
+            }
+        });
+        jPanel106.add(jLabel60);
 
         jLabel138.setFont(jLabel138.getFont());
         jLabel138.setText(bundle.getString("CrInstrument.jLabel138.text")); 
@@ -9902,7 +9510,7 @@ public void doLayout(){
         jPanel142.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 153, 255)));
         jPanel142.setLayout(new java.awt.BorderLayout());
         jPanel50.add(jPanel142);
-        jPanel142.setBounds(710, 260, 270, 260);
+        jPanel142.setBounds(730, 260, 250, 230);
 
         jPanel112.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9937,189 +9545,9 @@ public void doLayout(){
 
         jTabbedPane3.addTab(bundle.getString("CrInstrument.jPanel50.TabConstraints.tabTitle"), jPanel50); 
 
-        jPanel51.setFont(jPanel51.getFont());
-        jPanel51.setLayout(null);
-
-        jPanel92.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel169.setFont(jLabel169.getFont());
-        jLabel169.setText(bundle.getString("CrInstrument.jLabel169.text")); 
-        jPanel92.add(jLabel169);
-
-        jComboBox40.setEditable(true);
-        jComboBox40.setFont(jComboBox40.getFont());
-        jComboBox40.setPreferredSize(new java.awt.Dimension(204, 25));
-        jComboBox40.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jComboBox40ItemStateChanged(evt);
-            }
-        });
-        jComboBox40.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jComboBox40ActionPerformed(evt);
-            }
-        });
-        jPanel92.add(jComboBox40);
-
-        jLabel170.setFont(jLabel170.getFont());
-        jLabel170.setText(bundle.getString("CrInstrument.jLabel170.text")); 
-        jPanel92.add(jLabel170);
-
-        jComboBox50.setEditable(true);
-        jComboBox50.setFont(jComboBox50.getFont());
-        jComboBox50.setPreferredSize(new java.awt.Dimension(129, 25));
-        jComboBox50.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jComboBox50ItemStateChanged(evt);
-            }
-        });
-        jPanel92.add(jComboBox50);
-
-        jLabel171.setFont(jLabel171.getFont());
-        jLabel171.setText(bundle.getString("CrInstrument.jLabel171.text")); 
-        jPanel92.add(jLabel171);
-
-        jComboBox51.setEditable(true);
-        jComboBox51.setFont(jComboBox51.getFont());
-        jComboBox51.setPreferredSize(new java.awt.Dimension(129, 25));
-        jComboBox51.addItemListener(new java.awt.event.ItemListener() {
-            public void itemStateChanged(java.awt.event.ItemEvent evt) {
-                jComboBox51ItemStateChanged(evt);
-            }
-        });
-        jPanel92.add(jComboBox51);
-
-        jPanel51.add(jPanel92);
-        jPanel92.setBounds(90, 70, 910, 40);
-
-        curveList.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                curveListMouseClicked(evt);
-            }
-        });
-        jScrollPane10.setViewportView(curveList);
-
-        jPanel51.add(jScrollPane10);
-        jScrollPane10.setBounds(14, 50, 60, 190);
-
-        jLabel109.setFont(jLabel109.getFont());
-        jLabel109.setText(bundle.getString("CrInstrument.jLabel109.text")); 
-        jPanel51.add(jLabel109);
-        jLabel109.setBounds(20, 30, 60, 15);
-
-        jPanel95.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jButton38.setFont(jButton38.getFont());
-        jButton38.setText(bundle.getString("CrInstrument.jButton38.text")); 
-        jButton38.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton38ActionPerformed(evt);
-            }
-        });
-        jPanel95.add(jButton38);
-
-        jButton39.setFont(jButton39.getFont());
-        jButton39.setText(bundle.getString("CrInstrument.jButton39.text")); 
-        jButton39.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton39ActionPerformed(evt);
-            }
-        });
-        jPanel95.add(jButton39);
-
-        jButton40.setFont(jButton40.getFont());
-        jButton40.setText(bundle.getString("CrInstrument.jButton40.text")); 
-        jButton40.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton40ActionPerformed(evt);
-            }
-        });
-        jPanel95.add(jButton40);
-
-        jPanel51.add(jPanel95);
-        jPanel95.setBounds(90, 30, 670, 40);
-
-        jPanel102.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel103.setFont(jLabel103.getFont());
-        jLabel103.setText(bundle.getString("CrInstrument.jLabel103.text")); 
-        jPanel102.add(jLabel103);
-
-        jComboBox33.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Trend" }));
-        jPanel102.add(jComboBox33);
-
-        jPanel51.add(jPanel102);
-        jPanel102.setBounds(90, 150, 660, 40);
-
-        jButton46.setFont(jButton46.getFont());
-        jButton46.setText(bundle.getString("CrInstrument.jButton46.text")); 
-        jButton46.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton46ActionPerformed(evt);
-            }
-        });
-        jPanel51.add(jButton46);
-        jButton46.setBounds(10, 240, 120, 30);
-
-        jButton47.setFont(jButton47.getFont());
-        jButton47.setText(bundle.getString("CrInstrument.jButton47.text")); 
-        jButton47.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton47ActionPerformed(evt);
-            }
-        });
-        jPanel51.add(jButton47);
-        jButton47.setBounds(10, 270, 120, 30);
-
-        jPanel105.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel106.setFont(jLabel106.getFont());
-        jLabel106.setText(bundle.getString("CrInstrument.jLabel106.text")); 
-        jPanel105.add(jLabel106);
-
-        jComboBox34.setEditable(true);
-        jComboBox34.setFont(jComboBox34.getFont());
-        jPanel105.add(jComboBox34);
-
-        jLabel89.setFont(jLabel89.getFont());
-        jLabel89.setText(bundle.getString("CrInstrument.jLabel89.text")); 
-        jPanel105.add(jLabel89);
-
-        jLabel91.setBackground(new java.awt.Color(255, 255, 255));
-        jLabel91.setText(bundle.getString("CrInstrument.jLabel91.text")); 
-        jLabel91.setOpaque(true);
-        jPanel105.add(jLabel91);
-
-        jLabel172.setFont(jLabel172.getFont());
-        jLabel172.setText(bundle.getString("CrInstrument.jLabel172.text")); 
-        jPanel105.add(jLabel172);
-
-        jComboBox52.setEditable(true);
-        jComboBox52.setFont(jComboBox52.getFont());
-        jComboBox52.setPreferredSize(new java.awt.Dimension(129, 25));
-        jPanel105.add(jComboBox52);
-
-        jPanel51.add(jPanel105);
-        jPanel105.setBounds(90, 110, 880, 40);
-
-        jPanel107.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel144.setFont(jLabel144.getFont());
-        jLabel144.setText(bundle.getString("CrInstrument.jLabel144.text")); 
-        jPanel107.add(jLabel144);
-
-        jLabel145.setFont(jLabel145.getFont());
-        jLabel145.setText(bundle.getString("CrInstrument.jLabel145.text")); 
-        jPanel107.add(jLabel145);
-
-        jComboBox38.setModel(new javax.swing.DefaultComboBoxModel(colors));
-        jComboBox38.setRenderer(new MyCellRenderer());
-        jPanel107.add(jComboBox38);
-
-        jPanel51.add(jPanel107);
-        jPanel107.setBounds(90, 190, 810, 40);
-
-        jTabbedPane3.addTab(bundle.getString("CrInstrument.jPanel51.TabConstraints.tabTitle"), jPanel51); 
+        curvePanel.setFont(curvePanel.getFont());
+        curvePanel.setLayout(new java.awt.BorderLayout());
+        jTabbedPane3.addTab(bundle.getString("CrInstrument.curvePanel.TabConstraints.tabTitle"), curvePanel); 
 
         jPanel3.add(jTabbedPane3, java.awt.BorderLayout.CENTER);
 
@@ -10298,6 +9726,14 @@ public void doLayout(){
         jMenu3.setText(bundle.getString("CrInstrument.jMenu3.text")); 
         jMenu3.setFont(jMenu3.getFont());
 
+        jMenuItem3.setText(bundle.getString("CrInstrument.jMenuItem3.text")); 
+        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem3ActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jMenuItem3);
+
         jMenuItem8.setFont(jMenuItem8.getFont());
         jMenuItem8.setText(bundle.getString("CrInstrument.jMenuItem8.text")); 
         jMenuItem8.addActionListener(new java.awt.event.ActionListener() {
@@ -10457,7 +9893,7 @@ public void doLayout(){
         } catch (InterruptedException e) {
         }
 
-        lightPanel2.setColor(Color.green, Color.green);
+        lightPanel.setColor(Color.green, Color.green);
         connected = true;
       }
       if (onlyReceiveCB.isSelected()) {
@@ -10474,7 +9910,7 @@ public void doLayout(){
 
         btnConnect.setEnabled(false);
 
-        lightPanel2.setColor(Color.green, Color.green);
+        lightPanel.setColor(Color.green, Color.green);
         currentStat = 0;
         currentLightStat = 0;
         btnStart.setText(bundle2.getString("CrInstrument.xy.msg4"));
@@ -10500,37 +9936,37 @@ public void doLayout(){
       eventThread.setStatus(wn.w.getGNS(1),"",26);
     }
 
-    private void jTable2MouseReleased(java.awt.event.MouseEvent evt) {
+    private void deviceTableMouseReleased(java.awt.event.MouseEvent evt) {
 
     }
 
-    private void jTable2MouseClicked(java.awt.event.MouseEvent evt) {
-      int row = jTable2.getSelectedRow();
-      int column = jTable2.getSelectedColumn();
-      String device = (String) jTable2.getModel().getValueAt(row, 0);
-      String model = (String) jTable2.getModel().getValueAt(row, 1);
-      String SN = (String) jTable2.getModel().getValueAt(row, 2);
-      String dataName = (String) jTable2.getModel().getValueAt(row, 3);
+    private void deviceTableMouseClicked(java.awt.event.MouseEvent evt) {
+      int row = deviceTable.getSelectedRow();
+      int column = deviceTable.getSelectedColumn();
+      String device = (String) deviceTable.getModel().getValueAt(row, 0);
+      String model = (String) deviceTable.getModel().getValueAt(row, 1);
+      String SN = (String) deviceTable.getModel().getValueAt(row, 2);
+      String dataName = (String) deviceTable.getModel().getValueAt(row, 3);
       String id=device+","+model+","+SN+","+dataName;
       if (id != null && id.length() > 0) {
         currentTable2Row = row;
         currentSensorID = currentStation + "," + id;
         showSensorData(row);
-        jTable2.repaint();
+        deviceTable.repaint();
         showCurve(currentSensorID);
       }
     }
   void showSensorData(int row) {
 
-    if (jTable2.getRowCount() > 0 && row > -1 && row < jTable2.getRowCount()) {
+    if (deviceTable.getRowCount() > 0 && row > -1 && row < deviceTable.getRowCount()) {
       
 
       if (sensors.get(currentSensorID) != null) {
         String info2[] = ylib.csvlinetoarray((String) sensors.get(currentSensorID));
-        jLabel20.setText(info2[0] );
-        jLabel34.setText(info2[1]+ " (" + info2[2] + ") - "+info2[3]);
-        jLabel35.setText(info2[4]+":" );
-        jLabel30.setText(info2[20] + " "+info2[9]);
+        da_station_01.setText(info2[0] );
+        da_device_01.setText(info2[1]+ " (" + info2[2] + ") - "+info2[3]);
+        da_dataname_01.setText(info2[4]+":" );
+        da_datavalue_01.setText(info2[20] + " "+info2[9]);
       }
     }
   }
@@ -10764,7 +10200,7 @@ public void doLayout(){
 
       connected = true;
     }
-    lightPanel2.setColor(Color.green, Color.green);
+    lightPanel.setColor(Color.green, Color.green);
     eventThread.setStatus(wn.w.getGNS(1),"",11);
 
   }
@@ -11515,23 +10951,6 @@ void updateActionItem(){
     chartTM.put(newItem, newItem+",");
   }
 
-  private void jButton38ActionPerformed(java.awt.event.ActionEvent evt) {
-    int cnt=curveList.getModel().getSize();
-    int max=0;
-    if(cnt>0){
-      for(int i=0;i<cnt;i++) {
-         String tm=(String)curveList.getModel().getElementAt(i);
-         int v=Integer.parseInt(tm.substring(2));
-         if(v>max) max=v;
-      }
-    }
-    max=max+1;
-    String newItem="CV"+zero(4-String.valueOf(max).length())+max;
-    curveListModel.addElement(newItem);
-    curveList.setSelectedValue(newItem, true);
-    curveTM.put(newItem, newItem+",");
-  }
-
   private void jButton36ActionPerformed(java.awt.event.ActionEvent evt) {
     if(chartList.getSelectedIndex()>-1){
       int selNo=chartList.getSelectedIndex();
@@ -11557,7 +10976,8 @@ void updateActionItem(){
        for(int i=0;i<data2.length && i<data.length;i++) data[i]=data2[i];
      }
      data[0]=sel;
-       data[1]=String.valueOf(((Color)jComboBox35.getSelectedItem()).getRGB());
+
+       data[1]=String.valueOf(jLabel60.getBackground().getRGB());
        data[2]=jTextField47.getText();
        data[3]=jTextField48.getText();
        data[4]=jTextField49.getText();
@@ -11596,49 +11016,6 @@ void updateActionItem(){
 
   private void chartListMouseClicked(java.awt.event.MouseEvent evt) {
    showChart();
-  }
-
-  private void curveListMouseClicked(java.awt.event.MouseEvent evt) {
-    showCurve();
-  }
-
-  private void jButton40ActionPerformed(java.awt.event.ActionEvent evt) {
-    if(curveList.getSelectedIndex()>-1){
-     String sel=(String)curveList.getSelectedValue();
-      String data[]=new String[curveMaxArrCnt];
-       for(int i=0;i<data.length;i++) data[i]="";
-     if(curveTM.get(sel)!=null){
-       String data2[]=ylib.csvlinetoarray((String)curveTM.get(sel));
-       for(int i=0;i<data2.length && i<data.length;i++) data[i]=data2[i];
-     }
-     data[0]=sel;
-       data[1]="";
-       data[2]="";
-       data[3]=(String)jComboBox34.getSelectedItem();
-       data[4]=(String)jComboBox40.getSelectedItem();
-       data[5]=(String)jComboBox51.getSelectedItem();
-       data[6]=(String)jComboBox52.getSelectedItem();
-       data[7]=jLabel91.getText();
-       data[8]=(String)jComboBox33.getSelectedItem();
-       data[9]=String.valueOf(((Color)jComboBox38.getSelectedItem()).getRGB());
-       data[10]=(String)jComboBox50.getSelectedItem();
-       curveTM.put(sel, data);
-     }
-  }
-
-  private void jButton39ActionPerformed(java.awt.event.ActionEvent evt) {
-    if(curveList.getSelectedIndex()>-1){
-      int selNo=curveList.getSelectedIndex();
-      String sel=(String)curveList.getSelectedValue();
-      curveListModel.removeElement(sel);
-      curveTM.remove(sel);
-      if(curveListModel.size() < selNo+1) selNo=curveListModel.size()-1;
-      if(selNo>-1){
-      curveList.setSelectedIndex(selNo);
-      sel=(String)curveList.getSelectedValue();
-      showCurve();
-      }
-    }
   }
 
   private void clearShowBtnActionPerformed(java.awt.event.ActionEvent evt) {
@@ -11714,21 +11091,21 @@ public String getDataSrcFromStation(String station){
     if(evt.getStateChange()==evt.SELECTED){
       if(jComboBox20.getSelectedIndex()==0){
         jComboBox26.setVisible(false);
-        jLabel30.setVisible(false);
+        da_datavalue_01.setVisible(false);
         jTextField46.setVisible(false);
         jLabel93.setVisible(false);
         jTextField13.setVisible(false);
         jCheckBox35.setText("Byte from");
       } else {
         jComboBox26.setVisible(true);
-        jLabel30.setVisible(true);
+        da_datavalue_01.setVisible(true);
         jTextField46.setVisible(true);
         jLabel93.setVisible(true);
         jTextField13.setVisible(true);
         jCheckBox35.setText("Char from");
         String sel=(String)jComboBox26.getSelectedItem();
         if(sel.equalsIgnoreCase("whole line")){
-        jLabel30.setVisible(false);
+        da_datavalue_01.setVisible(false);
         jTextField46.setVisible(false);
         jLabel93.setVisible(false);
         jTextField13.setVisible(false);
@@ -11875,19 +11252,6 @@ void eventSwapItem(String item1,String item2){
 
   }
 
-  private void jButton46ActionPerformed(java.awt.event.ActionEvent evt) {
-    int sel=curveList.getSelectedIndex();
-    if(sel>0){
-      String key=(String)curveList.getSelectedValue();
-      String data=(String)curveTM.get(key);
-      curveList.setSelectedIndex(sel-1);
-      String key2=(String)curveList.getSelectedValue();
-      String data2=(String)curveTM.get(key2);
-      curveTM.put(key, data2);
-      curveTM.put(key2, data);
-   }
-  }
-
   private void jButton45ActionPerformed(java.awt.event.ActionEvent evt) {
     int sel=chartList.getSelectedIndex();
     if(sel>-1 && sel<(chartListModel.size()-1)){
@@ -11898,19 +11262,6 @@ void eventSwapItem(String item1,String item2){
       String data2=(String)chartTM.get(key2);
       chartTM.put(key, data2);
       chartTM.put(key2, data);
-   }
-  }
-
-  private void jButton47ActionPerformed(java.awt.event.ActionEvent evt) {
-    int sel=curveList.getSelectedIndex();
-    if(sel>-1 && sel<(curveListModel.size()-1)){
-      String key=(String)curveList.getSelectedValue();
-      String data=(String)curveTM.get(key);
-      curveList.setSelectedIndex(sel+1);
-      String key2=(String)curveList.getSelectedValue();
-      String data2=(String)curveTM.get(key2);
-      curveTM.put(key, data2);
-      curveTM.put(key2, data);
    }
   }
 
@@ -12140,113 +11491,6 @@ void eventSwapItem(String item1,String item2){
     }
   }
 
-  private void jComboBox40ItemStateChanged(java.awt.event.ItemEvent evt) {
-    if(evt.getStateChange()==evt.SELECTED){
-      if(jComboBox40.getSelectedIndex()>0){
-        String sel=(String)jComboBox40.getSelectedItem();
-        Iterator it=sensors.values().iterator();
-        jComboBox50.removeAllItems();
-        jComboBox50.addItem("");
-        for(;it.hasNext();){
-          String info[]=ylib.csvlinetoarray((String)it.next());
-          if(info[0].equalsIgnoreCase(sel)){
-            boolean exists = false;
-            for (int index = 0; index < jComboBox50.getItemCount() && !exists; index++) {
-               if (info[1].equals((String)jComboBox50.getItemAt(index))) {
-                  exists = true; break;
-               }
-             }
-	     if(!exists) {
-               jComboBox50.addItem(info[1]);
-             }
-          }
-        }
-        jComboBox50.setSelectedIndex(0);
-      } 
-    }
-  }
-
-  private void jComboBox50ItemStateChanged(java.awt.event.ItemEvent evt) {
-    if(evt.getStateChange()==evt.SELECTED){
-      if(jComboBox50.getSelectedIndex()>0){
-        String station=(String)jComboBox40.getSelectedItem();
-        String sel=(String)jComboBox50.getSelectedItem();
-        Iterator it=sensors.values().iterator();
-        jComboBox51.removeAllItems();
-        jComboBox51.addItem("");
-        for(;it.hasNext();){
-          String info[]=ylib.csvlinetoarray((String)it.next());
-          if(info[0].equalsIgnoreCase(station) && info[1].equalsIgnoreCase(sel)){
-            boolean exists=false;
-            for (int index = 0; index < jComboBox51.getItemCount() && !exists; index++) {
-               if (info[2].equals((String)jComboBox51.getItemAt(index))) {
-                  exists = true; break;
-               }
-             }
-	     if(!exists) {
-               jComboBox51.addItem(info[2]);
-             }
-          }
-        }
-        jComboBox51.setSelectedIndex(0);
-      } 
-    }
-  }
-
-  private void jComboBox51ItemStateChanged(java.awt.event.ItemEvent evt) {
-    if(evt.getStateChange()==evt.SELECTED){
-      if(jComboBox51.getSelectedIndex()>0){
-        String station=(String)jComboBox40.getSelectedItem();
-        String device=(String)jComboBox50.getSelectedItem();
-        String sel=(String)jComboBox51.getSelectedItem();
-        Iterator it=sensors.values().iterator();
-        jComboBox52.removeAllItems();
-        jComboBox52.addItem("");
-        for(;it.hasNext();){
-          String info[]=ylib.csvlinetoarray((String)it.next());
-          if(info[0].equalsIgnoreCase(station) && info[1].equalsIgnoreCase(device) && info[2].equalsIgnoreCase(sel)){
-            boolean exists=false;
-            for (int index = 0; index < jComboBox52.getItemCount() && !exists; index++) {
-               if (info[4].equals((String)jComboBox52.getItemAt(index))) {
-                  exists = true; break;
-               }
-             }
-	     if(!exists) {
-               jComboBox52.addItem(info[4]);
-             }
-          }
-        }
-        jComboBox52.setSelectedIndex(0);
-      } 
-    }
-  }
-
-  private void jComboBox40ActionPerformed(java.awt.event.ActionEvent evt) {
-
-  }
-
-  private void byStationActionPerformed(java.awt.event.ActionEvent evt) {
-   updateChartProfile();
-  }
-
-  private void byDeviceActionPerformed(java.awt.event.ActionEvent evt) {
-   updateChartProfile();
-  }
-
-  private void byModelActionPerformed(java.awt.event.ActionEvent evt) {
-   updateChartProfile();
-  }
-
-  private void byChartGroupActionPerformed(java.awt.event.ActionEvent evt) {
-   updateChartProfile();
-  }
-
-  private void chartGroupCBItemStateChanged(java.awt.event.ItemEvent evt) {
-    if(evt.getStateChange()==evt.SELECTED){
-      updateChartProfile();
-    }
-  }
-
   private void btnEditSrcActionPerformed(java.awt.event.ActionEvent evt) {
   
 
@@ -12374,7 +11618,7 @@ eventThread.setStatus(wn.w.getGNS(1),"",34);
   }
 
   private void jMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {
-         String webAddr="http://www.cloud-rain.com/web/ci/doc/"+bundle2.getString("CrInstrument.xy.msg2");
+         String webAddr=bundle2.getString("CrInstrument.xy.msg2");
          if(webAddr.indexOf("http")==-1){
              webAddr=webAddr.substring(5);
              webAddr=webAddr.replace('/', File.separatorChar);
@@ -12408,26 +11652,6 @@ eventThread.setStatus(wn.w.getGNS(1),"",34);
       about = new CIAbout(this, true);
     }
     about.setVisible(true);
-  }
-
-  private void jButton57ActionPerformed(java.awt.event.ActionEvent evt) {
-   currentUI.clear();
-   Iterator it=defaultUI.keySet().iterator();
-   for(;it.hasNext();){
-       String key=(String)it.next();
-       currentUI.put(key, (String)defaultUI.get(key));
-   }
-   framePanel.setItems(currentUI);
-  }
-
-  private void btnApplySetting_uiActionPerformed(java.awt.event.ActionEvent evt) {
-    TreeMap tm=framePanel.getItems();
-    Iterator it=tm.keySet().iterator();
-    for(;it.hasNext();){
-        String key=(String)it.next();
-        if(tm.get(key)!=null) currentUI.put(key, (String)tm.get(key));
-    }
-    validate();
   }
 private void updateItem(){
 
@@ -12675,6 +11899,23 @@ if(evt.getStateChange()==evt.SELECTED){
       } else {
         JOptionPane.showMessageDialog(this, bundle2.getString("CrInstrument.xy.msg145"));
       }
+    }
+
+    private void jLabel60MouseClicked(java.awt.event.MouseEvent evt) {
+       Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel60.getBackground());
+       if(newColor!=null) jLabel60.setBackground(newColor);
+    }
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {
+         String webAddr=bundle2.getString("CrInstrument.xy.msg146");
+         if(webAddr.indexOf("http")==-1){
+             webAddr=webAddr.substring(5);
+             webAddr=webAddr.replace('/', File.separatorChar);
+             webAddr=(new File(webAddr)).getAbsolutePath();
+             webAddr="file:///"+webAddr.replace(File.separatorChar,'/');
+         }
+
+         openURL.open(webAddr);
     }
  private void changeReceiveListItem(){
   String datasrc=(String)receiveList.getSelectedValue();
@@ -13074,7 +12315,7 @@ void showChart(){
      String sel=(String)chartList.getSelectedValue();
      if(chartTM.get(sel)!=null){
        String data[]=ylib.csvlinetoarray((String)chartTM.get(sel));
-       if(data.length>1) jComboBox35.setSelectedItem(new Color(Integer.parseInt(data[1])));
+       if(data.length>1) jLabel60.setBackground(new Color(Integer.parseInt(data[1])));
        if(data.length>2) jTextField47.setText(data[2]);
        if(data.length>3) jTextField48.setText(data[3]);
        if(data.length>4) jTextField49.setText(data[4]);
@@ -13109,23 +12350,6 @@ void showChart(){
        }
      }
 }
-void showCurve(){
-    if(curveList.getSelectedIndex()>-1){
-     String sel=(String)curveList.getSelectedValue();
-     if(curveTM.get(sel)!=null){
-       String data[]=ylib.csvlinetoarray((String)curveTM.get(sel));
-
-       if(data.length>3) jComboBox34.setSelectedItem(data[3]);
-       if(data.length>4) jComboBox40.setSelectedItem(data[4]);
-       if(data.length>5) jComboBox51.setSelectedItem(data[5]);
-       if(data.length>6) jComboBox52.setSelectedItem(data[6]);
-       if(data.length>7) jLabel91.setText(data[7]);
-       if(data.length>8) jComboBox33.setSelectedItem(data[8]);
-       if(data.length>9) jComboBox38.setSelectedItem(new Color(Integer.parseInt(data[9])));
-       if(data.length>10) jComboBox50.setSelectedItem(data[10]);
-       }
-     }
-}
 
   boolean confirmExit() {
     if (continueMonitor) {
@@ -13154,13 +12378,13 @@ void showCurve(){
         if (files[i].getName().toLowerCase().indexOf(rawFile.toLowerCase()) == 0 && files[i].getName().length() > (rawFile.length() + 1)
                 && files[i].getName().charAt(rawFile.length()) == '.') {
           String tmp = files[i].getName().substring(rawFile.length() + 1);
-          if (wn.isNumeric(tmp) && Integer.parseInt(tmp) > rawMax) {
+          if (isNumeric(tmp) && Integer.parseInt(tmp) > rawMax) {
             rawMax = Integer.parseInt(tmp);
           }
         } else if (files[i].getName().toLowerCase().indexOf(calculatedFile.toLowerCase()) == 0 && files[i].getName().length() > (calculatedFile.length() + 1)
                 && files[i].getName().charAt(calculatedFile.length()) == '.') {
           String tmp = files[i].getName().substring(calculatedFile.length() + 1);
-          if (wn.isNumeric(tmp) && Integer.parseInt(tmp) > rawMax) {
+          if (isNumeric(tmp) && Integer.parseInt(tmp) > rawMax) {
             calculatedMax = Integer.parseInt(tmp);
           }
         }
@@ -13187,43 +12411,43 @@ void showCurve(){
       String info2[] = ylib.csvlinetoarray((String) sensors.get(key));
 
       double vK = 1.0, vT0 = 0, vA0 = 0.0, vB0 = 0.0, offsetA = 0.0, offsetB = 0.0, aG = 1.0, bG = 1.0, dA = 0.0, dB = 0.0, dT = 0.0;
-      if (wn.isNumeric(info2[2])) {
+      if (isNumeric(info2[2])) {
         vA0 = Double.parseDouble(info2[2]);
       }
       if (vA0 > 9999.0) {
         vA0 = 0.0;
       }
-      if (wn.isNumeric(info2[26])) {
+      if (isNumeric(info2[26])) {
         vB0 = Double.parseDouble(info2[26]);
       }
       if (vB0 > 9999.0) {
         vB0 = 0.0;
       }
-      if (wn.isNumeric(info2[3])) {
+      if (isNumeric(info2[3])) {
         offsetA = Double.parseDouble(info2[3]);
       }
-      if (wn.isNumeric(info2[27])) {
+      if (isNumeric(info2[27])) {
         offsetB = Double.parseDouble(info2[27]);
       }
-      if (wn.isNumeric(info2[4])) {
+      if (isNumeric(info2[4])) {
         aG = Double.parseDouble(info2[4]);
       }
-      if (wn.isNumeric(info2[28])) {
+      if (isNumeric(info2[28])) {
         bG = Double.parseDouble(info2[28]);
       }
-      if (wn.isNumeric(info2[17])) {
+      if (isNumeric(info2[17])) {
         dA = Double.parseDouble(info2[17]);
       }
-      if (wn.isNumeric(info2[18])) {
+      if (isNumeric(info2[18])) {
         dB = Double.parseDouble(info2[18]);
       }
-      if (wn.isNumeric(info2[9])) {
+      if (isNumeric(info2[9])) {
         vK = Double.parseDouble(info2[9]);
       }
-      if (wn.isNumeric(info2[10])) {
+      if (isNumeric(info2[10])) {
         vT0 = Double.parseDouble(info2[10]);
       }
-      if (wn.isNumeric(info2[11])) {
+      if (isNumeric(info2[11])) {
         dT = Double.parseDouble(info2[11]);
       }
 
@@ -13274,9 +12498,9 @@ void showStation(){
       boolean newStation = !station.equals(currentStation);
       if (newStation) {
         currentStation = station;
-        int rcount = jTable2.getRowCount();
+        int rcount = deviceTable.getRowCount();
         for (int i = rcount - 1; i > -1; i--) {
-          ((DefaultTableModel) jTable2.getModel()).removeRow(i);
+          ((DefaultTableModel) deviceTable.getModel()).removeRow(i);
         }
       }
       TreeMap sensorsC = (TreeMap) sensors.clone();
@@ -13331,22 +12555,22 @@ void showStation(){
               }
 
             }
-            if (jTable2.getModel().getRowCount() < inx + 1) {
-              ((DefaultTableModel) jTable2.getModel()).addRow(new Object[jTable2.getModel().getColumnCount()]);
+            if (deviceTable.getModel().getRowCount() < inx + 1) {
+              ((DefaultTableModel) deviceTable.getModel()).addRow(new Object[deviceTable.getModel().getColumnCount()]);
             }
-            jTable2.getModel().setValueAt(info2[1], inx, 0);
-            jTable2.getModel().setValueAt(info2[2], inx, 1);
-            jTable2.getModel().setValueAt(info2[3], inx, 2);
-            jTable2.getModel().setValueAt(info2[4], inx, 3);
+            deviceTable.getModel().setValueAt(info2[1], inx, 0);
+            deviceTable.getModel().setValueAt(info2[2], inx, 1);
+            deviceTable.getModel().setValueAt(info2[3], inx, 2);
+            deviceTable.getModel().setValueAt(info2[4], inx, 3);
 
-            jTable2.getModel().setValueAt(info20+(statRow==2? "  ":(statRow==1? " ":"")), inx, 4);
+            deviceTable.getModel().setValueAt(info20+(statRow==2? "  ":(statRow==1? " ":"")), inx, 4);
 
             if (statRow == 2) {
-              jTable2.getModel().setValueAt(bundle2.getString("CrInstrument.xy.msg97"), inx, 5);
+              deviceTable.getModel().setValueAt(bundle2.getString("CrInstrument.xy.msg97"), inx, 5);
             } else if (statRow == 1) {
-              jTable2.getModel().setValueAt(bundle2.getString("CrInstrument.xy.msg98"), inx, 5);
+              deviceTable.getModel().setValueAt(bundle2.getString("CrInstrument.xy.msg98"), inx, 5);
             } else {
-              jTable2.getModel().setValueAt(bundle2.getString("CrInstrument.xy.msg99"), inx, 5);
+              deviceTable.getModel().setValueAt(bundle2.getString("CrInstrument.xy.msg99"), inx, 5);
             }
             if (statRow > statAll) {
               statAll = statRow;
@@ -13361,34 +12585,34 @@ void showStation(){
         currentStat = statAll;
       }
 
-      int rcount2 = jTable2.getRowCount();
+      int rcount2 = deviceTable.getRowCount();
       if (rcount2 > inx) {
         for (int i = rcount2 - 1; i >= inx; i--) {
-          ((DefaultTableModel) jTable2.getModel()).removeRow(i);
+          ((DefaultTableModel) deviceTable.getModel()).removeRow(i);
         }
       }
 
       if (inx > 0) {
         String id = "";
         if (currentSensorID == null || currentSensorID.length() < 1 || newStation) {
-          id = (String) jTable2.getModel().getValueAt(0, 0)+","+(String) jTable2.getModel().getValueAt(0, 1)+","+
-                    (String) jTable2.getModel().getValueAt(0, 2)+","+(String) jTable2.getModel().getValueAt(0, 3);
+          id = (String) deviceTable.getModel().getValueAt(0, 0)+","+(String) deviceTable.getModel().getValueAt(0, 1)+","+
+                    (String) deviceTable.getModel().getValueAt(0, 2)+","+(String) deviceTable.getModel().getValueAt(0, 3);
           currentTable2Row = 0;
           currentSensorID = currentStation + "," + id;
         } else {
           boolean foundCurrentID = false;
-          int rows = jTable2.getRowCount();
+          int rows = deviceTable.getRowCount();
           for (int i = 0; i < rows; i++) {
-            if ((station + "," + (String) jTable2.getModel().getValueAt(i, 0)+","+(String) jTable2.getModel().getValueAt(i, 1)+","+
-                    (String) jTable2.getModel().getValueAt(i, 2)+","+(String) jTable2.getModel().getValueAt(i, 3)).equals(currentSensorID)) {
+            if ((station + "," + (String) deviceTable.getModel().getValueAt(i, 0)+","+(String) deviceTable.getModel().getValueAt(i, 1)+","+
+                    (String) deviceTable.getModel().getValueAt(i, 2)+","+(String) deviceTable.getModel().getValueAt(i, 3)).equals(currentSensorID)) {
               foundCurrentID = true;
               currentTable2Row = i;
               break;
             }
           }
           if (!foundCurrentID) {
-            id = (String) jTable2.getModel().getValueAt(0, 0)+","+(String) jTable2.getModel().getValueAt(0, 1)+","+
-                    (String) jTable2.getModel().getValueAt(0, 2)+","+(String) jTable2.getModel().getValueAt(0, 3);
+            id = (String) deviceTable.getModel().getValueAt(0, 0)+","+(String) deviceTable.getModel().getValueAt(0, 1)+","+
+                    (String) deviceTable.getModel().getValueAt(0, 2)+","+(String) deviceTable.getModel().getValueAt(0, 3);
             currentTable2Row = 0;
             currentSensorID = station + "," + id;
           }
@@ -13404,9 +12628,9 @@ void showStation(){
 
     }
     else {
-      int rcount = jTable2.getRowCount();
+      int rcount = deviceTable.getRowCount();
       for (int i = rcount - 1; i > -1; i--) {
-        ((DefaultTableModel) jTable2.getModel()).removeRow(i);
+        ((DefaultTableModel) deviceTable.getModel()).removeRow(i);
       }
     }
   }
@@ -13521,38 +12745,6 @@ void showStation(){
       return comp;
     }
   }
-  class MyCellRenderer extends JButton implements ListCellRenderer {  
-     public MyCellRenderer() {  
-         setOpaque(true); 
-
-     }
-     boolean b=false;
-    @Override
-    public void setBackground(Color bg) {
-
-         if(!b)
-         {
-             return;
-         }
-
-        super.setBackground(bg);
-    }
-     public Component getListCellRendererComponent(  
-         JList list,  
-         Object value,  
-         int index,  
-
-         boolean isSelected,  
-         boolean cellHasFocus)  
-     {  
-
-         b=true;
-         setText(" ");           
-         setBackground((Color)value);        
-         b=false;
-         return this;  
-     }  
-}
 class ShowStationTableThread extends Thread{
 CrInstrument instrument;
 
@@ -13600,17 +12792,13 @@ class ShowStationChartThread extends Thread{
 
     private javax.swing.JCheckBox CBUseEngineerUnit;
     private javax.swing.JPanel FTPPanel;
-    private javax.swing.JPanel NodeMgntPanel;
-    private javax.swing.JPanel UIPanel;
     private javax.swing.JList actionList;
     private javax.swing.JList actionList2;
     private javax.swing.JButton btnAddAction1ToEvent;
     private javax.swing.JButton btnApplySetting_accounts;
     private javax.swing.JButton btnApplySetting_device;
-    private javax.swing.JButton btnApplySetting_node;
     private javax.swing.JButton btnApplySetting_ports;
     private javax.swing.JButton btnApplySetting_records;
-    private javax.swing.JButton btnApplySetting_ui;
     private javax.swing.JButton btnCondition1AddToEvent;
     public javax.swing.JButton btnConnect;
     private javax.swing.JButton btnEditSrc;
@@ -13651,20 +12839,16 @@ class ShowStationChartThread extends Thread{
     private javax.swing.ButtonGroup buttonGroup3;
     private javax.swing.ButtonGroup buttonGroup4;
     private javax.swing.ButtonGroup buttonGroup5;
+    private javax.swing.ButtonGroup buttonGroup6;
     private javax.swing.ButtonGroup buttonGroup7;
     private javax.swing.ButtonGroup buttonGroup8;
     private javax.swing.ButtonGroup buttonGroup9;
-    private javax.swing.JRadioButton byChartGroup;
-    private javax.swing.JRadioButton byDataName;
-    private javax.swing.JRadioButton byDevice;
-    private javax.swing.JRadioButton byModel;
-    private javax.swing.JRadioButton byStation;
     private javax.swing.JCheckBox cbAutoAdjustY;
     private javax.swing.JCheckBox cbRemark;
     private javax.swing.JCheckBox cbZero;
-    private javax.swing.JComboBox chartGroupCB;
     private javax.swing.JList chartList;
     private javax.swing.JPanel chartOptionPanel;
+    private javax.swing.JPanel chartPanel;
     public javax.swing.JCheckBox chkSumCB;
     public javax.swing.JComboBox chkSumCBB;
     private javax.swing.JButton clearSendBtn;
@@ -13673,7 +12857,153 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JList conditionList2;
     public javax.swing.JCheckBox continueSendCB;
     public javax.swing.JCheckBox crnlCB;
-    private javax.swing.JList curveList;
+    private javax.swing.JPanel curvePanel;
+    private javax.swing.JLabel da_dataname_01;
+    private javax.swing.JLabel da_dataname_02;
+    private javax.swing.JLabel da_dataname_03;
+    private javax.swing.JLabel da_dataname_04;
+    private javax.swing.JLabel da_dataname_05;
+    private javax.swing.JLabel da_dataname_06;
+    private javax.swing.JLabel da_dataname_07;
+    private javax.swing.JLabel da_dataname_08;
+    private javax.swing.JLabel da_dataname_09;
+    private javax.swing.JLabel da_dataname_10;
+    private javax.swing.JLabel da_dataname_11;
+    private javax.swing.JLabel da_dataname_12;
+    private javax.swing.JLabel da_dataname_13;
+    private javax.swing.JLabel da_dataname_14;
+    private javax.swing.JLabel da_dataname_15;
+    private javax.swing.JLabel da_dataname_16;
+    private javax.swing.JLabel da_dataname_17;
+    private javax.swing.JLabel da_dataname_18;
+    private javax.swing.JLabel da_dataname_19;
+    private javax.swing.JLabel da_dataname_20;
+    private javax.swing.JLabel da_dataname_21;
+    private javax.swing.JLabel da_dataname_22;
+    private javax.swing.JLabel da_dataname_23;
+    private javax.swing.JLabel da_dataname_24;
+    private javax.swing.JLabel da_dataname_25;
+    private javax.swing.JLabel da_dataname_26;
+    private javax.swing.JLabel da_dataname_27;
+    private javax.swing.JLabel da_dataname_28;
+    private javax.swing.JLabel da_dataname_29;
+    private javax.swing.JLabel da_dataname_30;
+    private javax.swing.JLabel da_dataname_31;
+    private javax.swing.JLabel da_dataname_32;
+    private javax.swing.JLabel da_dataname_33;
+    private javax.swing.JLabel da_dataname_34;
+    private javax.swing.JLabel da_dataname_35;
+    private javax.swing.JLabel da_dataname_36;
+    private javax.swing.JLabel da_dataname_37;
+    private javax.swing.JLabel da_dataname_38;
+    private javax.swing.JLabel da_dataname_39;
+    private javax.swing.JLabel da_dataname_40;
+    private javax.swing.JLabel da_dataname_41;
+    private javax.swing.JLabel da_dataname_42;
+    private javax.swing.JLabel da_dataname_43;
+    private javax.swing.JLabel da_dataname_44;
+    private javax.swing.JLabel da_dataname_45;
+    private javax.swing.JLabel da_dataname_46;
+    private javax.swing.JLabel da_dataname_47;
+    private javax.swing.JLabel da_dataname_48;
+    private javax.swing.JLabel da_datavalue_01;
+    private javax.swing.JLabel da_datavalue_02;
+    private javax.swing.JLabel da_datavalue_03;
+    private javax.swing.JLabel da_datavalue_04;
+    private javax.swing.JLabel da_datavalue_05;
+    private javax.swing.JLabel da_datavalue_06;
+    private javax.swing.JLabel da_datavalue_07;
+    private javax.swing.JLabel da_datavalue_08;
+    private javax.swing.JLabel da_datavalue_09;
+    private javax.swing.JLabel da_datavalue_10;
+    private javax.swing.JLabel da_datavalue_11;
+    private javax.swing.JLabel da_datavalue_12;
+    private javax.swing.JLabel da_datavalue_13;
+    private javax.swing.JLabel da_datavalue_14;
+    private javax.swing.JLabel da_datavalue_15;
+    private javax.swing.JLabel da_datavalue_16;
+    private javax.swing.JLabel da_datavalue_17;
+    private javax.swing.JLabel da_datavalue_18;
+    private javax.swing.JLabel da_datavalue_19;
+    private javax.swing.JLabel da_datavalue_20;
+    private javax.swing.JLabel da_datavalue_21;
+    private javax.swing.JLabel da_datavalue_22;
+    private javax.swing.JLabel da_datavalue_23;
+    private javax.swing.JLabel da_datavalue_24;
+    private javax.swing.JLabel da_datavalue_25;
+    private javax.swing.JLabel da_datavalue_26;
+    private javax.swing.JLabel da_datavalue_27;
+    private javax.swing.JLabel da_datavalue_28;
+    private javax.swing.JLabel da_datavalue_29;
+    private javax.swing.JLabel da_datavalue_30;
+    private javax.swing.JLabel da_datavalue_31;
+    private javax.swing.JLabel da_datavalue_32;
+    private javax.swing.JLabel da_datavalue_33;
+    private javax.swing.JLabel da_datavalue_34;
+    private javax.swing.JLabel da_datavalue_35;
+    private javax.swing.JLabel da_datavalue_36;
+    private javax.swing.JLabel da_datavalue_37;
+    private javax.swing.JLabel da_datavalue_38;
+    private javax.swing.JLabel da_datavalue_39;
+    private javax.swing.JLabel da_datavalue_40;
+    private javax.swing.JLabel da_datavalue_41;
+    private javax.swing.JLabel da_datavalue_42;
+    private javax.swing.JLabel da_datavalue_43;
+    private javax.swing.JLabel da_datavalue_44;
+    private javax.swing.JLabel da_datavalue_45;
+    private javax.swing.JLabel da_datavalue_46;
+    private javax.swing.JLabel da_datavalue_47;
+    private javax.swing.JLabel da_datavalue_48;
+    private javax.swing.JLabel da_device_01;
+    private javax.swing.JLabel da_device_02;
+    private javax.swing.JLabel da_device_03;
+    private javax.swing.JLabel da_device_04;
+    private javax.swing.JLabel da_device_05;
+    private javax.swing.JLabel da_device_06;
+    private javax.swing.JLabel da_device_07;
+    private javax.swing.JLabel da_device_08;
+    private javax.swing.JLabel da_device_09;
+    private javax.swing.JLabel da_device_10;
+    private javax.swing.JLabel da_device_11;
+    private javax.swing.JLabel da_device_12;
+    private javax.swing.JLabel da_device_13;
+    private javax.swing.JLabel da_device_14;
+    private javax.swing.JLabel da_device_15;
+    private javax.swing.JLabel da_device_16;
+    private javax.swing.JLabel da_device_17;
+    private javax.swing.JLabel da_device_18;
+    private javax.swing.JLabel da_device_19;
+    private javax.swing.JLabel da_device_20;
+    private javax.swing.JLabel da_device_21;
+    private javax.swing.JLabel da_device_22;
+    private javax.swing.JLabel da_device_23;
+    private javax.swing.JLabel da_device_24;
+    private javax.swing.JLabel da_device_25;
+    private javax.swing.JLabel da_device_26;
+    private javax.swing.JLabel da_device_27;
+    private javax.swing.JLabel da_device_28;
+    private javax.swing.JLabel da_device_29;
+    private javax.swing.JLabel da_device_30;
+    private javax.swing.JLabel da_device_31;
+    private javax.swing.JLabel da_device_32;
+    private javax.swing.JLabel da_station_01;
+    private javax.swing.JLabel da_station_02;
+    private javax.swing.JLabel da_station_03;
+    private javax.swing.JLabel da_station_04;
+    private javax.swing.JLabel da_station_05;
+    private javax.swing.JLabel da_station_06;
+    private javax.swing.JLabel da_station_07;
+    private javax.swing.JLabel da_station_08;
+    private javax.swing.JLabel da_station_09;
+    private javax.swing.JLabel da_station_10;
+    private javax.swing.JLabel da_station_11;
+    private javax.swing.JLabel da_station_12;
+    private javax.swing.JLabel da_station_13;
+    private javax.swing.JLabel da_station_14;
+    private javax.swing.JLabel da_station_15;
+    private javax.swing.JLabel da_station_16;
+    private javax.swing.JPanel dataPanel;
+    private javax.swing.JTable deviceTable;
     private javax.swing.JList eventList;
     private javax.swing.JMenuItem fileMenuItem01;
     private javax.swing.JMenuItem fileMenuItem02;
@@ -13702,18 +13032,12 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JButton jButton35;
     private javax.swing.JButton jButton36;
     private javax.swing.JButton jButton37;
-    private javax.swing.JButton jButton38;
-    private javax.swing.JButton jButton39;
     private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton40;
     private javax.swing.JButton jButton42;
     private javax.swing.JButton jButton43;
     private javax.swing.JButton jButton44;
     private javax.swing.JButton jButton45;
-    private javax.swing.JButton jButton46;
-    private javax.swing.JButton jButton47;
     private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton57;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
@@ -13740,7 +13064,6 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JCheckBox jCheckBox27;
     private javax.swing.JCheckBox jCheckBox28;
     private javax.swing.JCheckBox jCheckBox29;
-    private javax.swing.JCheckBox jCheckBox3;
     private javax.swing.JCheckBox jCheckBox30;
     private javax.swing.JCheckBox jCheckBox31;
     private javax.swing.JCheckBox jCheckBox32;
@@ -13748,17 +13071,11 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JCheckBox jCheckBox34;
     private javax.swing.JCheckBox jCheckBox35;
     private javax.swing.JCheckBox jCheckBox36;
-    private javax.swing.JCheckBox jCheckBox37;
-    private javax.swing.JCheckBox jCheckBox38;
     private javax.swing.JCheckBox jCheckBox39;
     private javax.swing.JCheckBox jCheckBox4;
     private javax.swing.JCheckBox jCheckBox40;
     private javax.swing.JCheckBox jCheckBox41;
     private javax.swing.JCheckBox jCheckBox42;
-    private javax.swing.JCheckBox jCheckBox43;
-    private javax.swing.JCheckBox jCheckBox44;
-    private javax.swing.JCheckBox jCheckBox45;
-    private javax.swing.JCheckBox jCheckBox46;
     private javax.swing.JCheckBox jCheckBox47;
     private javax.swing.JCheckBox jCheckBox48;
     private javax.swing.JCheckBox jCheckBox5;
@@ -13786,15 +13103,8 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JComboBox jComboBox30;
     private javax.swing.JComboBox jComboBox31;
     private javax.swing.JComboBox jComboBox32;
-    private javax.swing.JComboBox jComboBox33;
-    private javax.swing.JComboBox jComboBox34;
-    private javax.swing.JComboBox jComboBox35;
-    private javax.swing.JComboBox jComboBox36;
-    private javax.swing.JComboBox jComboBox37;
-    private javax.swing.JComboBox jComboBox38;
     private javax.swing.JComboBox jComboBox39;
     private javax.swing.JComboBox jComboBox4;
-    private javax.swing.JComboBox jComboBox40;
     private javax.swing.JComboBox jComboBox41;
     private javax.swing.JComboBox jComboBox42;
     private javax.swing.JComboBox jComboBox43;
@@ -13805,12 +13115,6 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JComboBox jComboBox48;
     private javax.swing.JComboBox jComboBox49;
     private javax.swing.JComboBox jComboBox5;
-    private javax.swing.JComboBox jComboBox50;
-    private javax.swing.JComboBox jComboBox51;
-    private javax.swing.JComboBox jComboBox52;
-    private javax.swing.JComboBox jComboBox53;
-    private javax.swing.JComboBox jComboBox54;
-    private javax.swing.JComboBox jComboBox55;
     private javax.swing.JComboBox jComboBox6;
     private javax.swing.JComboBox jComboBox7;
     private javax.swing.JComboBox jComboBox8;
@@ -13820,13 +13124,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel100;
     private javax.swing.JLabel jLabel101;
     private javax.swing.JLabel jLabel102;
-    private javax.swing.JLabel jLabel103;
     private javax.swing.JLabel jLabel104;
-    private javax.swing.JLabel jLabel105;
-    private javax.swing.JLabel jLabel106;
-    private javax.swing.JLabel jLabel107;
-    private javax.swing.JLabel jLabel108;
-    private javax.swing.JLabel jLabel109;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel110;
     private javax.swing.JLabel jLabel111;
@@ -13848,7 +13146,6 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel126;
     private javax.swing.JLabel jLabel127;
     private javax.swing.JLabel jLabel129;
-    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel130;
     private javax.swing.JLabel jLabel131;
     private javax.swing.JLabel jLabel132;
@@ -13856,18 +13153,11 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel134;
     private javax.swing.JLabel jLabel135;
     private javax.swing.JLabel jLabel136;
-    private javax.swing.JLabel jLabel137;
     private javax.swing.JLabel jLabel138;
-    private javax.swing.JLabel jLabel139;
     private javax.swing.JLabel jLabel14;
-    private javax.swing.JLabel jLabel140;
-    private javax.swing.JLabel jLabel141;
     private javax.swing.JLabel jLabel142;
     private javax.swing.JLabel jLabel143;
-    private javax.swing.JLabel jLabel144;
-    private javax.swing.JLabel jLabel145;
     private javax.swing.JLabel jLabel146;
-    private javax.swing.JLabel jLabel147;
     private javax.swing.JLabel jLabel148;
     private javax.swing.JLabel jLabel149;
     private javax.swing.JLabel jLabel15;
@@ -13875,8 +13165,6 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel151;
     private javax.swing.JLabel jLabel152;
     private javax.swing.JLabel jLabel153;
-    private javax.swing.JLabel jLabel154;
-    private javax.swing.JLabel jLabel156;
     private javax.swing.JLabel jLabel157;
     private javax.swing.JLabel jLabel158;
     private javax.swing.JLabel jLabel159;
@@ -13889,171 +13177,22 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel165;
     private javax.swing.JLabel jLabel166;
     private javax.swing.JLabel jLabel167;
-    private javax.swing.JLabel jLabel168;
-    private javax.swing.JLabel jLabel169;
     private javax.swing.JLabel jLabel17;
-    private javax.swing.JLabel jLabel170;
-    private javax.swing.JLabel jLabel171;
-    private javax.swing.JLabel jLabel172;
-    private javax.swing.JLabel jLabel173;
-    private javax.swing.JLabel jLabel174;
-    private javax.swing.JLabel jLabel175;
-    private javax.swing.JLabel jLabel176;
-    private javax.swing.JLabel jLabel177;
-    private javax.swing.JLabel jLabel178;
-    private javax.swing.JLabel jLabel179;
     private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel180;
-    private javax.swing.JLabel jLabel181;
-    private javax.swing.JLabel jLabel182;
-    private javax.swing.JLabel jLabel183;
-    private javax.swing.JLabel jLabel184;
-    private javax.swing.JLabel jLabel185;
-    private javax.swing.JLabel jLabel186;
-    private javax.swing.JLabel jLabel187;
-    private javax.swing.JLabel jLabel188;
-    private javax.swing.JLabel jLabel189;
     private javax.swing.JLabel jLabel19;
-    private javax.swing.JLabel jLabel190;
-    private javax.swing.JLabel jLabel191;
-    private javax.swing.JLabel jLabel192;
-    private javax.swing.JLabel jLabel193;
-    private javax.swing.JLabel jLabel194;
-    private javax.swing.JLabel jLabel195;
-    private javax.swing.JLabel jLabel196;
-    private javax.swing.JLabel jLabel197;
-    private javax.swing.JLabel jLabel198;
-    private javax.swing.JLabel jLabel199;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel20;
-    private javax.swing.JLabel jLabel200;
-    private javax.swing.JLabel jLabel201;
-    private javax.swing.JLabel jLabel202;
-    private javax.swing.JLabel jLabel203;
-    private javax.swing.JLabel jLabel204;
-    private javax.swing.JLabel jLabel205;
-    private javax.swing.JLabel jLabel206;
-    private javax.swing.JLabel jLabel207;
-    private javax.swing.JLabel jLabel208;
-    private javax.swing.JLabel jLabel209;
     private javax.swing.JLabel jLabel21;
-    private javax.swing.JLabel jLabel210;
-    private javax.swing.JLabel jLabel211;
-    private javax.swing.JLabel jLabel212;
-    private javax.swing.JLabel jLabel213;
-    private javax.swing.JLabel jLabel214;
-    private javax.swing.JLabel jLabel215;
-    private javax.swing.JLabel jLabel216;
-    private javax.swing.JLabel jLabel217;
-    private javax.swing.JLabel jLabel218;
-    private javax.swing.JLabel jLabel219;
     private javax.swing.JLabel jLabel22;
-    private javax.swing.JLabel jLabel220;
-    private javax.swing.JLabel jLabel221;
-    private javax.swing.JLabel jLabel222;
-    private javax.swing.JLabel jLabel223;
-    private javax.swing.JLabel jLabel224;
-    private javax.swing.JLabel jLabel225;
-    private javax.swing.JLabel jLabel226;
-    private javax.swing.JLabel jLabel227;
-    private javax.swing.JLabel jLabel228;
-    private javax.swing.JLabel jLabel229;
     private javax.swing.JLabel jLabel23;
-    private javax.swing.JLabel jLabel230;
-    private javax.swing.JLabel jLabel231;
-    private javax.swing.JLabel jLabel232;
-    private javax.swing.JLabel jLabel233;
-    private javax.swing.JLabel jLabel234;
-    private javax.swing.JLabel jLabel235;
-    private javax.swing.JLabel jLabel236;
-    private javax.swing.JLabel jLabel237;
-    private javax.swing.JLabel jLabel238;
-    private javax.swing.JLabel jLabel239;
     private javax.swing.JLabel jLabel24;
-    private javax.swing.JLabel jLabel240;
-    private javax.swing.JLabel jLabel241;
-    private javax.swing.JLabel jLabel242;
-    private javax.swing.JLabel jLabel243;
-    private javax.swing.JLabel jLabel244;
-    private javax.swing.JLabel jLabel245;
-    private javax.swing.JLabel jLabel246;
-    private javax.swing.JLabel jLabel247;
-    private javax.swing.JLabel jLabel248;
-    private javax.swing.JLabel jLabel249;
     private javax.swing.JLabel jLabel25;
-    private javax.swing.JLabel jLabel250;
-    private javax.swing.JLabel jLabel251;
-    private javax.swing.JLabel jLabel252;
-    private javax.swing.JLabel jLabel253;
-    private javax.swing.JLabel jLabel254;
-    private javax.swing.JLabel jLabel255;
-    private javax.swing.JLabel jLabel256;
-    private javax.swing.JLabel jLabel257;
-    private javax.swing.JLabel jLabel258;
-    private javax.swing.JLabel jLabel259;
     private javax.swing.JLabel jLabel26;
-    private javax.swing.JLabel jLabel260;
-    private javax.swing.JLabel jLabel261;
-    private javax.swing.JLabel jLabel262;
-    private javax.swing.JLabel jLabel263;
-    private javax.swing.JLabel jLabel264;
-    private javax.swing.JLabel jLabel265;
-    private javax.swing.JLabel jLabel266;
-    private javax.swing.JLabel jLabel267;
-    private javax.swing.JLabel jLabel268;
-    private javax.swing.JLabel jLabel269;
     private javax.swing.JLabel jLabel27;
-    private javax.swing.JLabel jLabel270;
-    private javax.swing.JLabel jLabel271;
-    private javax.swing.JLabel jLabel272;
-    private javax.swing.JLabel jLabel273;
-    private javax.swing.JLabel jLabel274;
-    private javax.swing.JLabel jLabel275;
-    private javax.swing.JLabel jLabel276;
-    private javax.swing.JLabel jLabel277;
-    private javax.swing.JLabel jLabel278;
-    private javax.swing.JLabel jLabel279;
     private javax.swing.JLabel jLabel28;
-    private javax.swing.JLabel jLabel280;
-    private javax.swing.JLabel jLabel281;
-    private javax.swing.JLabel jLabel282;
-    private javax.swing.JLabel jLabel283;
-    private javax.swing.JLabel jLabel284;
-    private javax.swing.JLabel jLabel285;
-    private javax.swing.JLabel jLabel286;
-    private javax.swing.JLabel jLabel287;
-    private javax.swing.JLabel jLabel288;
-    private javax.swing.JLabel jLabel289;
     private javax.swing.JLabel jLabel29;
-    private javax.swing.JLabel jLabel290;
-    private javax.swing.JLabel jLabel291;
-    private javax.swing.JLabel jLabel292;
-    private javax.swing.JLabel jLabel293;
-    private javax.swing.JLabel jLabel294;
-    private javax.swing.JLabel jLabel295;
-    private javax.swing.JLabel jLabel296;
-    private javax.swing.JLabel jLabel297;
-    private javax.swing.JLabel jLabel298;
-    private javax.swing.JLabel jLabel299;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel30;
-    private javax.swing.JLabel jLabel300;
-    private javax.swing.JLabel jLabel301;
-    private javax.swing.JLabel jLabel302;
-    private javax.swing.JLabel jLabel303;
-    private javax.swing.JLabel jLabel304;
-    private javax.swing.JLabel jLabel305;
-    private javax.swing.JLabel jLabel306;
-    private javax.swing.JLabel jLabel307;
-    private javax.swing.JLabel jLabel308;
-    private javax.swing.JLabel jLabel309;
-    private javax.swing.JLabel jLabel31;
-    private javax.swing.JLabel jLabel310;
-    private javax.swing.JLabel jLabel311;
     private javax.swing.JLabel jLabel32;
     private javax.swing.JLabel jLabel33;
-    private javax.swing.JLabel jLabel34;
-    private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel36;
     private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
@@ -14064,9 +13203,6 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel42;
     private javax.swing.JLabel jLabel43;
     private javax.swing.JLabel jLabel44;
-    private javax.swing.JLabel jLabel45;
-    private javax.swing.JLabel jLabel46;
-    private javax.swing.JLabel jLabel47;
     private javax.swing.JLabel jLabel48;
     private javax.swing.JLabel jLabel49;
     private javax.swing.JLabel jLabel5;
@@ -14074,46 +13210,33 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel51;
     private javax.swing.JLabel jLabel52;
     private javax.swing.JLabel jLabel53;
-    private javax.swing.JLabel jLabel54;
-    private javax.swing.JLabel jLabel55;
-    private javax.swing.JLabel jLabel56;
-    private javax.swing.JLabel jLabel57;
     private javax.swing.JLabel jLabel58;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel60;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel71;
-    private javax.swing.JLabel jLabel72;
-    private javax.swing.JLabel jLabel73;
     private javax.swing.JLabel jLabel74;
-    private javax.swing.JLabel jLabel75;
     private javax.swing.JLabel jLabel76;
     private javax.swing.JLabel jLabel77;
     private javax.swing.JLabel jLabel78;
     private javax.swing.JLabel jLabel79;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel80;
     private javax.swing.JLabel jLabel81;
     private javax.swing.JLabel jLabel82;
     private javax.swing.JLabel jLabel83;
     private javax.swing.JLabel jLabel84;
-    private javax.swing.JLabel jLabel85;
     private javax.swing.JLabel jLabel86;
     private javax.swing.JLabel jLabel87;
     private javax.swing.JLabel jLabel88;
-    private javax.swing.JLabel jLabel89;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabel90;
-    private javax.swing.JLabel jLabel91;
     private javax.swing.JLabel jLabel92;
     private javax.swing.JLabel jLabel93;
     private javax.swing.JLabel jLabel94;
     private javax.swing.JLabel jLabel95;
     private javax.swing.JLabel jLabel96;
-    private javax.swing.JLabel jLabel97;
     private javax.swing.JLabel jLabel98;
     private javax.swing.JLabel jLabel99;
-    private javax.swing.JList jList10;
-    private javax.swing.JList jList9;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
@@ -14123,6 +13246,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JMenuItem jMenuItem20;
     private javax.swing.JMenuItem jMenuItem26;
     private javax.swing.JMenuItem jMenuItem27;
+    private javax.swing.JMenuItem jMenuItem3;
     private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JMenuItem jMenuItem8;
@@ -14131,16 +13255,12 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel100;
     private javax.swing.JPanel jPanel101;
-    private javax.swing.JPanel jPanel102;
     private javax.swing.JPanel jPanel103;
     private javax.swing.JPanel jPanel104;
-    private javax.swing.JPanel jPanel105;
     private javax.swing.JPanel jPanel106;
-    private javax.swing.JPanel jPanel107;
     private javax.swing.JPanel jPanel108;
     private javax.swing.JPanel jPanel109;
     private javax.swing.JPanel jPanel11;
-    private javax.swing.JPanel jPanel110;
     private javax.swing.JPanel jPanel111;
     private javax.swing.JPanel jPanel112;
     private javax.swing.JPanel jPanel113;
@@ -14154,7 +13274,6 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JPanel jPanel120;
     private javax.swing.JPanel jPanel121;
     private javax.swing.JPanel jPanel122;
-    private javax.swing.JPanel jPanel123;
     private javax.swing.JPanel jPanel124;
     private javax.swing.JPanel jPanel125;
     private javax.swing.JPanel jPanel126;
@@ -14173,21 +13292,12 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JPanel jPanel138;
     private javax.swing.JPanel jPanel139;
     private javax.swing.JPanel jPanel14;
-    private javax.swing.JPanel jPanel140;
-    private javax.swing.JPanel jPanel141;
     private javax.swing.JPanel jPanel142;
-    private javax.swing.JPanel jPanel143;
-    private javax.swing.JPanel jPanel144;
-    private javax.swing.JPanel jPanel145;
-    private javax.swing.JPanel jPanel146;
-    private javax.swing.JPanel jPanel147;
     private javax.swing.JPanel jPanel148;
     private javax.swing.JPanel jPanel149;
     private javax.swing.JPanel jPanel15;
     private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel17;
-    private javax.swing.JPanel jPanel18;
-    private javax.swing.JPanel jPanel19;
     public javax.swing.JPanel jPanel2;
     public javax.swing.JPanel jPanel20;
     private javax.swing.JPanel jPanel21;
@@ -14204,13 +13314,9 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JPanel jPanel31;
     private javax.swing.JPanel jPanel34;
     private javax.swing.JPanel jPanel35;
-    private javax.swing.JPanel jPanel36;
     private javax.swing.JPanel jPanel37;
     private javax.swing.JPanel jPanel38;
-    private javax.swing.JPanel jPanel39;
     public javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel40;
-    private javax.swing.JPanel jPanel41;
     private javax.swing.JPanel jPanel42;
     private javax.swing.JPanel jPanel43;
     private javax.swing.JPanel jPanel44;
@@ -14219,7 +13325,6 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JPanel jPanel49;
     public javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel50;
-    private javax.swing.JPanel jPanel51;
     private javax.swing.JPanel jPanel52;
     private javax.swing.JPanel jPanel53;
     private javax.swing.JPanel jPanel54;
@@ -14263,10 +13368,8 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JPanel jPanel9;
     private javax.swing.JPanel jPanel90;
     private javax.swing.JPanel jPanel91;
-    private javax.swing.JPanel jPanel92;
     private javax.swing.JPanel jPanel93;
     private javax.swing.JPanel jPanel94;
-    private javax.swing.JPanel jPanel95;
     private javax.swing.JPanel jPanel96;
     private javax.swing.JPanel jPanel97;
     private javax.swing.JPanel jPanel98;
@@ -14291,13 +13394,10 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JRadioButton jRadioButton7;
     private javax.swing.JRadioButton jRadioButton8;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane10;
     private javax.swing.JScrollPane jScrollPane11;
     private javax.swing.JScrollPane jScrollPane12;
     private javax.swing.JScrollPane jScrollPane13;
     private javax.swing.JScrollPane jScrollPane14;
-    private javax.swing.JScrollPane jScrollPane15;
-    private javax.swing.JScrollPane jScrollPane16;
     private javax.swing.JScrollPane jScrollPane17;
     private javax.swing.JScrollPane jScrollPane18;
     private javax.swing.JScrollPane jScrollPane19;
@@ -14312,17 +13412,13 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JScrollPane jScrollPane9;
     javax.swing.JTabbedPane jTabbedPane1;
     public javax.swing.JTabbedPane jTabbedPane2;
-    private javax.swing.JTabbedPane jTabbedPane3;
-    private javax.swing.JTabbedPane jTabbedPane4;
+    javax.swing.JTabbedPane jTabbedPane3;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTable jTable2;
     private javax.swing.JTable jTable3;
     private javax.swing.JTable jTable4;
     private javax.swing.JTable jTable5;
     private javax.swing.JTable jTable6;
     private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField10;
-    private javax.swing.JTextField jTextField11;
     private javax.swing.JTextField jTextField12;
     private javax.swing.JTextField jTextField13;
     private javax.swing.JTextField jTextField14;
@@ -14337,7 +13433,6 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JTextField jTextField27;
     private javax.swing.JTextField jTextField28;
     private javax.swing.JTextField jTextField29;
-    private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField30;
     private javax.swing.JTextField jTextField31;
     private javax.swing.JTextField jTextField32;
@@ -14351,12 +13446,10 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextField43;
     private javax.swing.JTextField jTextField44;
-    private javax.swing.JTextField jTextField45;
     private javax.swing.JTextField jTextField46;
     private javax.swing.JTextField jTextField47;
     private javax.swing.JTextField jTextField48;
     private javax.swing.JTextField jTextField49;
-    private javax.swing.JTextField jTextField5;
     private javax.swing.JTextField jTextField50;
     private javax.swing.JTextField jTextField51;
     private javax.swing.JTextField jTextField52;
@@ -14368,7 +13461,6 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JTextField jTextField59;
     private javax.swing.JTextField jTextField6;
     private javax.swing.JTextField jTextField60;
-    private javax.swing.JTextField jTextField61;
     private javax.swing.JTextField jTextField62;
     private javax.swing.JTextField jTextField63;
     private javax.swing.JTextField jTextField64;
@@ -14381,16 +13473,11 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JTextField jTextField70;
     private javax.swing.JTextField jTextField71;
     private javax.swing.JTextField jTextField72;
-    private javax.swing.JTextField jTextField73;
-    private javax.swing.JTextField jTextField74;
-    private javax.swing.JTextField jTextField75;
-    private javax.swing.JTextField jTextField76;
-    private javax.swing.JTextField jTextField77;
     private javax.swing.JTextField jTextField8;
-    private javax.swing.JTextField jTextField9;
-    private ci.LightPanel lightPanel2;
+    private ci.LightPanel lightPanel;
     public javax.swing.JMenuItem menuItemLoginAdmin;
     public javax.swing.JMenuItem menuItemLoginUser;
+    private javax.swing.JPanel nodeMgntPanel;
     private javax.swing.JCheckBox onlyReceiveCB;
     public javax.swing.JList receiveList;
     private javax.swing.JTextPane receiveTP;
@@ -14409,11 +13496,14 @@ class ShowStationChartThread extends Thread{
     public javax.swing.JCheckBox showSysMsgCB;
     public javax.swing.JCheckBox showTimeCB;
     public javax.swing.JList stationList;
+    private javax.swing.JLabel statusLabel;
     private javax.swing.JButton stopContinueSendBtn;
+    private javax.swing.JLabel timeLabel;
     private javax.swing.JMenuItem toolMenuItem01;
     private javax.swing.JMenuItem toolMenuItem02;
     private javax.swing.JMenuItem toolMenuItem03;
     private javax.swing.JMenuItem toolMenuItem04;
     private javax.swing.JMenuItem toolMenuItem05;
+    javax.swing.JPanel uiPanel;
 
 }
