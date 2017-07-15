@@ -24,7 +24,7 @@ public class UserDialog extends javax.swing.JDialog {
          int width=Toolkit.getDefaultToolkit().getScreenSize().width;
         int h=Toolkit.getDefaultToolkit().getScreenSize().height-20;
 
-        int w2=350;
+        int w2=450;
         int h2=120;
 
         setSize(w2,h2);
@@ -43,6 +43,7 @@ public class UserDialog extends javax.swing.JDialog {
 
     private void initComponents() {
 
+        jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jPasswordField1 = new javax.swing.JPasswordField();
 
@@ -51,19 +52,23 @@ public class UserDialog extends javax.swing.JDialog {
         setTitle(bundle.getString("UserDialog.title")); 
         getContentPane().setLayout(null);
 
+        jPanel1.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
         jLabel1.setFont(jLabel1.getFont().deriveFont(jLabel1.getFont().getSize()+6f));
         jLabel1.setText(bundle.getString("UserDialog.jLabel1.text")); 
-        getContentPane().add(jLabel1);
-        jLabel1.setBounds(20, 10, 130, 40);
+        jPanel1.add(jLabel1);
 
         jPasswordField1.setFont(jPasswordField1.getFont().deriveFont(jPasswordField1.getFont().getSize()+6f));
+        jPasswordField1.setPreferredSize(new java.awt.Dimension(156, 30));
         jPasswordField1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jPasswordField1ActionPerformed(evt);
             }
         });
-        getContentPane().add(jPasswordField1);
-        jPasswordField1.setBounds(160, 20, 150, 30);
+        jPanel1.add(jPasswordField1);
+
+        getContentPane().add(jPanel1);
+        jPanel1.setBounds(20, 20, 410, 40);
 
         pack();
     }
@@ -84,6 +89,7 @@ public class UserDialog extends javax.swing.JDialog {
     }
 
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPasswordField jPasswordField1;
 
 }

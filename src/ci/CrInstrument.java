@@ -33,13 +33,13 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 
 /**
- *
+2 *
  * @author Administrator
  */
 public class CrInstrument extends WSNApplication implements Runnable {
-  public static String version = "2.17.0024";
+  public static String version = "2.17.0028";
   public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-  String versionTime = "20170714-080000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
+  String versionTime = "20170716-100000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
           stationFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_stations.txt",
           sensorFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_sensors.txt",currentViewDSrc="",
           statusFile = System.getProperty("user.home") + File.separator + "ci_status.txt", 
@@ -69,7 +69,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
   CIShowDataThread showThread;
   CIFileThread fileThread;
   CIMiscThread miscThread;
-  CIEventThread eventThread;
+  CIEventThread eventThread=new CIEventThread(this);
   CIActionThread actionThread;
   ShowStationTableThread showTableThread;
   ShowStationChartThread showChartThread;
@@ -81,7 +81,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
   int roomIndex = 7,eventMaxArrCnt=15,condMaxArrCnt=40,actMaxArrCnt=80,chartMaxArrCnt=60,curveMaxArrCnt=60,
           currentChartType=1,n120=1;
   public int showIndex=7,showType=2,maxMainLogLength=100000,maxDSrcLogLength=10000;
-  boolean beginTextPane=true,lastIsData=false,beginToReceive=false,needChk=false;
+  boolean beginTextPane=true,lastIsData=false,beginToReceive=false,needChk=false,resetFrameSize=true;
   public String lastDataFid="",lastDataType="",lastDataPortN="",lastDataConnectionId="";
   WSN wn;
   WaitThread waitThread = new WaitThread();
@@ -89,7 +89,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
   SaveRecordThread saveRecordThread = new SaveRecordThread();
   Vector waitV = new Vector();
   boolean modifySensors = false, cycleOn = false, connected = false, updateHistoryRecord = false, adminLogin = false, userLogin = false,
-          firstRound = true,  changeSensor = false, changeStation = false, isSleep = false, hasNewVersion = false;
+          firstRound = true,  changeSensor = false, changeStation = false, isSleep = false, hasNewVersion = false,
+          skipUICBBChanged=false;
 
   GMailThread2 gm2 = new GMailThread2();
 
@@ -129,7 +130,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
   static public SimpleDateFormat format3 = new SimpleDateFormat("yyyyMMdd"), format4 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss"),
           format8 = new SimpleDateFormat("yyyy-MM-dd"), format9 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-  String apId = "1006",preFrameInfo="";
+  String apId = "1006";
 
   int resetCnt = 300,
           waitDeviceAction_c = 0, waitDeviceActionCount_c = 0, waitKeyAction_m = 0, waitKeyActionCount_m = 0;
@@ -238,6 +239,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     }
     updateHistoryFile(0);
     eventThread.setStatus(wn.w.getGNS(1),"",50);
+    sysLog("System start at " + format4.format(new Date(startTime)) + " (version=" + version + ", version time=" + versionTime + ",ci-demo="+props.getProperty("ci-demo")+", run_my_ap_only="+wn.getPropsString("run_my_ap_only")+")(This need "+(System.currentTimeMillis()-startTime)+" ms to start.)");
   }
 
   void init3() {
@@ -271,7 +273,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     fileThread.start();
     miscThread=new CIMiscThread(this);
     miscThread.start();
-    eventThread=new CIEventThread(this);
+
     eventThread.start();
     actionThread=new CIActionThread(this);
     actionThread.start();
@@ -282,9 +284,10 @@ public class CrInstrument extends WSNApplication implements Runnable {
     double panels[][] = {{0.02, 0.02, 0.96, 0.53}, {0.02, 0.57, 0.96, 0.41}};
     multiPanel = new MultiPanel2(Color.white, panels);
     if (OneVar.check(props.getProperty("lky-n"), 1)) {
-      chartPanel.add(multiPanel);
+
+      chartPanel.add(multiPanel,BorderLayout.CENTER);
     }
-    multiPanel.setBounds(5, 20, chartPanel.getWidth() - 10, chartPanel.getHeight() - 25);
+
     getCurrentRN();
 
     chkAndAdjustEvents();
@@ -394,8 +397,6 @@ public class CrInstrument extends WSNApplication implements Runnable {
     btnZoomOut.setVisible(false);
     cbRemark.setVisible(false);
 
-    validate();
-    sysLog("System start at " + format4.format(new Date(startTime)) + " (version=" + version + ", version time=" + versionTime + ",ci-demo="+props.getProperty("ci-demo")+", run_my_ap_only="+wn.getPropsString("run_my_ap_only")+")");
   }
 
   void setUpSerialPort(){
@@ -2845,7 +2846,7 @@ String getFileHead(String station){
             + ",lastIssueCmdTime_m=" + (lastIssueCmdTime_m == 0 ? "0" : format4.format(new Date(lastIssueCmdTime_m)))
             + ",\r\nlastReceiveTime=" + (lastReceiveTime == 0 ? "0" : format4.format(new Date(lastReceiveTime)))
             + ",lastDataTime=" + (lastDataTime == 0 ? "0" : format4.format(new Date(lastDataTime)))
-            + ", lastRecordTime=" + (lastRecordTime == 0 ? "0" : format4.format(new Date(lastRecordTime)))+", exit code="+type);
+            + ", lastRecordTime=" + (lastRecordTime == 0 ? "0" : format4.format(new Date(lastRecordTime)))+", exit code="+type+(type==106? ",wait count=\""+wn.getPropsString("ap_start_max_wait_sec")+"\" secs":"") );
   }
   void restart(){
     onExit(110);
@@ -4515,17 +4516,16 @@ public void setStatus(String nodeId,String dataSrc[],int statusCode){
   @Override
 public void doLayout(){
   super.doLayout();
-  String info[];
+  String info[]=null;
   updateTitle();
   int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
   int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
   int frameWidth = 1024;
   int frameHeight = 712;
 
-  if(currentUI.get("frame")!=null){
+  if(resetFrameSize && currentUI.get("frame")!=null){
     String frameInfo=(String)currentUI.get("frame");
 
-    if(!frameInfo.equals(preFrameInfo)) {
     info=ylib.csvlinetoarray(frameInfo);
 
     if(info.length > 5 && info[5].length()>0){
@@ -4538,7 +4538,11 @@ public void doLayout(){
        device=java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
       if(device.isFullScreenSupported()){
          device.setFullScreenWindow(this);
-        }
+        } else {
+            this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+      }
+      frameWidth=screenWidth;
+      frameHeight=screenHeight;
     } else {
 
         int x=(screenWidth - frameWidth) / 2,y=(screenHeight-20 - frameHeight) / 2 - 10;
@@ -4559,18 +4563,23 @@ public void doLayout(){
            }
         if(info[2].equals("%") && x==100 && y==100){
             this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        }  else {
+            frameWidth=screenWidth;
+            frameHeight=screenHeight;
+        }  else if(resetFrameSize){
              setSize(frameWidth, frameHeight);
              setLocation(x, y);
+             resetFrameSize=false;
         }
         if(info.length>14 && info[14].equalsIgnoreCase("r")) setResizable(true); else setResizable(false);
     }
 
     jPanel1.setBackground((info.length>7 && info[7].length()>0 && isNumeric(info[7]))? new Color(Integer.parseInt(info[7])):jPanel1.getBackground());
-    preFrameInfo=frameInfo;
-    }
 
+  } else {
+      frameWidth=this.getWidth();
+      frameHeight=this.getHeight();
   }
+
   if(currentUI.get("button 01")!=null){
     info=ylib.csvlinetoarray((String)currentUI.get("button 01"));
     if(info.length>2 && info[2].equalsIgnoreCase("s")){
@@ -4865,6 +4874,7 @@ public void doLayout(){
            Font font=label.getFont();
            if(info[1].trim().length()>0) label.setText(info[1]);
            label.setFont(getFont(font,font.getSize(),info[8],info[9],info[11].equalsIgnoreCase("b"),info[12].equalsIgnoreCase("i")));
+           label.setOpaque((info.length>13 && info[13].equalsIgnoreCase("o")));
            label.setBackground((info.length>7 && info[7].length()>0 && isNumeric(info[7]))? new Color(Integer.parseInt(info[7])):label.getBackground());
            label.setForeground((info.length>10 && info[10].length()>0 && isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):label.getForeground());
          } else label.setVisible(false);
@@ -5775,7 +5785,7 @@ public void doLayout(){
         chartPanel.setBackground(new java.awt.Color(255, 255, 255));
         chartPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)), bundle.getString("CrInstrument.chartPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP)); 
         chartPanel.setFont(chartPanel.getFont());
-        chartPanel.setLayout(null);
+        chartPanel.setLayout(new java.awt.BorderLayout());
         jPanel1.add(chartPanel);
         chartPanel.setBounds(560, 10, 440, 460);
 
@@ -7970,8 +7980,10 @@ public void doLayout(){
         jPanel115.setFont(jPanel115.getFont());
         jPanel115.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
+        jLabel150.setBackground(new java.awt.Color(255, 255, 0));
         jLabel150.setFont(jLabel150.getFont().deriveFont(jLabel150.getFont().getStyle() | java.awt.Font.BOLD, jLabel150.getFont().getSize()+2));
         jLabel150.setText(bundle.getString("CrInstrument.jLabel150.text")); 
+        jLabel150.setOpaque(true);
         jPanel115.add(jLabel150);
 
         showCB.setFont(showCB.getFont());
@@ -8072,9 +8084,11 @@ public void doLayout(){
         jPanel119.setBackground(new java.awt.Color(0, 0, 204));
         jPanel119.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
+        jLabel151.setBackground(new java.awt.Color(255, 0, 51));
         jLabel151.setFont(jLabel151.getFont().deriveFont(jLabel151.getFont().getStyle() | java.awt.Font.BOLD, jLabel151.getFont().getSize()+2));
         jLabel151.setForeground(new java.awt.Color(255, 255, 255));
         jLabel151.setText(bundle.getString("CrInstrument.jLabel151.text")); 
+        jLabel151.setOpaque(true);
         jPanel119.add(jLabel151);
 
         buttonGroup9.add(send16RB);

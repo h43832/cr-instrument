@@ -213,8 +213,10 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
            if(info.length > 6 && info[6].length()>0) height2=(int)(Double.parseDouble(info[6]) * ((double)frameHeight));
            label.setBounds((int)(((double)x2)/instrument.dataAreaRatio), (int)(((double)y2)/instrument.dataAreaRatio),
                    (int)(((double)width2)/instrument.dataAreaRatio),(int)(((double)height2)/instrument.dataAreaRatio));
+
            Font font=label.getFont();
            if(info[1].trim().length()>0) label.setText(info[1]);
+           label.setOpaque((info.length>13 && info[13].equalsIgnoreCase("o")));
            label.setFont(instrument.getFont(font,font.getSize(),info[8],info[9],info[11].equalsIgnoreCase("b"),info[12].equalsIgnoreCase("i")));
            label.setBackground((info.length>7 && info[7].length()>0 && instrument.isNumeric(info[7]))? new Color(Integer.parseInt(info[7])):label.getBackground());
            label.setForeground((info.length>10 && info[10].length()>0 && instrument.isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):label.getForeground());
@@ -239,11 +241,15 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
     info[4]=(instrument.isNumeric(instrument.uiPanel2.jTextField85.getText())? String.valueOf(Double.parseDouble(instrument.uiPanel2.jTextField85.getText())/100.0):"0.0");
     info[5]=(instrument.isNumeric(instrument.uiPanel2.jTextField86.getText())? String.valueOf(Double.parseDouble(instrument.uiPanel2.jTextField86.getText())/100.0):"0.0");
     info[6]=(instrument.isNumeric(instrument.uiPanel2.jTextField87.getText())? String.valueOf(Double.parseDouble(instrument.uiPanel2.jTextField87.getText())/100.0):"0.0");
+    info[8]=(String)instrument.uiPanel2.jComboBox54.getSelectedItem();
+    if(info[8].equals(bundle2.getString("CrInstrument.xy.msg150"))) info[8]="";
     info[9]=instrument.uiPanel2.jTextField88.getText().trim();
     if(instrument.uiPanel2.jCheckBox65.isSelected()) info[11]="b"; else info[11]="e";
     if(instrument.uiPanel2.jCheckBox66.isSelected()) info[12]="i"; else info[12]="e";
     info[7]=""+instrument.uiPanel2.jLabel324.getBackground().getRGB();
     info[10]=""+instrument.uiPanel2.jLabel328.getBackground().getRGB();
+    if(instrument.uiPanel2.jCheckBox1.isSelected()) info[13]="o"; else info[13]="e";
+
     instrument.editUI.put(sel,ylib.arrayToCsvLine(info));
     invalidate();
      }

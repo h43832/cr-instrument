@@ -274,16 +274,45 @@ public class CIFramePanel extends javax.swing.JPanel {
     info[4]= (instrument.isNumeric(instrument.uiPanel2.jTextField9.getText())? String.valueOf(Double.parseDouble(instrument.uiPanel2.jTextField9.getText())/100.0):"0.0");
     info[5]= (instrument.isNumeric(instrument.uiPanel2.jTextField10.getText())? String.valueOf(Double.parseDouble(instrument.uiPanel2.jTextField10.getText())/100.0):"0.0");
     info[6]= (instrument.isNumeric(instrument.uiPanel2.jTextField61.getText())? String.valueOf(Double.parseDouble(instrument.uiPanel2.jTextField61.getText())/100.0):"0.0");
+    info[8]=(String)instrument.uiPanel2.jComboBox53.getSelectedItem();
+    if(info[8].equals(bundle2.getString("CrInstrument.xy.msg150"))) info[8]="";
     info[9]= instrument.uiPanel2.jTextField73.getText().trim();
     if(instrument.uiPanel2.jCheckBox3.isSelected()) info[11]="b"; else info[11]="e";
     if(instrument.uiPanel2.jCheckBox46.isSelected()) info[12]="i"; else info[12]="e";
     info[7]=""+instrument.uiPanel2.jLabel63.getBackground().getRGB();
     info[10]=""+instrument.uiPanel2.jLabel62.getBackground().getRGB();
     info[13]=""+instrument.uiPanel2.jLabel2.getBackground().getRGB();
+
     instrument.editUI.put(sel,ylib.arrayToCsvLine(info));
     invalidate();
-    if(sel.equalsIgnoreCase("data area")) instrument.dataPanel2.invalidate();
+    if(sel.equalsIgnoreCase("data area")) {
+
+        instrument.uiPanel2.updateDataAreaPanel();
+        instrument.dataPanel2.invalidate();
+    }
      }
+   }
+   void updateAreaItem_DataArea(){
+    String sel="data area";
+    if(instrument.editUI.get(sel)==null) return;
+    String info[]=ylib.csvlinetoarray((String)instrument.editUI.get(sel));
+    info[3]= (instrument.isNumeric(instrument.uiPanel2.jTextField6.getText())? String.valueOf(Double.parseDouble(instrument.uiPanel2.jTextField6.getText())/100.0):"0.0");
+    info[4]= (instrument.isNumeric(instrument.uiPanel2.jTextField7.getText())? String.valueOf(Double.parseDouble(instrument.uiPanel2.jTextField7.getText())/100.0):"0.0");
+    info[5]= (instrument.isNumeric(instrument.uiPanel2.jTextField1.getText())? String.valueOf(Double.parseDouble(instrument.uiPanel2.jTextField1.getText())/100.0):"0.0");
+    info[6]= (instrument.isNumeric(instrument.uiPanel2.jTextField2.getText())? String.valueOf(Double.parseDouble(instrument.uiPanel2.jTextField2.getText())/100.0):"0.0");
+    info[9]= instrument.uiPanel2.jTextField4.getText().trim();
+    if(instrument.uiPanel2.jCheckBox2.isSelected()) info[11]="b"; else info[11]="e";
+    if(instrument.uiPanel2.jCheckBox4.isSelected()) info[12]="i"; else info[12]="e";
+    info[7]=""+instrument.uiPanel2.jLabel14.getBackground().getRGB();
+    info[8]=(String)instrument.uiPanel2.jComboBox1.getSelectedItem();
+    if(info[8].equals(bundle2.getString("CrInstrument.xy.msg150"))) info[8]="";
+    info[10]=""+instrument.uiPanel2.jLabel10.getBackground().getRGB();
+    info[13]=""+instrument.uiPanel2.jLabel4.getBackground().getRGB();
+
+    instrument.editUI.put(sel,ylib.arrayToCsvLine(info));
+    invalidate();
+        instrument.uiPanel2.updateDataAreaPanel();
+        instrument.dataPanel2.invalidate();
    }
   
 
@@ -665,6 +694,11 @@ public BasicStroke getStroke(int lineWidth,int lineStyle){
     }
 
     private void dataPanelMouseClicked(java.awt.event.MouseEvent evt) {
+       if(evt.getClickCount()==2){
+           instrument.jTabbedPane1.setSelectedComponent(instrument.jPanel3);
+           instrument.jTabbedPane3.setSelectedComponent(instrument.uiPanel);
+           instrument.uiPanel2.jTabbedPane4.setSelectedComponent(instrument.uiPanel2.dataPanel);
+       }
         instrument.uiPanel2.jComboBox36.setSelectedItem("data area");
 
     }

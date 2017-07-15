@@ -300,19 +300,26 @@ void setFromUITM(){
          }
       }
 
+     instrument.skipUICBBChanged=true;
      jComboBox53.removeAllItems();
      jComboBox54.removeAllItems();
+     jComboBox1.removeAllItems();
      jComboBox53.addItem("");
      jComboBox54.addItem("");
+     jComboBox1.addItem("");
      jComboBox53.addItem(bundle2.getString("CrInstrument.xy.msg150"));
      jComboBox54.addItem(bundle2.getString("CrInstrument.xy.msg150"));
+     jComboBox1.addItem(bundle2.getString("CrInstrument.xy.msg150"));
      String fonts[] = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
     for ( int i = 0; i < fonts.length; i++ )  {
      jComboBox53.addItem(fonts[i]);
      jComboBox54.addItem(fonts[i]);
+     jComboBox1.addItem(fonts[i]);
     }
+    instrument.skipUICBBChanged=false;
 
     setFrameItem();
+    setDataAreaItem();
 
     if(instrument.editUI.get("misc")!=null){
         String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("misc"));
@@ -352,9 +359,29 @@ void setFrameItem(){
                  else jLabel61.setBackground(Color.white);
         if(info[2].trim().equals("%")) jCheckBox38.setSelected(true); else jCheckBox38.setSelected(false);
         if(info[8].toLowerCase().trim().equals("c")) jCheckBox43.setSelected(true); else jCheckBox43.setSelected(false);
-        if(info[13].toLowerCase().trim().equals("f")) jCheckBox44.setSelected(true); else jCheckBox45.setSelected(false);
-        if(info[14].toLowerCase().trim().equals("r")) jCheckBox44.setSelected(true); else jCheckBox45.setSelected(false);
+        if(info[13].toLowerCase().trim().equals("f")) jCheckBox44.setSelected(true); else jCheckBox44.setSelected(false);
+        if(info[14].toLowerCase().trim().equals("r")) jCheckBox45.setSelected(true); else jCheckBox45.setSelected(false);
     }
+}
+void setDataAreaItem(){
+   if(instrument.editUI.get("data area")!=null){
+    String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("data area"));
+
+    jTextField6.setText((instrument.isNumeric(info[3])? String.valueOf(Double.parseDouble(info[3])*100.0):"0.0"));
+    jTextField7.setText((instrument.isNumeric(info[4])? String.valueOf(Double.parseDouble(info[4])*100.0):"0.0"));
+    jTextField1.setText((instrument.isNumeric(info[5])? String.valueOf(Double.parseDouble(info[5])*100.0):"0.0"));
+    jTextField2.setText((instrument.isNumeric(info[6])? String.valueOf(Double.parseDouble(info[6])*100.0):"0.0"));
+    jTextField4.setText(info[9]);
+    if(info[11].equalsIgnoreCase("b")) jCheckBox2.setSelected(true); else jCheckBox2.setSelected(false);
+    if(info[12].equalsIgnoreCase("i")) jCheckBox4.setSelected(true); else jCheckBox4.setSelected(false);
+    if(instrument.isNumeric(info[7])) jLabel14.setBackground(new Color(Integer.parseInt(info[7])));
+                 else jLabel14.setBackground(Color.white);
+    jComboBox1.setSelectedItem(info[8]);
+    if(instrument.isNumeric(info[10])) jLabel10.setBackground(new Color(Integer.parseInt(info[10])));
+                 else jLabel10.setBackground(Color.white);
+    if(instrument.isNumeric(info[13])) jLabel4.setBackground(new Color(Integer.parseInt(info[13])));
+                 else jLabel4.setBackground(Color.white);
+   }
 }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -459,6 +486,31 @@ void setFrameItem(){
         jPanel2 = new javax.swing.JPanel();
         jComboBox15 = new javax.swing.JComboBox();
         jCheckBox64 = new javax.swing.JCheckBox();
+        jCheckBox1 = new javax.swing.JCheckBox();
+        jPanel3 = new javax.swing.JPanel();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel15 = new javax.swing.JLabel();
+        jTextField6 = new javax.swing.JTextField();
+        jLabel16 = new javax.swing.JLabel();
+        jTextField7 = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        jTextField1 = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        jTextField2 = new javax.swing.JTextField();
+        jLabel7 = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel13 = new javax.swing.JLabel();
+        jLabel14 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
+        jComboBox1 = new javax.swing.JComboBox();
+        jLabel12 = new javax.swing.JLabel();
+        jTextField4 = new javax.swing.JTextField();
+        jLabel9 = new javax.swing.JLabel();
+        jLabel10 = new javax.swing.JLabel();
+        jCheckBox2 = new javax.swing.JCheckBox();
+        jCheckBox4 = new javax.swing.JCheckBox();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
         miscPanel = new javax.swing.JPanel();
         jPanel123 = new javax.swing.JPanel();
         jLabel137 = new javax.swing.JLabel();
@@ -522,7 +574,7 @@ void setFrameItem(){
             }
         });
         mainPanel.add(btnApplySetting_ui);
-        btnApplySetting_ui.setBounds(20, 170, 260, 50);
+        btnApplySetting_ui.setBounds(20, 170, 260, 60);
 
         jPanel144.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 255)), bundle.getString("CrInstrument.jPanel144.border.title"))); 
         jPanel144.setFont(jPanel144.getFont());
@@ -629,6 +681,7 @@ void setFrameItem(){
         jPanel143.add(jLabel72);
 
         jComboBox53.setEditable(true);
+        jComboBox53.setFont(jComboBox53.getFont());
         jComboBox53.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         jComboBox53.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -966,7 +1019,7 @@ void setFrameItem(){
             }
         });
         dataPanel.add(jButton18);
-        jButton18.setBounds(40, 20, 230, 50);
+        jButton18.setBounds(20, 20, 250, 50);
 
         jButton23.setFont(jButton23.getFont().deriveFont(jButton23.getFont().getSize()+12f));
         jButton23.setText(bundle.getString("CrInstrument.jButton23.text")); 
@@ -976,7 +1029,7 @@ void setFrameItem(){
             }
         });
         dataPanel.add(jButton23);
-        jButton23.setBounds(40, 80, 230, 50);
+        jButton23.setBounds(20, 80, 250, 50);
 
         jButton24.setFont(jButton24.getFont().deriveFont(jButton24.getFont().getSize()+12f));
         jButton24.setText(bundle.getString("CrInstrument.jButton24.text")); 
@@ -986,12 +1039,12 @@ void setFrameItem(){
             }
         });
         dataPanel.add(jButton24);
-        jButton24.setBounds(40, 140, 230, 50);
+        jButton24.setBounds(20, 140, 250, 50);
 
         jPanel162.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 0)));
         jPanel162.setLayout(new java.awt.BorderLayout());
         dataPanel.add(jPanel162);
-        jPanel162.setBounds(360, 20, 420, 320);
+        jPanel162.setBounds(360, 10, 380, 280);
 
         jPanel163.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 255)), bundle.getString("CrInstrument.jPanel163.border.title"))); 
         jPanel163.setLayout(null);
@@ -1073,7 +1126,7 @@ void setFrameItem(){
         jPanel164.add(jLabel322);
 
         jPanel163.add(jPanel164);
-        jPanel164.setBounds(30, 70, 890, 40);
+        jPanel164.setBounds(20, 60, 900, 40);
 
         jPanel165.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -1098,6 +1151,7 @@ void setFrameItem(){
         jPanel165.add(jLabel325);
 
         jComboBox54.setEditable(true);
+        jComboBox54.setFont(jComboBox54.getFont());
         jComboBox54.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         jComboBox54.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -1158,7 +1212,7 @@ void setFrameItem(){
         jPanel165.add(jCheckBox66);
 
         jPanel163.add(jPanel165);
-        jPanel165.setBounds(30, 110, 910, 40);
+        jPanel165.setBounds(20, 100, 920, 40);
 
         jPanel2.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -1178,11 +1232,205 @@ void setFrameItem(){
         });
         jPanel2.add(jCheckBox64);
 
+        jCheckBox1.setFont(jCheckBox1.getFont());
+        jCheckBox1.setText(bundle.getString("CIUIPanel.jCheckBox1.text")); 
+        jCheckBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox1ActionPerformed(evt);
+            }
+        });
+        jPanel2.add(jCheckBox1);
+
         jPanel163.add(jPanel2);
-        jPanel2.setBounds(20, 27, 820, 40);
+        jPanel2.setBounds(20, 17, 820, 40);
 
         dataPanel.add(jPanel163);
-        jPanel163.setBounds(20, 350, 960, 180);
+        jPanel163.setBounds(20, 410, 960, 150);
+
+        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 255)), bundle.getString("CIUIPanel.jPanel3.border.title"))); 
+        jPanel3.setLayout(null);
+
+        jPanel4.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel15.setFont(jLabel15.getFont());
+        jLabel15.setText(bundle.getString("CIUIPanel.jLabel15.text")); 
+        jPanel4.add(jLabel15);
+
+        jTextField6.setFont(jTextField6.getFont());
+        jTextField6.setText(bundle.getString("CIUIPanel.jTextField6.text")); 
+        jTextField6.setPreferredSize(new java.awt.Dimension(76, 25));
+        jTextField6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField6ActionPerformed(evt);
+            }
+        });
+        jPanel4.add(jTextField6);
+
+        jLabel16.setFont(jLabel16.getFont());
+        jLabel16.setText(bundle.getString("CIUIPanel.jLabel16.text")); 
+        jPanel4.add(jLabel16);
+
+        jTextField7.setFont(jTextField7.getFont());
+        jTextField7.setText(bundle.getString("CIUIPanel.jTextField7.text")); 
+        jTextField7.setPreferredSize(new java.awt.Dimension(76, 25));
+        jTextField7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField7ActionPerformed(evt);
+            }
+        });
+        jPanel4.add(jTextField7);
+
+        jLabel5.setFont(jLabel5.getFont());
+        jLabel5.setText(bundle.getString("CIUIPanel.jLabel5.text")); 
+        jPanel4.add(jLabel5);
+
+        jTextField1.setFont(jTextField1.getFont());
+        jTextField1.setText(bundle.getString("CIUIPanel.jTextField1.text")); 
+        jTextField1.setPreferredSize(new java.awt.Dimension(76, 25));
+        jTextField1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextField1FocusLost(evt);
+            }
+        });
+        jTextField1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField1ActionPerformed(evt);
+            }
+        });
+        jPanel4.add(jTextField1);
+
+        jLabel6.setFont(jLabel6.getFont());
+        jLabel6.setText(bundle.getString("CIUIPanel.jLabel6.text")); 
+        jPanel4.add(jLabel6);
+
+        jTextField2.setFont(jTextField2.getFont());
+        jTextField2.setText(bundle.getString("CIUIPanel.jTextField2.text")); 
+        jTextField2.setPreferredSize(new java.awt.Dimension(76, 25));
+        jTextField2.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextField2FocusLost(evt);
+            }
+        });
+        jTextField2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField2ActionPerformed(evt);
+            }
+        });
+        jPanel4.add(jTextField2);
+
+        jLabel7.setFont(jLabel7.getFont());
+        jLabel7.setText(bundle.getString("CIUIPanel.jLabel7.text")); 
+        jPanel4.add(jLabel7);
+
+        jPanel3.add(jPanel4);
+        jPanel4.setBounds(20, 22, 920, 100);
+
+        jPanel5.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel13.setFont(jLabel13.getFont());
+        jLabel13.setText(bundle.getString("CIUIPanel.jLabel13.text")); 
+        jPanel5.add(jLabel13);
+
+        jLabel14.setBackground(new java.awt.Color(255, 51, 102));
+        jLabel14.setFont(jLabel14.getFont());
+        jLabel14.setText(bundle.getString("CIUIPanel.jLabel14.text")); 
+        jLabel14.setOpaque(true);
+        jLabel14.setPreferredSize(new java.awt.Dimension(40, 25));
+        jLabel14.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel14MouseClicked(evt);
+            }
+        });
+        jPanel5.add(jLabel14);
+
+        jLabel11.setFont(jLabel11.getFont());
+        jLabel11.setText(bundle.getString("CIUIPanel.jLabel11.text")); 
+        jPanel5.add(jLabel11);
+
+        jComboBox1.setEditable(true);
+        jComboBox1.setFont(jComboBox1.getFont());
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jComboBox1.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBox1ItemStateChanged(evt);
+            }
+        });
+        jPanel5.add(jComboBox1);
+
+        jLabel12.setFont(jLabel12.getFont());
+        jLabel12.setText(bundle.getString("CIUIPanel.jLabel12.text")); 
+        jPanel5.add(jLabel12);
+
+        jTextField4.setFont(jTextField4.getFont());
+        jTextField4.setText(bundle.getString("CIUIPanel.jTextField4.text")); 
+        jTextField4.setPreferredSize(new java.awt.Dimension(56, 25));
+        jTextField4.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextField4FocusLost(evt);
+            }
+        });
+        jTextField4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField4ActionPerformed(evt);
+            }
+        });
+        jPanel5.add(jTextField4);
+
+        jLabel9.setFont(jLabel9.getFont());
+        jLabel9.setText(bundle.getString("CIUIPanel.jLabel9.text")); 
+        jPanel5.add(jLabel9);
+
+        jLabel10.setBackground(new java.awt.Color(255, 51, 51));
+        jLabel10.setFont(jLabel10.getFont());
+        jLabel10.setText(bundle.getString("CIUIPanel.jLabel10.text")); 
+        jLabel10.setOpaque(true);
+        jLabel10.setPreferredSize(new java.awt.Dimension(40, 25));
+        jLabel10.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel10MouseClicked(evt);
+            }
+        });
+        jPanel5.add(jLabel10);
+
+        jCheckBox2.setFont(jCheckBox2.getFont());
+        jCheckBox2.setText(bundle.getString("CIUIPanel.jCheckBox2.text")); 
+        jCheckBox2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox2ActionPerformed(evt);
+            }
+        });
+        jPanel5.add(jCheckBox2);
+
+        jCheckBox4.setFont(jCheckBox4.getFont());
+        jCheckBox4.setText(bundle.getString("CIUIPanel.jCheckBox4.text")); 
+        jCheckBox4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox4ActionPerformed(evt);
+            }
+        });
+        jPanel5.add(jCheckBox4);
+
+        jLabel3.setFont(jLabel3.getFont());
+        jLabel3.setText(bundle.getString("CIUIPanel.jLabel3.text")); 
+        jPanel5.add(jLabel3);
+
+        jLabel4.setBackground(new java.awt.Color(255, 0, 51));
+        jLabel4.setFont(jLabel4.getFont());
+        jLabel4.setText(bundle.getString("CIUIPanel.jLabel4.text")); 
+        jLabel4.setOpaque(true);
+        jLabel4.setPreferredSize(new java.awt.Dimension(40, 25));
+        jLabel4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel4MouseClicked(evt);
+            }
+        });
+        jPanel5.add(jLabel4);
+
+        jPanel3.add(jPanel5);
+        jPanel5.setBounds(20, 60, 920, 40);
+
+        dataPanel.add(jPanel3);
+        jPanel3.setBounds(20, 300, 960, 110);
 
         jTabbedPane4.addTab(bundle.getString("CIUIPanel.dataPanel.TabConstraints.tabTitle"), dataPanel); 
 
@@ -1413,6 +1661,7 @@ void setFrameItem(){
         }
 
         setFrameItem();
+        setDataAreaItem();
 
         instrument.selectedUIAreaItem="";
         jComboBox36.setSelectedItem("");
@@ -1420,6 +1669,8 @@ void setFrameItem(){
         instrument.framePanel.invalidate();
         updateDataAreaPanel();
         instrument.dataPanel2.invalidate();
+
+        instrument.resetFrameSize=true;
         instrument.validate();
 
     }
@@ -1433,6 +1684,7 @@ void setFrameItem(){
             }
         }
 
+        instrument.resetFrameSize=true;
         instrument.validate();
         instrument.jTabbedPane1.setSelectedComponent(instrument.jPanel1);
     }
@@ -1471,6 +1723,7 @@ void setFrameItem(){
         }
 
       updateFramePanel();
+      setDataAreaItem();
       updateDataAreaPanel();
       instrument.framePanel.invalidate();
       instrument.dataPanel2.invalidate();
@@ -1546,9 +1799,11 @@ void showDataItem(String sel){
     jTextField85.setText((instrument.isNumeric(info[4])? String.valueOf(Double.parseDouble(info[4])*100.0):"0.0"));
     jTextField86.setText((instrument.isNumeric(info[5])? String.valueOf(Double.parseDouble(info[5])*100.0):"0.0"));
     jTextField87.setText((instrument.isNumeric(info[6])? String.valueOf(Double.parseDouble(info[6])*100.0):"0.0"));
+    jComboBox54.setSelectedItem(info[8]);
     jTextField88.setText(info[9]);
     if(info[11].toLowerCase().trim().equals("b")) jCheckBox65.setSelected(true); else jCheckBox65.setSelected(false);
     if(info[12].toLowerCase().trim().equals("i")) jCheckBox66.setSelected(true); else jCheckBox66.setSelected(false);
+    if(info[13].toLowerCase().trim().equals("o")) jCheckBox1.setSelected(true); else jCheckBox1.setSelected(false);
     if(instrument.isNumeric(info[7])) jLabel324.setBackground( new Color(Integer.parseInt(info[7])));
                  else jLabel324.setBackground(Color.darkGray);
     if(instrument.isNumeric(info[10])) jLabel328.setBackground( new Color(Integer.parseInt(info[10])));
@@ -1572,6 +1827,7 @@ void showAreaItem(String sel){
     jTextField9.setText((instrument.isNumeric(info[4])? String.valueOf(Double.parseDouble(info[4])*100.0):"0.0"));
     jTextField10.setText((instrument.isNumeric(info[5])? String.valueOf(Double.parseDouble(info[5])*100.0):"0.0"));
     jTextField61.setText((instrument.isNumeric(info[6])? String.valueOf(Double.parseDouble(info[6])*100.0):"0.0"));
+    jComboBox53.setSelectedItem(info[8]);
     jTextField73.setText(info[9]);
     if(info[11].toLowerCase().trim().equals("b")) jCheckBox3.setSelected(true); else jCheckBox3.setSelected(false);
     if(info[12].toLowerCase().trim().equals("i")) jCheckBox46.setSelected(true); else jCheckBox46.setSelected(false);
@@ -1792,7 +2048,7 @@ void updateButtonName(){
     }
 
     private void jComboBox53ItemStateChanged(java.awt.event.ItemEvent evt) {
-      if(evt.getStateChange()==evt.SELECTED){
+      if(evt.getStateChange()==evt.SELECTED && !instrument.skipUICBBChanged){
          instrument.framePanel.updateAreaItem();
       }
     }
@@ -1830,7 +2086,7 @@ void updateButtonName(){
     }
 
     private void jComboBox54ItemStateChanged(java.awt.event.ItemEvent evt) {
-      if(evt.getStateChange()==evt.SELECTED){
+      if(evt.getStateChange()==evt.SELECTED && !instrument.skipUICBBChanged){
           instrument.dataPanel2.updateDataItem();
       }
     }
@@ -1855,6 +2111,8 @@ void updateButtonName(){
                 if(instrument.editUI.get(id)!=null) instrument.currentUI.put(id, (String)instrument.editUI.get(id));
             }
         }
+
+        instrument.resetFrameSize=true;
         instrument.validate();
         instrument.jTabbedPane1.setSelectedComponent(instrument.jPanel1);
     }
@@ -1869,6 +2127,7 @@ void updateButtonName(){
         }
         instrument.selectedDataItem="";
         jComboBox15.setSelectedItem("");
+        setDataAreaItem();
 
     }
 
@@ -1886,6 +2145,8 @@ void updateButtonName(){
         instrument.selectedDataItem="";
         jComboBox15.setSelectedItem("");
 
+        setDataAreaItem();
+        instrument.resetFrameSize=true;
         instrument.validate();
     }
 
@@ -1909,6 +2170,8 @@ void updateButtonName(){
                 if(instrument.editUI.get(id)!=null) instrument.currentUI.put(id, (String)instrument.editUI.get(id));
             }
         }
+
+        instrument.resetFrameSize=true;
         instrument.validate();
         instrument.jTabbedPane1.setSelectedComponent(instrument.jPanel1);
 
@@ -1939,6 +2202,8 @@ void updateButtonName(){
 
         instrument.selectedMenuItem="";
         jComboBox21.setSelectedItem("");
+
+        instrument.resetFrameSize=true;
         instrument.validate();
 
         if(needUpdateChartProfile) instrument.updateChartProfile();
@@ -2079,6 +2344,80 @@ void updateButtonName(){
     private void jTextField88FocusLost(java.awt.event.FocusEvent evt) {
        instrument.dataPanel2.updateDataItem();
     }
+
+    private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {
+       instrument.dataPanel2.updateDataItem();
+    }
+
+    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {
+      instrument.framePanel.updateAreaItem_DataArea();
+    }
+
+    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {
+      instrument.framePanel.updateAreaItem_DataArea();
+    }
+
+    private void jCheckBox2ActionPerformed(java.awt.event.ActionEvent evt) {
+       instrument.framePanel.updateAreaItem_DataArea();
+    }
+
+    private void jCheckBox4ActionPerformed(java.awt.event.ActionEvent evt) {
+      instrument.framePanel.updateAreaItem_DataArea();
+    }
+
+    private void jTextField4ActionPerformed(java.awt.event.ActionEvent evt) {
+       instrument.framePanel.updateAreaItem_DataArea();
+    }
+
+    private void jComboBox1ItemStateChanged(java.awt.event.ItemEvent evt) {
+      if(evt.getStateChange()==evt.SELECTED && !instrument.skipUICBBChanged){
+          instrument.framePanel.updateAreaItem_DataArea();
+      }
+    }
+
+    private void jLabel14MouseClicked(java.awt.event.MouseEvent evt) {
+        Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel14.getBackground());
+        if(newColor!=null) {
+            jLabel14.setBackground(newColor);
+            instrument.framePanel.updateAreaItem_DataArea();
+        }
+    }
+
+    private void jLabel4MouseClicked(java.awt.event.MouseEvent evt) {
+        Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel4.getBackground());
+        if(newColor!=null) {
+            jLabel4.setBackground(newColor);
+            instrument.framePanel.updateAreaItem_DataArea();
+        }
+    }
+
+    private void jLabel10MouseClicked(java.awt.event.MouseEvent evt) {
+         Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel10.getBackground());
+        if(newColor!=null) {
+            jLabel10.setBackground(newColor);
+            instrument.framePanel.updateAreaItem_DataArea();
+        }
+    }
+
+    private void jTextField1FocusLost(java.awt.event.FocusEvent evt) {
+      instrument.framePanel.updateAreaItem_DataArea();
+    }
+
+    private void jTextField2FocusLost(java.awt.event.FocusEvent evt) {
+      instrument.framePanel.updateAreaItem_DataArea();
+    }
+
+    private void jTextField4FocusLost(java.awt.event.FocusEvent evt) {
+      instrument.framePanel.updateAreaItem_DataArea();
+    }
+
+    private void jTextField6ActionPerformed(java.awt.event.ActionEvent evt) {
+       instrument.framePanel.updateAreaItem_DataArea();
+    }
+
+    private void jTextField7ActionPerformed(java.awt.event.ActionEvent evt) {
+        instrument.framePanel.updateAreaItem_DataArea();
+    }
 void showMenuItem(String sel){
     if(instrument.editUI.get(sel)==null) return;
     String info[]=ylib.csvlinetoarray((String)instrument.editUI.get(sel));
@@ -2104,10 +2443,11 @@ public void updateDataAreaPanel(){
         if(info[2].equals("%")) frameHeight=(int)(Double.parseDouble(info[6]) * ((double)screenHeight)); else frameHeight=Integer.parseInt(info[6]);
       }
     }
-    String info[]=ylib.csvlinetoarray((String)instrument.currentUI.get("data area"));
-    int w3=420,h3=320;
+    String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("data area"));
+    int w3=380,h3=280;
     double ratio3=((double)w3)/((double)h3);
     int w4=w3,h4=h3;
+
     if(info.length > 5 && info[5].length()>0 && info.length > 6 && info[6].length()>0) {
             w4=(int)(Double.parseDouble(info[5]) * ((double)frameWidth));
             h4=(int)(Double.parseDouble(info[6]) * ((double)frameHeight));
@@ -2136,7 +2476,8 @@ public void updateDataAreaPanel(){
     } else {
         instrument.dataAreaRatio=1.0;
     }
-    jPanel162.setBounds(360, 20, w4, h4);
+
+    jPanel162.setBounds(360, 10, w4, h4);
   }
 }
 void updateFramePanel(){
@@ -2150,11 +2491,15 @@ void updateFramePanel(){
     String frameInfo=(String)instrument.editUI.get("frame");
     info=ylib.csvlinetoarray(frameInfo);
 
+    if(info.length>13 && info[13].equalsIgnoreCase("f")){
+        frameWidth=screenWidth; frameHeight=screenHeight;
+    } else {
     if(info.length > 5 && info[5].length()>0){
         if(info[2].equals("%")) frameWidth=(int)(Double.parseDouble(info[5]) * ((double)screenWidth)); else frameWidth=(int)Double.parseDouble(info[5]);
     }
     if(info.length > 6 && info[6].length()>0){
         if(info[2].equals("%")) frameHeight=(int)(Double.parseDouble(info[6]) * ((double)screenHeight)); else frameHeight=(int)Double.parseDouble(info[6]);
+    }
     }
     }
 
@@ -2206,7 +2551,7 @@ void updateDataAreaType(){
     else if(showAll.isSelected()) info[2]="showall";
     instrument.editUI.put("misc", ylib.arrayToCsvLine(info));
 }
-     void updateFrameItem(){
+  void updateFrameItem(){
     if(instrument.editUI.get("frame")==null) return;
     String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("frame"));
     info[1]=jTextField45.getText().trim();
@@ -2259,9 +2604,12 @@ void updateDataAreaType(){
     private javax.swing.JButton jButton28;
     private javax.swing.JButton jButton29;
     private javax.swing.JButton jButton57;
+    javax.swing.JCheckBox jCheckBox1;
+    javax.swing.JCheckBox jCheckBox2;
     javax.swing.JCheckBox jCheckBox3;
     javax.swing.JCheckBox jCheckBox37;
     javax.swing.JCheckBox jCheckBox38;
+    javax.swing.JCheckBox jCheckBox4;
     javax.swing.JCheckBox jCheckBox43;
     javax.swing.JCheckBox jCheckBox44;
     javax.swing.JCheckBox jCheckBox45;
@@ -2270,25 +2618,34 @@ void updateDataAreaType(){
     javax.swing.JCheckBox jCheckBox64;
     javax.swing.JCheckBox jCheckBox65;
     javax.swing.JCheckBox jCheckBox66;
+    javax.swing.JComboBox jComboBox1;
     javax.swing.JComboBox jComboBox15;
     javax.swing.JComboBox jComboBox21;
     javax.swing.JComboBox jComboBox36;
     javax.swing.JComboBox jComboBox53;
     javax.swing.JComboBox jComboBox54;
     private javax.swing.JLabel jLabel1;
+    javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel105;
     javax.swing.JLabel jLabel107;
     private javax.swing.JLabel jLabel108;
+    private javax.swing.JLabel jLabel11;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel137;
     javax.swing.JLabel jLabel139;
+    javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel140;
     private javax.swing.JLabel jLabel141;
     private javax.swing.JLabel jLabel147;
+    private javax.swing.JLabel jLabel15;
     javax.swing.JLabel jLabel154;
     javax.swing.JLabel jLabel156;
+    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel168;
     javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel311;
@@ -2303,19 +2660,24 @@ void updateDataAreaType(){
     private javax.swing.JLabel jLabel326;
     private javax.swing.JLabel jLabel327;
     javax.swing.JLabel jLabel328;
+    javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel46;
     private javax.swing.JLabel jLabel47;
+    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel54;
     private javax.swing.JLabel jLabel55;
     private javax.swing.JLabel jLabel56;
     private javax.swing.JLabel jLabel57;
+    private javax.swing.JLabel jLabel6;
     javax.swing.JLabel jLabel61;
     javax.swing.JLabel jLabel62;
     javax.swing.JLabel jLabel63;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel72;
     private javax.swing.JLabel jLabel73;
     private javax.swing.JLabel jLabel75;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabel97;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel110;
@@ -2334,15 +2696,23 @@ void updateDataAreaType(){
     private javax.swing.JPanel jPanel166;
     private javax.swing.JPanel jPanel167;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel32;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     javax.swing.JTabbedPane jTabbedPane4;
+    javax.swing.JTextField jTextField1;
     javax.swing.JTextField jTextField10;
     javax.swing.JTextField jTextField11;
+    javax.swing.JTextField jTextField2;
     javax.swing.JTextField jTextField22;
     javax.swing.JTextField jTextField3;
+    javax.swing.JTextField jTextField4;
     javax.swing.JTextField jTextField45;
     javax.swing.JTextField jTextField5;
+    javax.swing.JTextField jTextField6;
     javax.swing.JTextField jTextField61;
+    javax.swing.JTextField jTextField7;
     javax.swing.JTextField jTextField73;
     javax.swing.JTextField jTextField74;
     javax.swing.JTextField jTextField75;
