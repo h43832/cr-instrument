@@ -311,6 +311,7 @@ public class CIFramePanel extends javax.swing.JPanel {
 
     instrument.editUI.put(sel,ylib.arrayToCsvLine(info));
     invalidate();
+
         instrument.uiPanel2.updateDataAreaPanel();
         instrument.dataPanel2.invalidate();
    }

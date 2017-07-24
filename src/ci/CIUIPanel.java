@@ -273,6 +273,9 @@ private void keyPress(java.awt.event.KeyEvent evt){
           }
       }
   }
+  else if(evt.getKeyCode()==27){
+      instrument.soundThread.setStop(2);
+  }
 }
 private void keyRelease(java.awt.event.KeyEvent evt){
 
@@ -324,7 +327,7 @@ void setFromUITM(){
     if(instrument.editUI.get("misc")!=null){
         String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("misc"));
         if(info[1].trim().equalsIgnoreCase("station")) byStation.setSelected(true);
-        else if(info[1].trim().equalsIgnoreCase("device")) byDevice.setSelected(true);
+        else if(info[1].trim().equalsIgnoreCase("device")) byDeviceName.setSelected(true);
         else if(info[1].trim().equalsIgnoreCase("model")) byModel.setSelected(true);
         else if(info[1].trim().equalsIgnoreCase("dataname")) byDataName.setSelected(true);
         else if(info[1].trim().equalsIgnoreCase("chartgroup")) byChartGroup.setSelected(true);
@@ -332,7 +335,7 @@ void setFromUITM(){
 
         chartGroupCB.setSelectedItem(info[3]);
         if(info[2].trim().equalsIgnoreCase("station")) byStation1.setSelected(true);
-        else if(info[2].trim().equalsIgnoreCase("device")) byDevice1.setSelected(true);
+        else if(info[2].trim().equalsIgnoreCase("device")) byDeviceName1.setSelected(true);
         else if(info[2].trim().equalsIgnoreCase("model")) byModel1.setSelected(true);
         else if(info[2].trim().equalsIgnoreCase("dataname")) byDataName1.setSelected(true);
         else if(info[2].trim().equalsIgnoreCase("showall")) showAll.setSelected(true);
@@ -376,7 +379,9 @@ void setDataAreaItem(){
     if(info[12].equalsIgnoreCase("i")) jCheckBox4.setSelected(true); else jCheckBox4.setSelected(false);
     if(instrument.isNumeric(info[7])) jLabel14.setBackground(new Color(Integer.parseInt(info[7])));
                  else jLabel14.setBackground(Color.white);
+    instrument.skipUICBBChanged=true;
     jComboBox1.setSelectedItem(info[8]);
+    instrument.skipUICBBChanged=false;
     if(instrument.isNumeric(info[10])) jLabel10.setBackground(new Color(Integer.parseInt(info[10])));
                  else jLabel10.setBackground(Color.white);
     if(instrument.isNumeric(info[13])) jLabel4.setBackground(new Color(Integer.parseInt(info[13])));
@@ -487,7 +492,7 @@ void setDataAreaItem(){
         jComboBox15 = new javax.swing.JComboBox();
         jCheckBox64 = new javax.swing.JCheckBox();
         jCheckBox1 = new javax.swing.JCheckBox();
-        jPanel3 = new javax.swing.JPanel();
+        jPanel7 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         jLabel15 = new javax.swing.JLabel();
         jTextField6 = new javax.swing.JTextField();
@@ -498,7 +503,9 @@ void setDataAreaItem(){
         jLabel6 = new javax.swing.JLabel();
         jTextField2 = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
-        jPanel5 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jPanel6 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
@@ -509,13 +516,11 @@ void setDataAreaItem(){
         jLabel10 = new javax.swing.JLabel();
         jCheckBox2 = new javax.swing.JCheckBox();
         jCheckBox4 = new javax.swing.JCheckBox();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
         miscPanel = new javax.swing.JPanel();
         jPanel123 = new javax.swing.JPanel();
         jLabel137 = new javax.swing.JLabel();
         byStation = new javax.swing.JRadioButton();
-        byDevice = new javax.swing.JRadioButton();
+        byDeviceName = new javax.swing.JRadioButton();
         byModel = new javax.swing.JRadioButton();
         byDataName = new javax.swing.JRadioButton();
         byChartGroup = new javax.swing.JRadioButton();
@@ -527,8 +532,9 @@ void setDataAreaItem(){
         jPanel167 = new javax.swing.JPanel();
         jLabel168 = new javax.swing.JLabel();
         byStation1 = new javax.swing.JRadioButton();
-        byDevice1 = new javax.swing.JRadioButton();
+        byDeviceName1 = new javax.swing.JRadioButton();
         byModel1 = new javax.swing.JRadioButton();
+        byDevice1 = new javax.swing.JRadioButton();
         byDataName1 = new javax.swing.JRadioButton();
         showAll = new javax.swing.JRadioButton();
         jPanel32 = new javax.swing.JPanel();
@@ -1041,7 +1047,7 @@ void setDataAreaItem(){
         dataPanel.add(jButton24);
         jButton24.setBounds(20, 140, 250, 50);
 
-        jPanel162.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(255, 255, 0)));
+        jPanel162.setBackground(new java.awt.Color(153, 255, 255));
         jPanel162.setLayout(new java.awt.BorderLayout());
         dataPanel.add(jPanel162);
         jPanel162.setBounds(360, 10, 380, 280);
@@ -1247,8 +1253,8 @@ void setDataAreaItem(){
         dataPanel.add(jPanel163);
         jPanel163.setBounds(20, 410, 960, 150);
 
-        jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 255)), bundle.getString("CIUIPanel.jPanel3.border.title"))); 
-        jPanel3.setLayout(null);
+        jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 255)), bundle.getString("CIUIPanel.jPanel7.border.title"))); 
+        jPanel7.setLayout(null);
 
         jPanel4.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -1322,14 +1328,30 @@ void setDataAreaItem(){
         jLabel7.setText(bundle.getString("CIUIPanel.jLabel7.text")); 
         jPanel4.add(jLabel7);
 
-        jPanel3.add(jPanel4);
-        jPanel4.setBounds(20, 22, 920, 100);
+        jLabel3.setFont(jLabel3.getFont());
+        jLabel3.setText(bundle.getString("CIUIPanel.jLabel3.text")); 
+        jPanel4.add(jLabel3);
 
-        jPanel5.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+        jLabel4.setBackground(new java.awt.Color(255, 0, 51));
+        jLabel4.setFont(jLabel4.getFont());
+        jLabel4.setText(bundle.getString("CIUIPanel.jLabel4.text")); 
+        jLabel4.setOpaque(true);
+        jLabel4.setPreferredSize(new java.awt.Dimension(40, 25));
+        jLabel4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel4MouseClicked(evt);
+            }
+        });
+        jPanel4.add(jLabel4);
+
+        jPanel7.add(jPanel4);
+        jPanel4.setBounds(20, 20, 910, 35);
+
+        jPanel6.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         jLabel13.setFont(jLabel13.getFont());
         jLabel13.setText(bundle.getString("CIUIPanel.jLabel13.text")); 
-        jPanel5.add(jLabel13);
+        jPanel6.add(jLabel13);
 
         jLabel14.setBackground(new java.awt.Color(255, 51, 102));
         jLabel14.setFont(jLabel14.getFont());
@@ -1341,11 +1363,11 @@ void setDataAreaItem(){
                 jLabel14MouseClicked(evt);
             }
         });
-        jPanel5.add(jLabel14);
+        jPanel6.add(jLabel14);
 
         jLabel11.setFont(jLabel11.getFont());
         jLabel11.setText(bundle.getString("CIUIPanel.jLabel11.text")); 
-        jPanel5.add(jLabel11);
+        jPanel6.add(jLabel11);
 
         jComboBox1.setEditable(true);
         jComboBox1.setFont(jComboBox1.getFont());
@@ -1355,11 +1377,11 @@ void setDataAreaItem(){
                 jComboBox1ItemStateChanged(evt);
             }
         });
-        jPanel5.add(jComboBox1);
+        jPanel6.add(jComboBox1);
 
         jLabel12.setFont(jLabel12.getFont());
         jLabel12.setText(bundle.getString("CIUIPanel.jLabel12.text")); 
-        jPanel5.add(jLabel12);
+        jPanel6.add(jLabel12);
 
         jTextField4.setFont(jTextField4.getFont());
         jTextField4.setText(bundle.getString("CIUIPanel.jTextField4.text")); 
@@ -1374,11 +1396,11 @@ void setDataAreaItem(){
                 jTextField4ActionPerformed(evt);
             }
         });
-        jPanel5.add(jTextField4);
+        jPanel6.add(jTextField4);
 
         jLabel9.setFont(jLabel9.getFont());
         jLabel9.setText(bundle.getString("CIUIPanel.jLabel9.text")); 
-        jPanel5.add(jLabel9);
+        jPanel6.add(jLabel9);
 
         jLabel10.setBackground(new java.awt.Color(255, 51, 51));
         jLabel10.setFont(jLabel10.getFont());
@@ -1390,7 +1412,7 @@ void setDataAreaItem(){
                 jLabel10MouseClicked(evt);
             }
         });
-        jPanel5.add(jLabel10);
+        jPanel6.add(jLabel10);
 
         jCheckBox2.setFont(jCheckBox2.getFont());
         jCheckBox2.setText(bundle.getString("CIUIPanel.jCheckBox2.text")); 
@@ -1399,7 +1421,7 @@ void setDataAreaItem(){
                 jCheckBox2ActionPerformed(evt);
             }
         });
-        jPanel5.add(jCheckBox2);
+        jPanel6.add(jCheckBox2);
 
         jCheckBox4.setFont(jCheckBox4.getFont());
         jCheckBox4.setText(bundle.getString("CIUIPanel.jCheckBox4.text")); 
@@ -1408,29 +1430,13 @@ void setDataAreaItem(){
                 jCheckBox4ActionPerformed(evt);
             }
         });
-        jPanel5.add(jCheckBox4);
+        jPanel6.add(jCheckBox4);
 
-        jLabel3.setFont(jLabel3.getFont());
-        jLabel3.setText(bundle.getString("CIUIPanel.jLabel3.text")); 
-        jPanel5.add(jLabel3);
+        jPanel7.add(jPanel6);
+        jPanel6.setBounds(20, 60, 910, 40);
 
-        jLabel4.setBackground(new java.awt.Color(255, 0, 51));
-        jLabel4.setFont(jLabel4.getFont());
-        jLabel4.setText(bundle.getString("CIUIPanel.jLabel4.text")); 
-        jLabel4.setOpaque(true);
-        jLabel4.setPreferredSize(new java.awt.Dimension(40, 25));
-        jLabel4.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jLabel4MouseClicked(evt);
-            }
-        });
-        jPanel5.add(jLabel4);
-
-        jPanel3.add(jPanel5);
-        jPanel5.setBounds(20, 60, 920, 40);
-
-        dataPanel.add(jPanel3);
-        jPanel3.setBounds(20, 300, 960, 110);
+        dataPanel.add(jPanel7);
+        jPanel7.setBounds(20, 290, 960, 110);
 
         jTabbedPane4.addTab(bundle.getString("CIUIPanel.dataPanel.TabConstraints.tabTitle"), dataPanel); 
 
@@ -1453,15 +1459,15 @@ void setDataAreaItem(){
         });
         jPanel123.add(byStation);
 
-        buttonGroup1.add(byDevice);
-        byDevice.setFont(byDevice.getFont());
-        byDevice.setText(bundle.getString("CrInstrument.byDevice.text")); 
-        byDevice.addActionListener(new java.awt.event.ActionListener() {
+        buttonGroup1.add(byDeviceName);
+        byDeviceName.setFont(byDeviceName.getFont());
+        byDeviceName.setText(bundle.getString("CrInstrument.byDevice.text")); 
+        byDeviceName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                byDeviceActionPerformed(evt);
+                byDeviceNameActionPerformed(evt);
             }
         });
-        jPanel123.add(byDevice);
+        jPanel123.add(byDeviceName);
 
         buttonGroup1.add(byModel);
         byModel.setFont(byModel.getFont());
@@ -1554,15 +1560,15 @@ void setDataAreaItem(){
         });
         jPanel167.add(byStation1);
 
-        buttonGroup2.add(byDevice1);
-        byDevice1.setFont(byDevice1.getFont());
-        byDevice1.setText(bundle.getString("CrInstrument.byDevice1.text")); 
-        byDevice1.addActionListener(new java.awt.event.ActionListener() {
+        buttonGroup2.add(byDeviceName1);
+        byDeviceName1.setFont(byDeviceName1.getFont());
+        byDeviceName1.setText(bundle.getString("CrInstrument.byDevice1.text")); 
+        byDeviceName1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                byDevice1ActionPerformed(evt);
+                byDeviceName1ActionPerformed(evt);
             }
         });
-        jPanel167.add(byDevice1);
+        jPanel167.add(byDeviceName1);
 
         buttonGroup2.add(byModel1);
         byModel1.setFont(byModel1.getFont());
@@ -1573,6 +1579,16 @@ void setDataAreaItem(){
             }
         });
         jPanel167.add(byModel1);
+
+        buttonGroup2.add(byDevice1);
+        byDevice1.setFont(byDevice1.getFont());
+        byDevice1.setText(bundle.getString("CIUIPanel.byDevice1.text")); 
+        byDevice1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                byDevice1ActionPerformed(evt);
+            }
+        });
+        jPanel167.add(byDevice1);
 
         buttonGroup2.add(byDataName1);
         byDataName1.setFont(byDataName1.getFont());
@@ -1684,9 +1700,14 @@ void setDataAreaItem(){
             }
         }
 
+        setDataAreaItem();
+        updateDataAreaPanel();
+        instrument.dataPanel2.invalidate();
+
         instrument.resetFrameSize=true;
         instrument.validate();
         instrument.jTabbedPane1.setSelectedComponent(instrument.jPanel1);
+
     }
 
     private void jLabel63MouseClicked(java.awt.event.MouseEvent evt) {
@@ -1727,6 +1748,7 @@ void setDataAreaItem(){
       updateDataAreaPanel();
       instrument.framePanel.invalidate();
       instrument.dataPanel2.invalidate();
+
     }
 
     private void jLabel324MouseClicked(java.awt.event.MouseEvent evt) {
@@ -1749,7 +1771,7 @@ void setDataAreaItem(){
         updateChartTypeItem();
     }
 
-    private void byDeviceActionPerformed(java.awt.event.ActionEvent evt) {
+    private void byDeviceNameActionPerformed(java.awt.event.ActionEvent evt) {
         updateChartTypeItem();
     }
 
@@ -1771,7 +1793,7 @@ void setDataAreaItem(){
        updateDataAreaType();
     }
 
-    private void byDevice1ActionPerformed(java.awt.event.ActionEvent evt) {
+    private void byDeviceName1ActionPerformed(java.awt.event.ActionEvent evt) {
         updateDataAreaType();
     }
 
@@ -1799,7 +1821,9 @@ void showDataItem(String sel){
     jTextField85.setText((instrument.isNumeric(info[4])? String.valueOf(Double.parseDouble(info[4])*100.0):"0.0"));
     jTextField86.setText((instrument.isNumeric(info[5])? String.valueOf(Double.parseDouble(info[5])*100.0):"0.0"));
     jTextField87.setText((instrument.isNumeric(info[6])? String.valueOf(Double.parseDouble(info[6])*100.0):"0.0"));
+    instrument.skipUICBBChanged=true;
     jComboBox54.setSelectedItem(info[8]);
+    instrument.skipUICBBChanged=false;
     jTextField88.setText(info[9]);
     if(info[11].toLowerCase().trim().equals("b")) jCheckBox65.setSelected(true); else jCheckBox65.setSelected(false);
     if(info[12].toLowerCase().trim().equals("i")) jCheckBox66.setSelected(true); else jCheckBox66.setSelected(false);
@@ -1827,7 +1851,9 @@ void showAreaItem(String sel){
     jTextField9.setText((instrument.isNumeric(info[4])? String.valueOf(Double.parseDouble(info[4])*100.0):"0.0"));
     jTextField10.setText((instrument.isNumeric(info[5])? String.valueOf(Double.parseDouble(info[5])*100.0):"0.0"));
     jTextField61.setText((instrument.isNumeric(info[6])? String.valueOf(Double.parseDouble(info[6])*100.0):"0.0"));
+    instrument.skipUICBBChanged=true;
     jComboBox53.setSelectedItem(info[8]);
+    instrument.skipUICBBChanged=false;
     jTextField73.setText(info[9]);
     if(info[11].toLowerCase().trim().equals("b")) jCheckBox3.setSelected(true); else jCheckBox3.setSelected(false);
     if(info[12].toLowerCase().trim().equals("i")) jCheckBox46.setSelected(true); else jCheckBox46.setSelected(false);
@@ -2107,10 +2133,12 @@ void updateButtonName(){
         Iterator it=instrument.editUI.keySet().iterator();
         for(;it.hasNext();){
             String id=(String)it.next();
-            if(id.toLowerCase().indexOf("da_")!=-1){
+            if(id.toLowerCase().indexOf("da_")!=-1 || id.toLowerCase().indexOf("data area")!=-1){
                 if(instrument.editUI.get(id)!=null) instrument.currentUI.put(id, (String)instrument.editUI.get(id));
             }
         }
+
+        if(((String)jComboBox36.getSelectedItem()).equalsIgnoreCase("data area")) showAreaItem("data area"); 
 
         instrument.resetFrameSize=true;
         instrument.validate();
@@ -2121,7 +2149,7 @@ void updateButtonName(){
         Iterator it=instrument.currentUI.keySet().iterator();
         for(;it.hasNext();){
             String id=(String)it.next();
-            if(id.toLowerCase().indexOf("da_")!=-1){
+            if(id.toLowerCase().indexOf("da_")!=-1 || id.equalsIgnoreCase("data area")){
                 instrument.editUI.put(id, (String)instrument.currentUI.get(id));
             }
         }
@@ -2136,7 +2164,7 @@ void updateButtonName(){
         Iterator it=instrument.defaultUI.keySet().iterator();
         for(;it.hasNext();){
             String id=(String)it.next();
-            if(id.toLowerCase().indexOf("da_")!=-1){
+            if(id.toLowerCase().indexOf("da_")!=-1 || id.equalsIgnoreCase("data area")){
                 instrument.currentUI.put(id, (String)instrument.defaultUI.get(id));
                 instrument.editUI.put(id, (String)instrument.defaultUI.get(id));
             }
@@ -2148,6 +2176,7 @@ void updateButtonName(){
         setDataAreaItem();
         instrument.resetFrameSize=true;
         instrument.validate();
+        instrument.dataPanel2.invalidate();
     }
 
     private void jButton29ActionPerformed(java.awt.event.ActionEvent evt) {
@@ -2211,13 +2240,13 @@ void updateButtonName(){
      if(instrument.editUI.get("misc")!=null){
        String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("misc"));
        if(info[1].equalsIgnoreCase("staion")) byStation.setSelected(true);
-       else if(info[1].equalsIgnoreCase("device")) byDevice.setSelected(true);
+       else if(info[1].equalsIgnoreCase("device")) byDeviceName.setSelected(true);
        else if(info[1].equalsIgnoreCase("model")) byModel.setSelected(true);
        else if(info[1].equalsIgnoreCase("dataname")) byDataName.setSelected(true);
        else if(info[1].equalsIgnoreCase("chartgroup")) byChartGroup.setSelected(true);
        chartGroupCB.setSelectedItem(info[3]);
        if(info[2].equalsIgnoreCase("staion")) byStation1.setSelected(true);
-       else if(info[2].equalsIgnoreCase("device")) byDevice1.setSelected(true);
+       else if(info[2].equalsIgnoreCase("device")) byDeviceName1.setSelected(true);
        else if(info[2].equalsIgnoreCase("model")) byModel1.setSelected(true);
        else if(info[2].equalsIgnoreCase("dataname")) byDataName1.setSelected(true);
        else if(info[2].equalsIgnoreCase("showall")) showAll.setSelected(true);
@@ -2239,13 +2268,13 @@ void updateButtonName(){
      if(instrument.editUI.get("misc")!=null){
        String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("misc"));
        if(info[1].equalsIgnoreCase("staion")) byStation.setSelected(true);
-       else if(info[1].equalsIgnoreCase("device")) byDevice.setSelected(true);
+       else if(info[1].equalsIgnoreCase("device")) byDeviceName.setSelected(true);
        else if(info[1].equalsIgnoreCase("model")) byModel.setSelected(true);
        else if(info[1].equalsIgnoreCase("dataname")) byDataName.setSelected(true);
        else if(info[1].equalsIgnoreCase("chartgroup")) byChartGroup.setSelected(true);
        chartGroupCB.setSelectedItem(info[3]);
        if(info[2].equalsIgnoreCase("staion")) byStation1.setSelected(true);
-       else if(info[2].equalsIgnoreCase("device")) byDevice1.setSelected(true);
+       else if(info[2].equalsIgnoreCase("device")) byDeviceName1.setSelected(true);
        else if(info[2].equalsIgnoreCase("model")) byModel1.setSelected(true);
        else if(info[2].equalsIgnoreCase("dataname")) byDataName1.setSelected(true);
        else if(info[2].equalsIgnoreCase("showall")) showAll.setSelected(true);
@@ -2418,6 +2447,10 @@ void updateButtonName(){
     private void jTextField7ActionPerformed(java.awt.event.ActionEvent evt) {
         instrument.framePanel.updateAreaItem_DataArea();
     }
+
+    private void byDevice1ActionPerformed(java.awt.event.ActionEvent evt) {
+             updateDataAreaType();
+    }
 void showMenuItem(String sel){
     if(instrument.editUI.get(sel)==null) return;
     String info[]=ylib.csvlinetoarray((String)instrument.editUI.get(sel));
@@ -2534,7 +2567,7 @@ void updateChartTypeItem(){
     if(instrument.editUI.get("misc")==null) return;
     String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("misc"));
     if(byStation.isSelected()) info[1]="station";
-    else if(byDevice.isSelected()) info[1]="device";
+    else if(byDeviceName.isSelected()) info[1]="devicename";
     else if(byModel.isSelected()) info[1]="model";
     else if(byDataName.isSelected()) info[1]="dataname";
     else if(byChartGroup.isSelected()) info[1]="chartgroup";
@@ -2545,8 +2578,9 @@ void updateDataAreaType(){
     if(instrument.editUI.get("misc")==null) return;
     String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("misc"));
     if(byStation1.isSelected()) info[2]="station";
-    else if(byDevice1.isSelected()) info[2]="device";
+    else if(byDeviceName1.isSelected()) info[2]="devicename";
     else if(byModel1.isSelected()) info[2]="model";
+    else if(byDevice1.isSelected()) info[2]="device";
     else if(byDataName1.isSelected()) info[2]="dataname";
     else if(showAll.isSelected()) info[2]="showall";
     instrument.editUI.put("misc", ylib.arrayToCsvLine(info));
@@ -2588,8 +2622,9 @@ void updateDataAreaType(){
     javax.swing.JRadioButton byChartGroup;
     javax.swing.JRadioButton byDataName;
     javax.swing.JRadioButton byDataName1;
-    javax.swing.JRadioButton byDevice;
-    javax.swing.JRadioButton byDevice1;
+    private javax.swing.JRadioButton byDevice1;
+    javax.swing.JRadioButton byDeviceName;
+    javax.swing.JRadioButton byDeviceName1;
     javax.swing.JRadioButton byModel;
     javax.swing.JRadioButton byModel1;
     javax.swing.JRadioButton byStation;
@@ -2696,10 +2731,10 @@ void updateDataAreaType(){
     private javax.swing.JPanel jPanel166;
     private javax.swing.JPanel jPanel167;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel32;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
+    private javax.swing.JPanel jPanel7;
     javax.swing.JTabbedPane jTabbedPane4;
     javax.swing.JTextField jTextField1;
     javax.swing.JTextField jTextField10;

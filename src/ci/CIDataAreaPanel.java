@@ -1,6 +1,7 @@
 
 package ci;
 
+import static ci.CrInstrument.isNumeric;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
@@ -33,9 +34,18 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
           setBackground( new Color(Integer.parseInt(info[7])));
          }
 
-         Color fontColor=((info.length>10 && info[10].length()>0 && instrument.isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):getForeground());
+        String title=bundle2.getString("CrInstrument.jPanel162.border.title");
+        if(title.length()>0){
+        Color fontColor=((info.length>10 && info[10].length()>0 && isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):getForeground());
+        Color borderColor=((info.length>13 && info[13].length()>0 && isNumeric(info[13]))? new Color(Integer.parseInt(info[13])):new java.awt.Color(102, 0, 255));
 
-         setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(102, 0, 255)), bundle2.getString("CrInstrument.jPanel162.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, this.getFont(), fontColor)); 
+          Font titleFont=getFont();
+         int fontSize=(isNumeric(info[9])? Integer.parseInt(info[9]):getFont().getSize());
+         titleFont=instrument.getFont(getFont(), fontSize, getFont().getFontName(), ""+fontSize, info[11].equalsIgnoreCase("b"), info[12].equalsIgnoreCase("i"));
+         Border titleBorder=javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(borderColor), title, javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, titleFont, fontColor);
+         setBorder(titleBorder); 
+        }
+
         }
         int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
        int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
@@ -55,6 +65,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
     setDataArea(frameWidth,frameHeight);
     }
     void setDataArea(int frameWidth,int frameHeight){
+
       setLabel("da_station 01",da2_station_01,frameWidth,frameHeight);
       setLabel("da_station 02",da2_station_02,frameWidth,frameHeight);
       setLabel("da_station 03",da2_station_03,frameWidth,frameHeight);
@@ -199,6 +210,16 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
       setLabel("da_datavalue 46",da2_datavalue_46,frameWidth,frameHeight);
       setLabel("da_datavalue 47",da2_datavalue_47,frameWidth,frameHeight);
       setLabel("da_datavalue 48",da2_datavalue_48,frameWidth,frameHeight);
+      setLabel("da_xlabel 01",da2_xlabel_01,frameWidth,frameHeight);
+      setLabel("da_xlabel 02",da2_xlabel_02,frameWidth,frameHeight);
+      setLabel("da_xlabel 03",da2_xlabel_03,frameWidth,frameHeight);
+      setLabel("da_xlabel 04",da2_xlabel_04,frameWidth,frameHeight);
+      setLabel("da_xlabel 05",da2_xlabel_05,frameWidth,frameHeight);
+      setLabel("da_xlabel 06",da2_xlabel_06,frameWidth,frameHeight);
+      setLabel("da_xlabel 07",da2_xlabel_07,frameWidth,frameHeight);
+      setLabel("da_xlabel 08",da2_xlabel_08,frameWidth,frameHeight);
+      setLabel("da_xlabel 09",da2_xlabel_09,frameWidth,frameHeight);
+      setLabel("da_xlabel 10",da2_xlabel_10,frameWidth,frameHeight);
    }
    void setLabel(String key,JLabel label,int frameWidth,int frameHeight){
      String info[];
@@ -207,6 +228,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
          if(info.length>2 && info[2].equalsIgnoreCase("s")){
            int x2=0,y2=0,width2=0,height2=0;
            label.setVisible(true);
+           if(key.startsWith("da_x")) label.setText(info[1]);
            if(info.length > 3 && info[3].length()>0) x2=(int)(Double.parseDouble(info[3]) * ((double)frameWidth));
            if(info.length > 4 && info[4].length()>0) y2=(int)(Double.parseDouble(info[4]) * ((double)frameHeight));
            if(info.length > 5 && info[5].length()>0) width2=(int)(Double.parseDouble(info[5]) * ((double)frameWidth));
@@ -407,6 +429,16 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
         da2_datavalue_46 = new javax.swing.JLabel();
         da2_datavalue_47 = new javax.swing.JLabel();
         da2_datavalue_48 = new javax.swing.JLabel();
+        da2_xlabel_01 = new javax.swing.JLabel();
+        da2_xlabel_02 = new javax.swing.JLabel();
+        da2_xlabel_03 = new javax.swing.JLabel();
+        da2_xlabel_04 = new javax.swing.JLabel();
+        da2_xlabel_05 = new javax.swing.JLabel();
+        da2_xlabel_06 = new javax.swing.JLabel();
+        da2_xlabel_07 = new javax.swing.JLabel();
+        da2_xlabel_08 = new javax.swing.JLabel();
+        da2_xlabel_09 = new javax.swing.JLabel();
+        da2_xlabel_10 = new javax.swing.JLabel();
 
         addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -1999,6 +2031,106 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
         });
         add(da2_datavalue_48);
         da2_datavalue_48.setBounds(60, 150, 300, 60);
+
+        da2_xlabel_01.setFont(da2_xlabel_01.getFont());
+        da2_xlabel_01.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_01.text")); 
+        da2_xlabel_01.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                da2_xlabel_01MouseClicked(evt);
+            }
+        });
+        add(da2_xlabel_01);
+        da2_xlabel_01.setBounds(80, 240, 170, 20);
+
+        da2_xlabel_02.setFont(da2_xlabel_02.getFont());
+        da2_xlabel_02.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_02.text")); 
+        da2_xlabel_02.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                da2_xlabel_02MouseClicked(evt);
+            }
+        });
+        add(da2_xlabel_02);
+        da2_xlabel_02.setBounds(80, 240, 170, 20);
+
+        da2_xlabel_03.setFont(da2_xlabel_03.getFont());
+        da2_xlabel_03.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_03.text")); 
+        da2_xlabel_03.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                da2_xlabel_03MouseClicked(evt);
+            }
+        });
+        add(da2_xlabel_03);
+        da2_xlabel_03.setBounds(80, 240, 170, 20);
+
+        da2_xlabel_04.setFont(da2_xlabel_04.getFont());
+        da2_xlabel_04.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_04.text")); 
+        da2_xlabel_04.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                da2_xlabel_04MouseClicked(evt);
+            }
+        });
+        add(da2_xlabel_04);
+        da2_xlabel_04.setBounds(80, 240, 170, 20);
+
+        da2_xlabel_05.setFont(da2_xlabel_05.getFont());
+        da2_xlabel_05.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_05.text")); 
+        da2_xlabel_05.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                da2_xlabel_05MouseClicked(evt);
+            }
+        });
+        add(da2_xlabel_05);
+        da2_xlabel_05.setBounds(80, 240, 170, 20);
+
+        da2_xlabel_06.setFont(da2_xlabel_06.getFont());
+        da2_xlabel_06.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_06.text")); 
+        da2_xlabel_06.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                da2_xlabel_06MouseClicked(evt);
+            }
+        });
+        add(da2_xlabel_06);
+        da2_xlabel_06.setBounds(80, 240, 170, 20);
+
+        da2_xlabel_07.setFont(da2_xlabel_07.getFont());
+        da2_xlabel_07.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_07.text")); 
+        da2_xlabel_07.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                da2_xlabel_07MouseClicked(evt);
+            }
+        });
+        add(da2_xlabel_07);
+        da2_xlabel_07.setBounds(80, 240, 170, 20);
+
+        da2_xlabel_08.setFont(da2_xlabel_08.getFont());
+        da2_xlabel_08.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_08.text")); 
+        da2_xlabel_08.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                da2_xlabel_08MouseClicked(evt);
+            }
+        });
+        add(da2_xlabel_08);
+        da2_xlabel_08.setBounds(80, 240, 170, 20);
+
+        da2_xlabel_09.setFont(da2_xlabel_09.getFont());
+        da2_xlabel_09.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_09.text")); 
+        da2_xlabel_09.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                da2_xlabel_09MouseClicked(evt);
+            }
+        });
+        add(da2_xlabel_09);
+        da2_xlabel_09.setBounds(80, 240, 170, 20);
+
+        da2_xlabel_10.setFont(da2_xlabel_10.getFont());
+        da2_xlabel_10.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_10.text")); 
+        da2_xlabel_10.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                da2_xlabel_10MouseClicked(evt);
+            }
+        });
+        add(da2_xlabel_10);
+        da2_xlabel_10.setBounds(80, 240, 170, 20);
     }
 
     private void da2_datavalue_01MouseClicked(java.awt.event.MouseEvent evt) {
@@ -2582,6 +2714,46 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
        instrument.selectedDataItem="";
     }
 
+    private void da2_xlabel_01MouseClicked(java.awt.event.MouseEvent evt) {
+               instrument.uiPanel2.jComboBox15.setSelectedItem("da_xlabel 01");
+    }
+
+    private void da2_xlabel_02MouseClicked(java.awt.event.MouseEvent evt) {
+      instrument.uiPanel2.jComboBox15.setSelectedItem("da_xlabel 02");
+    }
+
+    private void da2_xlabel_03MouseClicked(java.awt.event.MouseEvent evt) {
+        instrument.uiPanel2.jComboBox15.setSelectedItem("da_xlabel 03");
+    }
+
+    private void da2_xlabel_04MouseClicked(java.awt.event.MouseEvent evt) {
+       instrument.uiPanel2.jComboBox15.setSelectedItem("da_xlabel 04");
+    }
+
+    private void da2_xlabel_05MouseClicked(java.awt.event.MouseEvent evt) {
+      instrument.uiPanel2.jComboBox15.setSelectedItem("da_xlabel 05");
+    }
+
+    private void da2_xlabel_06MouseClicked(java.awt.event.MouseEvent evt) {
+        instrument.uiPanel2.jComboBox15.setSelectedItem("da_xlabel 06");
+    }
+
+    private void da2_xlabel_07MouseClicked(java.awt.event.MouseEvent evt) {
+        instrument.uiPanel2.jComboBox15.setSelectedItem("da_xlabel 07");
+    }
+
+    private void da2_xlabel_08MouseClicked(java.awt.event.MouseEvent evt) {
+        instrument.uiPanel2.jComboBox15.setSelectedItem("da_xlabel 08");
+    }
+
+    private void da2_xlabel_09MouseClicked(java.awt.event.MouseEvent evt) {
+        instrument.uiPanel2.jComboBox15.setSelectedItem("da_xlabel 09");
+    }
+
+    private void da2_xlabel_10MouseClicked(java.awt.event.MouseEvent evt) {
+        instrument.uiPanel2.jComboBox15.setSelectedItem("da_xlabel 10");
+    }
+
     private javax.swing.JLabel da2_dataname_01;
     private javax.swing.JLabel da2_dataname_02;
     private javax.swing.JLabel da2_dataname_03;
@@ -2726,5 +2898,15 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
     private javax.swing.JLabel da2_station_14;
     private javax.swing.JLabel da2_station_15;
     private javax.swing.JLabel da2_station_16;
+    private javax.swing.JLabel da2_xlabel_01;
+    private javax.swing.JLabel da2_xlabel_02;
+    private javax.swing.JLabel da2_xlabel_03;
+    private javax.swing.JLabel da2_xlabel_04;
+    private javax.swing.JLabel da2_xlabel_05;
+    private javax.swing.JLabel da2_xlabel_06;
+    private javax.swing.JLabel da2_xlabel_07;
+    private javax.swing.JLabel da2_xlabel_08;
+    private javax.swing.JLabel da2_xlabel_09;
+    private javax.swing.JLabel da2_xlabel_10;
 
 }

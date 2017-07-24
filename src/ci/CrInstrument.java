@@ -37,9 +37,9 @@ import javax.swing.text.StyleConstants;
  * @author Administrator
  */
 public class CrInstrument extends WSNApplication implements Runnable {
-  public static String version = "2.17.0028";
+  public static String version = "2.17.0031";
   public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-  String versionTime = "20170716-100000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
+  String versionTime = "20170724-080000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
           stationFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_stations.txt",
           sensorFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_sensors.txt",currentViewDSrc="",
           statusFile = System.getProperty("user.home") + File.separator + "ci_status.txt", 
@@ -71,6 +71,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
   CIMiscThread miscThread;
   CIEventThread eventThread=new CIEventThread(this);
   CIActionThread actionThread;
+  CISoundThread soundThread=new CISoundThread(this);
   ShowStationTableThread showTableThread;
   ShowStationChartThread showChartThread;
   Thread myThread;
@@ -275,6 +276,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     miscThread.start();
 
     eventThread.start();
+
+    soundThread.start();
     actionThread=new CIActionThread(this);
     actionThread.start();
     showTableThread=new ShowStationTableThread();
@@ -896,11 +899,18 @@ public class CrInstrument extends WSNApplication implements Runnable {
   }
 void updateChartProfile(){
 
+    String byType="dataname",chartGroupName="";
+    TreeMap sensorsClone=(TreeMap)sensors.clone();
+    if(currentUI.get("misc")!=null){
+        String info[]=ylib.csvlinetoarray((String)currentUI.get("misc"));
+        byType=info[1];
+        chartGroupName=info[3];
+    }
   TreeMap currentChartTM=new TreeMap();
   currentDatumTM.clear();
   currentConfigTM.clear();
   currentStatusTM.clear();
-  if(uiPanel2.byStation.isSelected()){
+  if(byType.equalsIgnoreCase("station")){
     if(stationList.getSelectedValue()!=null){
       String station=(String)stationList.getSelectedValue();
 
@@ -928,7 +938,7 @@ void updateChartProfile(){
             String curveData[]=ylib.csvlinetoarray((String)it3.next());
             if(curveData[4].equals(station) && curveData[3].equals(chartData[0])){
               String actionData[]=ylib.csvlinetoarray((String)actionTM.get(curveData[2]));
-              Iterator it4=sensors.values().iterator();
+              Iterator it4=sensorsClone.values().iterator();
               for(;it4.hasNext();){
                 String sensorData[]=ylib.csvlinetoarray((String)it4.next());
                 if(sensorData[0].equalsIgnoreCase(station) && sensorData[2].equalsIgnoreCase(actionData[16])){
@@ -979,7 +989,7 @@ void updateChartProfile(){
     }
     if(currentChartTM.size()>0) return;
   }
-  if(uiPanel2.byDevice.isSelected()){
+  if(byType.equalsIgnoreCase("devicename")){
     if(stationList.getSelectedValue()!=null && deviceTable.getSelectedRow()>-1){
       int sel=deviceTable.getSelectedRow();
       String device=(String)deviceTable.getModel().getValueAt(sel, 0);
@@ -1011,7 +1021,7 @@ void updateChartProfile(){
         String curveData[]=ylib.csvlinetoarray((String)it3.next());
         if(curveData[4].equals(station) && curveData[3].equals(chartData[0])){
         String actionData[]=ylib.csvlinetoarray((String)actionTM.get(curveData[2]));
-        Iterator it4=sensors.values().iterator();
+        Iterator it4=sensorsClone.values().iterator();
           for(;it4.hasNext();){
             String sensorData[]=ylib.csvlinetoarray((String)it4.next());
             if(sensorData[0].equalsIgnoreCase(station) && sensorData[1].equalsIgnoreCase(actionData[39]) && sensorData[3].equals(sn)){
@@ -1063,7 +1073,7 @@ void updateChartProfile(){
     }
     if(currentChartTM.size()>0) return;
   }
-  if(uiPanel2.byModel.isSelected()){
+  if(byType.equalsIgnoreCase("model")){
     if(stationList.getSelectedValue()!=null && deviceTable.getSelectedRow()>-1){
       int sel=deviceTable.getSelectedRow();
       String device=(String)deviceTable.getModel().getValueAt(sel, 0);
@@ -1095,7 +1105,7 @@ void updateChartProfile(){
         String curveData[]=ylib.csvlinetoarray((String)it3.next());
         if(curveData[4].equals(station) && curveData[3].equals(chartData[0])){
         String actionData[]=ylib.csvlinetoarray((String)actionTM.get(curveData[2]));
-        Iterator it4=sensors.values().iterator();
+        Iterator it4=sensorsClone.values().iterator();
           for(;it4.hasNext();){
             String sensorData[]=ylib.csvlinetoarray((String)it4.next());
             if(sensorData[0].equalsIgnoreCase(station) && sensorData[1].equalsIgnoreCase(actionData[16]) && sensorData[2].equals(sn)){
@@ -1147,7 +1157,7 @@ void updateChartProfile(){
     }
     if(currentChartTM.size()>0) return;
   }
-  if(uiPanel2.byDataName.isSelected()){
+  if(byType.equalsIgnoreCase("dataname")){
     if(stationList.getSelectedValue()!=null && deviceTable.getSelectedRow()>-1){
       int sel=deviceTable.getSelectedRow();
       String device=(String)deviceTable.getModel().getValueAt(sel, 0);
@@ -1180,7 +1190,7 @@ void updateChartProfile(){
         String curveData[]=ylib.csvlinetoarray((String)it3.next());
         if(curveData[4].equals(station) && curveData[3].equals(chartData[0])){
         String actionData[]=ylib.csvlinetoarray((String)actionTM.get(curveData[2]));
-        Iterator it4=sensors.values().iterator();
+        Iterator it4=sensorsClone.values().iterator();
           for(;it4.hasNext();){
             String sensorData[]=ylib.csvlinetoarray((String)it4.next());
             if(sensorData[0].equalsIgnoreCase(station) && sensorData[1].equalsIgnoreCase(actionData[16]) && sensorData[2].equals(sn) && sensorData[6].equalsIgnoreCase(dataName)){
@@ -1231,9 +1241,8 @@ void updateChartProfile(){
     }
     if(currentChartTM.size()>0) return;
   }
-  if(uiPanel2.byChartGroup.isSelected()){
+  if(byType.equalsIgnoreCase("chartgroup")){
     if(uiPanel2.chartGroupCB.getSelectedItem()!=null && ((String)uiPanel2.chartGroupCB.getSelectedItem()).length()>0){
-      String chartGroupName=(String)uiPanel2.chartGroupCB.getSelectedItem();
 
       Iterator it=chartTM.values().iterator();
       for(;it.hasNext();){
@@ -1258,7 +1267,7 @@ void updateChartProfile(){
         String curveData[]=ylib.csvlinetoarray((String)it3.next());
         if(curveData[3].equals(chartData[0])){
         String actionData[]=ylib.csvlinetoarray((String)actionTM.get(curveData[2]));
-        Iterator it4=sensors.values().iterator();
+        Iterator it4=sensorsClone.values().iterator();
           for(;it4.hasNext();){
             String sensorData[]=ylib.csvlinetoarray((String)it4.next());
             if(sensorData[0].equalsIgnoreCase(actionData[1]) && sensorData[1].equalsIgnoreCase(actionData[16]) && curveData[6].equalsIgnoreCase(actionData[17])){
@@ -1339,7 +1348,8 @@ public void updateList(){
   sendListModel.clear();
   receiveListModel.addElement(allItemsName);
   sendListModel.addElement(allItemsName);
-  Iterator it=nameIdMap.keySet().iterator();
+  TreeMap nMapClone=(TreeMap)nameIdMap.clone();
+  Iterator it=nMapClone.keySet().iterator();
   for(;it.hasNext();){
     String key=(String)it.next();
 
@@ -1349,7 +1359,7 @@ public void updateList(){
       if(!sendListModel.contains(key)) sendListModel.addElement(key);
     }
   }
-  it=nameIdMap.keySet().iterator();
+  it=nMapClone.keySet().iterator();
   for(;it.hasNext();){
     String key=(String)it.next();
 
@@ -1365,6 +1375,7 @@ public void updateList(){
 
 public Config getConfig(String curveId){
   String tmp[]=ylib.csvlinetoarray(curveId);
+  TreeMap sensorsClone=(TreeMap)sensors.clone();
   if(allConfigTM.get(curveId)!=null) return (Config)allConfigTM.get(curveId);
   String confStr = "lin2,1431048,-65536,-1,A,1,1,1,0,0,0.0,1.0,0.0,2,45," +
             "-45,400,24,0,0,1.0,0.0,,,,Y,-24,,,," +
@@ -1458,8 +1469,8 @@ public Config getConfig(String curveId){
          chartData=ylib.csvlinetoarray((String)chartTM.get(curveData[3]));
       }
     }
-    if(sensors.get(curveId)!=null){
-      String info[]=ylib.csvlinetoarray((String)sensors.get(curveId));
+    if(sensorsClone.get(curveId)!=null){
+      String info[]=ylib.csvlinetoarray((String)sensorsClone.get(curveId));
       boolean foundLimit=false;
       if(WSN.isNumeric(info[5])) {confA[20]=info[5]; confA[1]=wn.w.addOneVar(confA[1],16); }  else confA[1]=wn.w.removeOneVar(confA[1],16);
       if(WSN.isNumeric(info[6])) {confA[21]=info[6]; confA[1]=wn.w.addOneVar(confA[1],17); }  else confA[1]=wn.w.removeOneVar(confA[1],17);
@@ -1948,6 +1959,16 @@ public Status getStatus(String curveId){
     } else {
       jCheckBox18.setSelected(false);
     }
+    if (chkProps("alert-sound-on")) {
+      jCheckBox3.setSelected(true);
+    } else {
+      jCheckBox3.setSelected(false);
+    }
+    if (chkProps("action-sound-on")) {
+      jCheckBox37.setSelected(true);
+    } else {
+      jCheckBox37.setSelected(false);
+    }
     jComboBox11.setSelectedItem("" + getPropsInt("email-time-h"));
     jComboBox7.setSelectedItem("" + getPropsInt("email-time-m"));
     jComboBox12.setSelectedItem("" + getPropsInt("sms-time-h"));
@@ -1963,6 +1984,12 @@ public Status getStatus(String curveId){
     } else {
       jCheckBox9.setSelected(false);
     }
+    jTextField3.setText(getPropsString("alert-sound-file"));
+    jTextField5.setText(getPropsString("alert-sound-times"));
+    jTextField9.setText(getPropsString("alert-sound-interval"));
+    jTextField10.setText(getPropsString("action-sound-file"));
+    jTextField11.setText(getPropsString("action-sound-times"));
+    jTextField22.setText(getPropsString("action-sound-interval"));
     jTextField6.setText(getPropsString("email-from"));
     jPasswordField7.setText(YB642D.decode(getPropsString("email-from-pw")));
     jTextField2.setText(getPropsString("sms-from"));
@@ -2071,6 +2098,23 @@ public Status getStatus(String curveId){
     props.put("email-time-m", jComboBox7.getSelectedItem());
     props.put("sms-time-h", jComboBox12.getSelectedItem());
     props.put("sms-time-m", jComboBox13.getSelectedItem());
+    if (jCheckBox3.isSelected()) {
+      props.put("alert-sound-on", "Y");
+    } else {
+      props.put("alert-sound-on", "N");
+    }
+    if (jCheckBox37.isSelected()) {
+      props.put("action-sound-on", "Y");
+    } else {
+      props.put("action-sound-on", "N");
+    }
+
+    props.put("alert-sound-file", jTextField3.getText().trim());
+    props.put("alert-sound-times", jTextField5.getText().trim());
+    props.put("alert-sound-interval", jTextField9.getText().trim());
+    props.put("action-sound-file", jTextField10.getText().trim());
+    props.put("action-sound-times", jTextField11.getText().trim());
+    props.put("action-sound-interval", jTextField22.getText().trim());
   }
 
   void updateProps_options() {
@@ -2228,6 +2272,7 @@ public void makeDataDir(){
     if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
       sysLog("saveData3(), from " + from);
     }
+    TreeMap sensorsClone=(TreeMap)sensors.clone();
     if(updateHistoryRecord) updateHistoryFile(1);
     long maxFileSize=5000000;
     if(getPropsLong("maxfilesize-in-k") >= 1000) maxFileSize=getPropsLong("maxfilesize-in-k") * 1000;
@@ -2247,11 +2292,11 @@ public void makeDataDir(){
     rowNumber++;
     StringBuffer sbRaw=new StringBuffer(rowNumber+","+format4.format(new Date(datatime)));
     StringBuffer sbCalculated=new StringBuffer(rowNumber+","+format4.format(new Date(datatime)));
-    Iterator it2=sensors.keySet().iterator();
+    Iterator it2=sensorsClone.keySet().iterator();
 
     for(;it2.hasNext();){
       String key=(String)it2.next();
-      String info2[]=ylib.csvlinetoarray((String)sensors.get(key));
+      String info2[]=ylib.csvlinetoarray((String)sensorsClone.get(key));
 
       if(info2.length>0 && info2[0].equals(station)){
 
@@ -2334,11 +2379,12 @@ public void makeDataDir(){
 String getFileHead(String station){
     String firstLine="No.,Time";
     String secondLine=",";
-    Iterator it=sensors.keySet().iterator();
+    TreeMap sensorsClone=(TreeMap)sensors.clone();
+    Iterator it=sensorsClone.keySet().iterator();
     String lastKey="";
     for(;it.hasNext();){
         String key=(String)it.next();
-        String[] info=ylib.csvlinetoarray((String)sensors.get(key));
+        String[] info=ylib.csvlinetoarray((String)sensorsClone.get(key));
         if(info[0].equalsIgnoreCase(station)){
             String key2=info[1]+"-"+info[2]+"-"+info[3];
             if(!key2.equalsIgnoreCase(lastKey)){
@@ -4510,9 +4556,6 @@ public void setStatus(String nodeId,String dataSrc[],int statusCode){
     }
     return id;
   }
-
-  
-
   @Override
 public void doLayout(){
   super.doLayout();
@@ -4858,6 +4901,16 @@ public void doLayout(){
       setLabel("da_datavalue 46",da_datavalue_46,frameWidth,frameHeight);
       setLabel("da_datavalue 47",da_datavalue_47,frameWidth,frameHeight);
       setLabel("da_datavalue 48",da_datavalue_48,frameWidth,frameHeight);
+      setLabel("da_xlabel 01",da_xlabel_01,frameWidth,frameHeight);
+      setLabel("da_xlabel 02",da_xlabel_02,frameWidth,frameHeight);
+      setLabel("da_xlabel 03",da_xlabel_03,frameWidth,frameHeight);
+      setLabel("da_xlabel 04",da_xlabel_04,frameWidth,frameHeight);
+      setLabel("da_xlabel 05",da_xlabel_05,frameWidth,frameHeight);
+      setLabel("da_xlabel 06",da_xlabel_06,frameWidth,frameHeight);
+      setLabel("da_xlabel 07",da_xlabel_07,frameWidth,frameHeight);
+      setLabel("da_xlabel 08",da_xlabel_08,frameWidth,frameHeight);
+      setLabel("da_xlabel 09",da_xlabel_09,frameWidth,frameHeight);
+      setLabel("da_xlabel 10",da_xlabel_10,frameWidth,frameHeight);
    }
    void setLabel(String key,JLabel label,int frameWidth,int frameHeight){
      String info[];
@@ -4866,6 +4919,7 @@ public void doLayout(){
          if(info.length>2 && info[2].equalsIgnoreCase("s")){
            int x2=0,y2=0,width2=0,height2=0;
            label.setVisible(true);
+           if(key.startsWith("da_x")) label.setText(info[1]);
            if(info.length > 3 && info[3].length()>0) x2=(int)(Double.parseDouble(info[3]) * ((double)frameWidth));
            if(info.length > 4 && info[4].length()>0) y2=(int)(Double.parseDouble(info[4]) * ((double)frameHeight));
            if(info.length > 5 && info[5].length()>0) width2=(int)(Double.parseDouble(info[5]) * ((double)frameWidth));
@@ -4878,7 +4932,7 @@ public void doLayout(){
            label.setBackground((info.length>7 && info[7].length()>0 && isNumeric(info[7]))? new Color(Integer.parseInt(info[7])):label.getBackground());
            label.setForeground((info.length>10 && info[10].length()>0 && isNumeric(info[10]))? new Color(Integer.parseInt(info[10])):label.getForeground());
          } else label.setVisible(false);
-       } else if(currentUI.size()>0) sysLog("Warning: label key '"+key+"' not found.");
+       } else if(currentUI.size()>0) sysLog("Warning: label key '"+key+"' not found in currentUI.");
    }
   void removeFromCoorDevices(String deviceAddr, int from) {
     if (wn.w.getHVar("a_monitor") != null && wn.w.getHVar("a_monitor").equalsIgnoreCase("true")) {
@@ -5171,6 +5225,16 @@ public void doLayout(){
         da_datavalue_46 = new javax.swing.JLabel();
         da_datavalue_47 = new javax.swing.JLabel();
         da_datavalue_48 = new javax.swing.JLabel();
+        da_xlabel_01 = new javax.swing.JLabel();
+        da_xlabel_02 = new javax.swing.JLabel();
+        da_xlabel_03 = new javax.swing.JLabel();
+        da_xlabel_04 = new javax.swing.JLabel();
+        da_xlabel_05 = new javax.swing.JLabel();
+        da_xlabel_06 = new javax.swing.JLabel();
+        da_xlabel_07 = new javax.swing.JLabel();
+        da_xlabel_08 = new javax.swing.JLabel();
+        da_xlabel_09 = new javax.swing.JLabel();
+        da_xlabel_10 = new javax.swing.JLabel();
         button02 = new javax.swing.JButton();
         btnStart = new javax.swing.JButton();
         statusLabel = new javax.swing.JLabel();
@@ -5238,13 +5302,15 @@ public void doLayout(){
         jLabel33 = new javax.swing.JLabel();
         jPanel10 = new javax.swing.JPanel();
         jPanel34 = new javax.swing.JPanel();
-        jLabel14 = new javax.swing.JLabel();
         jCheckBox1 = new javax.swing.JCheckBox();
         jCheckBox2 = new javax.swing.JCheckBox();
+        jCheckBox3 = new javax.swing.JCheckBox();
         jPanel38 = new javax.swing.JPanel();
-        jLabel74 = new javax.swing.JLabel();
         jCheckBox17 = new javax.swing.JCheckBox();
         jCheckBox18 = new javax.swing.JCheckBox();
+        jCheckBox37 = new javax.swing.JCheckBox();
+        jLabel14 = new javax.swing.JLabel();
+        jLabel74 = new javax.swing.JLabel();
         jPanel22 = new javax.swing.JPanel();
         jScrollPane5 = new javax.swing.JScrollPane();
         jTable4 = new javax.swing.JTable();
@@ -5255,6 +5321,28 @@ public void doLayout(){
         jTable3 = new javax.swing.JTable();
         jButton21 = new javax.swing.JButton();
         jButton22 = new javax.swing.JButton();
+        jPanel18 = new javax.swing.JPanel();
+        jPanel32 = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        jTextField3 = new javax.swing.JTextField();
+        jButton11 = new javax.swing.JButton();
+        jPanel33 = new javax.swing.JPanel();
+        jLabel13 = new javax.swing.JLabel();
+        jTextField5 = new javax.swing.JTextField();
+        jLabel20 = new javax.swing.JLabel();
+        jTextField9 = new javax.swing.JTextField();
+        jButton12 = new javax.swing.JButton();
+        jPanel19 = new javax.swing.JPanel();
+        jPanel36 = new javax.swing.JPanel();
+        jLabel30 = new javax.swing.JLabel();
+        jTextField10 = new javax.swing.JTextField();
+        jButton13 = new javax.swing.JButton();
+        jPanel39 = new javax.swing.JPanel();
+        jLabel31 = new javax.swing.JLabel();
+        jTextField11 = new javax.swing.JTextField();
+        jLabel34 = new javax.swing.JLabel();
+        jTextField22 = new javax.swing.JTextField();
+        jButton17 = new javax.swing.JButton();
         jPanel20 = new javax.swing.JPanel();
         jPanel24 = new javax.swing.JPanel();
         jPanel25 = new javax.swing.JPanel();
@@ -6657,6 +6745,56 @@ public void doLayout(){
         dataPanel.add(da_datavalue_48);
         da_datavalue_48.setBounds(60, 150, 300, 60);
 
+        da_xlabel_01.setFont(da_xlabel_01.getFont());
+        da_xlabel_01.setText(bundle.getString("CrInstrument.da_xlabel_01.text_1")); 
+        dataPanel.add(da_xlabel_01);
+        da_xlabel_01.setBounds(90, 230, 120, 15);
+
+        da_xlabel_02.setFont(da_xlabel_02.getFont());
+        da_xlabel_02.setText(bundle.getString("CrInstrument.da_xlabel_02.text")); 
+        dataPanel.add(da_xlabel_02);
+        da_xlabel_02.setBounds(90, 230, 120, 15);
+
+        da_xlabel_03.setFont(da_xlabel_03.getFont());
+        da_xlabel_03.setText(bundle.getString("CrInstrument.da_xlabel_03.text_1")); 
+        dataPanel.add(da_xlabel_03);
+        da_xlabel_03.setBounds(90, 230, 120, 15);
+
+        da_xlabel_04.setFont(da_xlabel_04.getFont());
+        da_xlabel_04.setText(bundle.getString("CrInstrument.da_xlabel_04.text_1")); 
+        dataPanel.add(da_xlabel_04);
+        da_xlabel_04.setBounds(90, 230, 120, 15);
+
+        da_xlabel_05.setFont(da_xlabel_05.getFont());
+        da_xlabel_05.setText(bundle.getString("CrInstrument.da_xlabel_05.text_1")); 
+        dataPanel.add(da_xlabel_05);
+        da_xlabel_05.setBounds(90, 230, 120, 15);
+
+        da_xlabel_06.setFont(da_xlabel_06.getFont());
+        da_xlabel_06.setText(bundle.getString("CrInstrument.da_xlabel_06.text")); 
+        dataPanel.add(da_xlabel_06);
+        da_xlabel_06.setBounds(90, 230, 120, 15);
+
+        da_xlabel_07.setFont(da_xlabel_07.getFont());
+        da_xlabel_07.setText(bundle.getString("CrInstrument.da_xlabel_07.text")); 
+        dataPanel.add(da_xlabel_07);
+        da_xlabel_07.setBounds(90, 230, 120, 15);
+
+        da_xlabel_08.setFont(da_xlabel_08.getFont());
+        da_xlabel_08.setText(bundle.getString("CrInstrument.da_xlabel_08.text")); 
+        dataPanel.add(da_xlabel_08);
+        da_xlabel_08.setBounds(90, 230, 120, 15);
+
+        da_xlabel_09.setFont(da_xlabel_09.getFont());
+        da_xlabel_09.setText(bundle.getString("CrInstrument.da_xlabel_09.text_1")); 
+        dataPanel.add(da_xlabel_09);
+        da_xlabel_09.setBounds(90, 230, 120, 15);
+
+        da_xlabel_10.setFont(da_xlabel_10.getFont());
+        da_xlabel_10.setText(bundle.getString("CrInstrument.da_xlabel_10.text_1")); 
+        dataPanel.add(da_xlabel_10);
+        da_xlabel_10.setBounds(90, 230, 120, 15);
+
         jPanel1.add(dataPanel);
         dataPanel.setBounds(170, 330, 380, 280);
 
@@ -7152,7 +7290,7 @@ public void doLayout(){
         jPanel17.setBounds(10, 50, 310, 40);
 
         jPanel5.add(jPanel15);
-        jPanel15.setBounds(20, 370, 380, 110);
+        jPanel15.setBounds(20, 420, 380, 110);
 
         jPanel10.setBackground(new java.awt.Color(255, 255, 255));
         jPanel10.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel10.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 153, 153))); 
@@ -7161,10 +7299,6 @@ public void doLayout(){
 
         jPanel34.setBackground(new java.awt.Color(255, 255, 255));
         jPanel34.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel14.setFont(jLabel14.getFont());
-        jLabel14.setText(bundle.getString("CrInstrument.jLabel14.text")); 
-        jPanel34.add(jLabel14);
 
         jCheckBox1.setBackground(new java.awt.Color(255, 255, 255));
         jCheckBox1.setFont(jCheckBox1.getFont());
@@ -7176,15 +7310,16 @@ public void doLayout(){
         jCheckBox2.setText(bundle.getString("CrInstrument.jCheckBox2.text")); 
         jPanel34.add(jCheckBox2);
 
+        jCheckBox3.setFont(jCheckBox3.getFont());
+        jCheckBox3.setText(bundle.getString("CrInstrument.jCheckBox3.text_1")); 
+        jCheckBox3.setOpaque(false);
+        jPanel34.add(jCheckBox3);
+
         jPanel10.add(jPanel34);
-        jPanel34.setBounds(10, 20, 350, 30);
+        jPanel34.setBounds(10, 60, 350, 30);
 
         jPanel38.setBackground(new java.awt.Color(255, 255, 255));
         jPanel38.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel74.setFont(jLabel74.getFont());
-        jLabel74.setText(bundle.getString("CrInstrument.jLabel74.text")); 
-        jPanel38.add(jLabel74);
 
         jCheckBox17.setBackground(new java.awt.Color(255, 255, 255));
         jCheckBox17.setFont(jCheckBox17.getFont());
@@ -7196,11 +7331,26 @@ public void doLayout(){
         jCheckBox18.setText(bundle.getString("CrInstrument.jCheckBox18.text")); 
         jPanel38.add(jCheckBox18);
 
+        jCheckBox37.setFont(jCheckBox37.getFont());
+        jCheckBox37.setText(bundle.getString("CrInstrument.jCheckBox37.text_1")); 
+        jCheckBox37.setOpaque(false);
+        jPanel38.add(jCheckBox37);
+
         jPanel10.add(jPanel38);
-        jPanel38.setBounds(10, 60, 350, 30);
+        jPanel38.setBounds(10, 130, 360, 30);
+
+        jLabel14.setFont(jLabel14.getFont());
+        jLabel14.setText(bundle.getString("CrInstrument.jLabel14.text")); 
+        jPanel10.add(jLabel14);
+        jLabel14.setBounds(20, 30, 250, 30);
+
+        jLabel74.setFont(jLabel74.getFont());
+        jLabel74.setText(bundle.getString("CrInstrument.jLabel74.text")); 
+        jPanel10.add(jLabel74);
+        jLabel74.setBounds(20, 105, 250, 20);
 
         jPanel5.add(jPanel10);
-        jPanel10.setBounds(20, 230, 380, 110);
+        jPanel10.setBounds(20, 230, 380, 180);
 
         jPanel22.setBackground(new java.awt.Color(255, 255, 255));
         jPanel22.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel22.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 153, 153))); 
@@ -7244,7 +7394,7 @@ public void doLayout(){
         jButton20.setBounds(170, 110, 110, 23);
 
         jPanel5.add(jPanel22);
-        jPanel22.setBounds(420, 230, 300, 140);
+        jPanel22.setBounds(410, 230, 310, 140);
 
         jPanel21.setBackground(new java.awt.Color(255, 255, 255));
         jPanel21.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel21.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 153, 153))); 
@@ -7288,7 +7438,137 @@ public void doLayout(){
         jButton22.setBounds(170, 110, 110, 23);
 
         jPanel5.add(jPanel21);
-        jPanel21.setBounds(420, 390, 300, 140);
+        jPanel21.setBounds(410, 390, 310, 140);
+
+        jPanel18.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel18.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 153)), bundle.getString("CrInstrument.jPanel18.border.title"))); 
+        jPanel18.setLayout(null);
+
+        jPanel32.setOpaque(false);
+        jPanel32.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel8.setFont(jLabel8.getFont());
+        jLabel8.setText(bundle.getString("CrInstrument.jLabel8.text_1")); 
+        jPanel32.add(jLabel8);
+
+        jTextField3.setFont(jTextField3.getFont());
+        jTextField3.setText(bundle.getString("CrInstrument.jTextField3.text_1")); 
+        jTextField3.setPreferredSize(new java.awt.Dimension(106, 25));
+        jPanel32.add(jTextField3);
+
+        jButton11.setFont(jButton11.getFont());
+        jButton11.setText(bundle.getString("CrInstrument.jButton11.text")); 
+        jButton11.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton11ActionPerformed(evt);
+            }
+        });
+        jPanel32.add(jButton11);
+
+        jPanel18.add(jPanel32);
+        jPanel32.setBounds(5, 17, 250, 40);
+
+        jPanel33.setOpaque(false);
+        jPanel33.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel13.setFont(jLabel13.getFont());
+        jLabel13.setText(bundle.getString("CrInstrument.jLabel13.text")); 
+        jPanel33.add(jLabel13);
+
+        jTextField5.setFont(jTextField5.getFont());
+        jTextField5.setText(bundle.getString("CrInstrument.jTextField5.text_1")); 
+        jTextField5.setPreferredSize(new java.awt.Dimension(36, 25));
+        jPanel33.add(jTextField5);
+
+        jLabel20.setFont(jLabel20.getFont());
+        jLabel20.setText(bundle.getString("CrInstrument.jLabel20.text_1")); 
+        jPanel33.add(jLabel20);
+
+        jTextField9.setFont(jTextField9.getFont());
+        jTextField9.setText(bundle.getString("CrInstrument.jTextField9.text_1")); 
+        jTextField9.setPreferredSize(new java.awt.Dimension(36, 25));
+        jPanel33.add(jTextField9);
+
+        jPanel18.add(jPanel33);
+        jPanel33.setBounds(10, 60, 240, 40);
+
+        jButton12.setFont(jButton12.getFont());
+        jButton12.setText(bundle.getString("CrInstrument.jButton12.text")); 
+        jButton12.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton12ActionPerformed(evt);
+            }
+        });
+        jPanel18.add(jButton12);
+        jButton12.setBounds(70, 110, 120, 30);
+
+        jPanel5.add(jPanel18);
+        jPanel18.setBounds(730, 220, 260, 150);
+
+        jPanel19.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel19.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 153)), bundle.getString("CrInstrument.jPanel19.border.title"))); 
+        jPanel19.setLayout(null);
+
+        jPanel36.setOpaque(false);
+        jPanel36.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel30.setFont(jLabel30.getFont());
+        jLabel30.setText(bundle.getString("CrInstrument.jLabel30.text_1")); 
+        jPanel36.add(jLabel30);
+
+        jTextField10.setFont(jTextField10.getFont());
+        jTextField10.setText(bundle.getString("CrInstrument.jTextField10.text_1")); 
+        jTextField10.setPreferredSize(new java.awt.Dimension(106, 25));
+        jPanel36.add(jTextField10);
+
+        jButton13.setFont(jButton13.getFont());
+        jButton13.setText(bundle.getString("CrInstrument.jButton13.text")); 
+        jButton13.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton13ActionPerformed(evt);
+            }
+        });
+        jPanel36.add(jButton13);
+
+        jPanel19.add(jPanel36);
+        jPanel36.setBounds(5, 17, 250, 40);
+
+        jPanel39.setOpaque(false);
+        jPanel39.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel31.setFont(jLabel31.getFont());
+        jLabel31.setText(bundle.getString("CrInstrument.jLabel31.text_1")); 
+        jPanel39.add(jLabel31);
+
+        jTextField11.setFont(jTextField11.getFont());
+        jTextField11.setText(bundle.getString("CrInstrument.jTextField11.text_1")); 
+        jTextField11.setPreferredSize(new java.awt.Dimension(36, 25));
+        jPanel39.add(jTextField11);
+
+        jLabel34.setFont(jLabel34.getFont());
+        jLabel34.setText(bundle.getString("CrInstrument.jLabel34.text")); 
+        jPanel39.add(jLabel34);
+
+        jTextField22.setFont(jTextField22.getFont());
+        jTextField22.setText(bundle.getString("CrInstrument.jTextField22.text_1")); 
+        jTextField22.setPreferredSize(new java.awt.Dimension(36, 25));
+        jPanel39.add(jTextField22);
+
+        jPanel19.add(jPanel39);
+        jPanel39.setBounds(10, 60, 240, 40);
+
+        jButton17.setFont(jButton17.getFont());
+        jButton17.setText(bundle.getString("CrInstrument.jButton17.text_1")); 
+        jButton17.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton17ActionPerformed(evt);
+            }
+        });
+        jPanel19.add(jButton17);
+        jButton17.setBounds(70, 110, 120, 30);
+
+        jPanel5.add(jPanel19);
+        jPanel19.setBounds(730, 390, 260, 150);
 
         jTabbedPane2.addTab(bundle.getString("CrInstrument.jPanel5.TabConstraints.tabTitle"), jPanel5); 
 
@@ -8357,7 +8637,8 @@ public void doLayout(){
         jLabel83.setText(bundle.getString("CrInstrument.jLabel83.text")); 
         jPanel77.add(jLabel83);
 
-        jComboBox18.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Set device SN", "Set data value", "Send email message", "Send SMS message to cell phone", "Send command", "Next station send command", "Next device send command", "Stop continue send command", "Connect all port", "Disconnect all port", "Start monitor", "Stop monitor", "Open URL", "Exit application", "Restart application", "Java class" }));
+        jComboBox18.setFont(jComboBox18.getFont());
+        jComboBox18.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Set device SN", "Set data value", "Send email message", "Send SMS message to cell phone", "Send command", "Alert sound alarm", "Action sound alarm", "Next station send command", "Next device send command", "Stop continue send command", "Connect all port", "Disconnect all port", "Start monitor", "Stop monitor", "Open URL", "Exit application", "Restart application", "Java class" }));
         jComboBox18.setPreferredSize(new java.awt.Dimension(250, 25));
         jComboBox18.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -9071,6 +9352,7 @@ public void doLayout(){
         jLabel78.setText(bundle.getString("CrInstrument.jLabel78.text")); 
         jPanel74.add(jLabel78);
 
+        jComboBox16.setFont(jComboBox16.getFont());
         jComboBox16.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "After system startup", "Click connect button", "Click start button", "Click stop button", "After connected", "After disconnected", "Over upper take-action level", "Under lower take-action level", "Over upper alert level", "Under lower alert level", "Data condition", "Data checked by Java class", "Any data", "Click button 01", "Click button 02", "Click button 03", "Click button 04", "Click button 05", "Click button 06", "Click button 07", "Click button 08", "Click button 09", "Click button 10", "Click file menuitem 01", "Click file menuitem 02", "Click file menuitem 03", "Click file menuitem 04", "Click file menuitem 05", "Click help menuitem 01", "Click help menuitem 02", "Click help menuitem 03", "Click help menuitem 04", "Click help menuitem 05", "Click tool menuitem 01", "Click tool menuitem 02", "Click tool menuitem 03", "Click tool menuitem 04", "Click tool menuitem 05", "Before system terminated", " ", " ", " " }));
         jComboBox16.setPreferredSize(new java.awt.Dimension(250, 21));
         jComboBox16.addItemListener(new java.awt.event.ItemListener() {
@@ -9972,16 +10254,585 @@ public void doLayout(){
     }
   void showSensorData(int row) {
 
-    if (deviceTable.getRowCount() > 0 && row > -1 && row < deviceTable.getRowCount()) {
-      
-
-      if (sensors.get(currentSensorID) != null) {
-        String info2[] = ylib.csvlinetoarray((String) sensors.get(currentSensorID));
-        da_station_01.setText(info2[0] );
-        da_device_01.setText(info2[1]+ " (" + info2[2] + ") - "+info2[3]);
-        da_dataname_01.setText(info2[4]+":" );
-        da_datavalue_01.setText(info2[20] + " "+info2[9]);
+    String byType="dataname";
+    TreeMap sensorsClone=(TreeMap)sensors.clone();
+    if(currentUI.get("misc")!=null){
+        String info[]=ylib.csvlinetoarray((String)currentUI.get("misc"));
+        byType=info[2];
+    }
+    if(byType.equalsIgnoreCase("showall")){
+        TreeMap stations=new TreeMap();
+        TreeMap devices=new TreeMap();
+        Iterator it=sensorsClone.values().iterator();
+        int inx=0;
+        for(;it.hasNext();){
+            String info[]=ylib.csvlinetoarray((String)it.next());
+            stations.put(info[0],"");
+            devices.put(info[1]+ " (" + info[2] + ") - "+info[3], "");
+            showDataName(inx,info[4]);
+            showDataValue(inx,info[20],info[9]);
+            inx++;
+        }
+        showStations(stations);
+        showDevices(devices);
+    } else {
+      if (deviceTable.getRowCount() > 0 && row > -1 && row < deviceTable.getRowCount()) {
+       if (sensorsClone.get(currentSensorID) != null) {
+        if(byType.equalsIgnoreCase("dataname")){
+         String info2[] = ylib.csvlinetoarray((String) sensorsClone.get(currentSensorID));
+         da_station_01.setText(info2[0] );
+         da_device_01.setText(info2[1]+ " (" + info2[2] + ") - "+info2[3]);
+         da_dataname_01.setText(info2[4]+":" );
+         da_datavalue_01.setText(info2[20] + " "+info2[9]);
+        }else if (byType.equalsIgnoreCase("device")){
+         String info2[] = ylib.csvlinetoarray((String) sensorsClone.get(currentSensorID));
+         String key2=info2[0]+","+info2[1]+","+info2[2]+","+info2[3];
+        TreeMap stations=new TreeMap();
+        TreeMap devices=new TreeMap();
+        Iterator it=sensorsClone.values().iterator();
+        int inx=0;
+        for(;it.hasNext();){
+            String info[]=ylib.csvlinetoarray((String)it.next());
+            String key=info[0]+","+info[1]+","+info[2]+","+info[3];
+            if(key.equalsIgnoreCase(key2)){
+            stations.put(info[0],"");
+            devices.put(info[1]+ " (" + info[2] + ") - "+info[3], "");
+            showDataName(inx,info[4]);
+            showDataValue(inx,info[20],info[9]);
+            inx++;
+            }
+        }
+        showStations(stations);
+        showDevices(devices);
+        }else if (byType.equalsIgnoreCase("model")){
+         String info2[] = ylib.csvlinetoarray((String) sensorsClone.get(currentSensorID));
+         String key2=info2[0]+","+info2[1]+","+info2[2];
+        TreeMap stations=new TreeMap();
+        TreeMap devices=new TreeMap();
+        Iterator it=sensorsClone.values().iterator();
+        int inx=0;
+        for(;it.hasNext();){
+            String info[]=ylib.csvlinetoarray((String)it.next());
+            String key=info[0]+","+info[1]+","+info[2];
+            if(key.equalsIgnoreCase(key2)){
+            stations.put(info[0],"");
+            devices.put(info[1]+ " (" + info[2] + ") - "+info[3], "");
+            showDataName(inx,info[4]);
+            showDataValue(inx,info[20],info[9]);
+            inx++;
+            }
+        }
+        showStations(stations);
+        showDevices(devices);
+        }else if (byType.equalsIgnoreCase("devicename")){
+         String info2[] = ylib.csvlinetoarray((String) sensorsClone.get(currentSensorID));
+         String key2=info2[0]+","+info2[1];
+        TreeMap stations=new TreeMap();
+        TreeMap devices=new TreeMap();
+        Iterator it=sensorsClone.values().iterator();
+        int inx=0;
+        for(;it.hasNext();){
+            String info[]=ylib.csvlinetoarray((String)it.next());
+            String key=info[0]+","+info[1];
+            if(key.equalsIgnoreCase(key2)){
+            stations.put(info[0],"");
+            devices.put(info[1]+ " (" + info[2] + ") - "+info[3], "");
+            showDataName(inx,info[4]);
+            showDataValue(inx,info[20],info[9]);
+            inx++;
+            }
+        }
+        showStations(stations);
+        showDevices(devices);
+        }else if (byType.equalsIgnoreCase("station")){
+         String info2[] = ylib.csvlinetoarray((String) sensorsClone.get(currentSensorID));
+         String key2=info2[0];
+        TreeMap stations=new TreeMap();
+        TreeMap devices=new TreeMap();
+        Iterator it=sensorsClone.values().iterator();
+        int inx=0;
+        for(;it.hasNext();){
+            String info[]=ylib.csvlinetoarray((String)it.next());
+            String key=info[0];
+            if(key.equalsIgnoreCase(key2)){
+            stations.put(info[0],"");
+            devices.put(info[1]+ " (" + info[2] + ") - "+info[3], "");
+            showDataName(inx,info[4]);
+            showDataValue(inx,info[20],info[9]);
+            inx++;
+            }
+        }
+        showStations(stations);
+        showDevices(devices);
+        }
+       }
       }
+    }
+  }
+  void showStations(TreeMap tm){
+      Iterator it=tm.keySet().iterator();
+      int inx=0;
+      for(;it.hasNext();){
+          String key=(String)it.next();
+          showStationName(inx,key);
+          inx++;
+      }
+  }
+  void showDevices(TreeMap tm){
+      Iterator it=tm.keySet().iterator();
+      int inx=0;
+      for(;it.hasNext();){
+          String key=(String)it.next();
+          showDeviceName(inx,key);
+          inx++;
+      }
+  }
+  void showStationName(int inx,String name){
+    switch(inx){
+        case 0:
+            da_station_01.setText(name);
+            break;
+        case 1:
+            da_station_02.setText(name);
+            break;
+        case 2:
+            da_station_03.setText(name);
+            break;
+        case 3:
+            da_station_04.setText(name);
+            break;
+        case 4:
+            da_station_05.setText(name);
+            break;
+        case 5:
+            da_station_06.setText(name);
+            break;
+        case 6:
+            da_station_07.setText(name);
+            break;
+        case 7:
+            da_station_08.setText(name);
+            break;
+        case 8:
+            da_station_09.setText(name);
+            break;
+        case 9:
+            da_station_10.setText(name);
+            break;
+        case 10:
+            da_station_11.setText(name);
+            break;
+        case 11:
+            da_station_12.setText(name);
+            break;
+        case 12:
+            da_station_13.setText(name);
+            break;
+        case 13:
+            da_station_14.setText(name);
+            break;
+        case 14:
+            da_station_15.setText(name);
+            break;
+        case 15:
+            da_station_16.setText(name);
+            break;
+    }
+  }
+  void showDeviceName(int inx,String name){
+    switch(inx){
+        case 0:
+            da_device_01.setText(name);
+            break;
+        case 1:
+            da_device_02.setText(name);
+            break;
+        case 2:
+            da_device_03.setText(name);
+            break;
+        case 3:
+            da_device_04.setText(name);
+            break;
+        case 4:
+            da_device_05.setText(name);
+            break;
+        case 5:
+            da_device_06.setText(name);
+            break;
+        case 6:
+            da_device_07.setText(name);
+            break;
+        case 7:
+            da_device_08.setText(name);
+            break;
+        case 8:
+            da_device_09.setText(name);
+            break;
+        case 9:
+            da_device_10.setText(name);
+            break;
+        case 10:
+            da_device_11.setText(name);
+            break;
+        case 11:
+            da_device_12.setText(name);
+            break;
+        case 12:
+            da_device_13.setText(name);
+            break;
+        case 13:
+            da_device_14.setText(name);
+            break;
+        case 14:
+            da_device_15.setText(name);
+            break;
+        case 15:
+            da_device_16.setText(name);
+            break;
+        case 16:
+                da_device_17.setText(name);
+            break;
+        case 17:
+            da_device_18.setText(name);
+            break;
+        case 18:
+            da_device_19.setText(name);
+            break;
+        case 19:
+            da_device_20.setText(name);
+            break;
+        case 20:
+            da_device_21.setText(name);
+            break;
+        case 21:
+            da_device_22.setText(name);
+            break;
+        case 22:
+            da_device_23.setText(name);
+            break;
+        case 23:
+            da_device_24.setText(name);
+            break;
+        case 24:
+            da_device_25.setText(name);
+            break;
+        case 25:
+            da_device_26.setText(name);
+            break;
+        case 26:
+            da_device_27.setText(name);
+            break;
+        case 27:
+            da_device_28.setText(name);
+            break;
+        case 28:
+            da_device_29.setText(name);
+            break;
+        case 29:
+            da_device_30.setText(name);
+            break;
+        case 30:
+            da_device_31.setText(name);
+            break;
+        case 31:
+            da_device_32.setText(name);
+            break;
+    }
+  }
+  void showDataName(int inx,String name){
+    switch(inx){
+        case 0:
+            da_dataname_01.setText(name);
+            break;
+        case 1:
+            da_dataname_02.setText(name);
+            break;
+        case 2:
+            da_dataname_03.setText(name);
+            break;
+        case 3:
+            da_dataname_04.setText(name);
+            break;
+        case 4:
+            da_dataname_05.setText(name);
+            break;
+        case 5:
+            da_dataname_06.setText(name);
+            break;
+        case 6:
+            da_dataname_07.setText(name);
+            break;
+        case 7:
+            da_dataname_08.setText(name);
+            break;
+        case 8:
+            da_dataname_09.setText(name);
+            break;
+        case 9:
+            da_dataname_10.setText(name);
+            break;
+        case 10:
+            da_dataname_11.setText(name);
+            break;
+        case 11:
+            da_dataname_12.setText(name);
+            break;
+        case 12:
+            da_dataname_13.setText(name);
+            break;
+        case 13:
+            da_dataname_14.setText(name);
+            break;
+        case 14:
+            da_dataname_15.setText(name);
+            break;
+        case 15:
+            da_dataname_16.setText(name);
+            break;
+        case 16:
+                da_dataname_17.setText(name);
+            break;
+        case 17:
+            da_dataname_18.setText(name);
+            break;
+        case 18:
+            da_dataname_19.setText(name);
+            break;
+        case 19:
+            da_dataname_20.setText(name);
+            break;
+        case 20:
+            da_dataname_21.setText(name);
+            break;
+        case 21:
+            da_dataname_22.setText(name);
+            break;
+        case 22:
+            da_dataname_23.setText(name);
+            break;
+        case 23:
+            da_dataname_24.setText(name);
+            break;
+        case 24:
+            da_dataname_25.setText(name);
+            break;
+        case 25:
+            da_dataname_26.setText(name);
+            break;
+        case 26:
+            da_dataname_27.setText(name);
+            break;
+        case 27:
+            da_dataname_28.setText(name);
+            break;
+        case 28:
+            da_dataname_29.setText(name);
+            break;
+        case 29:
+            da_dataname_30.setText(name);
+            break;
+        case 30:
+            da_dataname_31.setText(name);
+            break;
+        case 31:
+            da_dataname_32.setText(name);
+            break;
+        case 32:
+            da_dataname_33.setText(name);
+            break;
+        case 33:
+            da_dataname_34.setText(name);
+            break;
+        case 34:
+            da_dataname_35.setText(name);
+            break;
+        case 35:
+            da_dataname_36.setText(name);
+            break;
+        case 36:
+            da_dataname_37.setText(name);
+            break;
+        case 37:
+            da_dataname_38.setText(name);
+            break;
+        case 38:
+            da_dataname_39.setText(name);
+            break;
+        case 39:
+            da_dataname_40.setText(name);
+            break;
+        case 40:
+            da_dataname_41.setText(name);
+            break;
+        case 41:
+            da_dataname_42.setText(name);
+            break;
+        case 42:
+            da_dataname_43.setText(name);
+            break;
+        case 43:
+            da_dataname_44.setText(name);
+            break;
+        case 44:
+            da_dataname_45.setText(name);
+            break;
+        case 45:
+            da_dataname_46.setText(name);
+            break;
+        case 46:
+            da_dataname_47.setText(name);
+            break;
+        case 47:
+            da_dataname_48.setText(name);
+            break;
+    }
+  }
+  void showDataValue(int inx,String value,String unit){
+    switch(inx){
+        case 0:
+            da_datavalue_01.setText(value + " "+unit);
+            break;
+        case 1:
+            da_datavalue_02.setText(value + " "+unit);
+            break;
+        case 2:
+            da_datavalue_03.setText(value + " "+unit);
+            break;
+        case 3:
+            da_datavalue_04.setText(value + " "+unit);
+            break;
+        case 4:
+            da_datavalue_05.setText(value + " "+unit);
+            break;
+        case 5:
+            da_datavalue_06.setText(value + " "+unit);
+            break;
+        case 6:
+            da_datavalue_07.setText(value + " "+unit);
+            break;
+        case 7:
+            da_datavalue_08.setText(value + " "+unit);
+            break;
+        case 8:
+            da_datavalue_09.setText(value + " "+unit);
+            break;
+        case 9:
+            da_datavalue_10.setText(value + " "+unit);
+            break;
+        case 10:
+            da_datavalue_11.setText(value + " "+unit);
+            break;
+        case 11:
+            da_datavalue_12.setText(value + " "+unit);
+            break;
+        case 12:
+            da_datavalue_13.setText(value + " "+unit);
+            break;
+        case 13:
+            da_datavalue_14.setText(value + " "+unit);
+            break;
+        case 14:
+            da_datavalue_15.setText(value + " "+unit);
+            break;
+        case 15:
+            da_datavalue_16.setText(value + " "+unit);
+            break;
+        case 16:
+                da_datavalue_17.setText(value + " "+unit);
+            break;
+        case 17:
+            da_datavalue_18.setText(value + " "+unit);
+            break;
+        case 18:
+            da_datavalue_19.setText(value + " "+unit);
+            break;
+        case 19:
+            da_datavalue_20.setText(value + " "+unit);
+            break;
+        case 20:
+            da_datavalue_21.setText(value + " "+unit);
+            break;
+        case 21:
+            da_datavalue_22.setText(value + " "+unit);
+            break;
+        case 22:
+            da_datavalue_23.setText(value + " "+unit);
+            break;
+        case 23:
+            da_datavalue_24.setText(value + " "+unit);
+            break;
+        case 24:
+            da_datavalue_25.setText(value + " "+unit);
+            break;
+        case 25:
+            da_datavalue_26.setText(value + " "+unit);
+            break;
+        case 26:
+            da_datavalue_27.setText(value + " "+unit);
+            break;
+        case 27:
+            da_datavalue_28.setText(value + " "+unit);
+            break;
+        case 28:
+            da_datavalue_29.setText(value + " "+unit);
+            break;
+        case 29:
+            da_datavalue_30.setText(value + " "+unit);
+            break;
+        case 30:
+            da_datavalue_31.setText(value + " "+unit);
+            break;
+        case 31:
+            da_datavalue_32.setText(value + " "+unit);
+            break;
+        case 32:
+            da_datavalue_33.setText(value + " "+unit);
+            break;
+        case 33:
+            da_datavalue_34.setText(value + " "+unit);
+            break;
+        case 34:
+            da_datavalue_35.setText(value + " "+unit);
+            break;
+        case 35:
+            da_datavalue_36.setText(value + " "+unit);
+            break;
+        case 36:
+            da_datavalue_37.setText(value + " "+unit);
+            break;
+        case 37:
+            da_datavalue_38.setText(value + " "+unit);
+            break;
+        case 38:
+            da_datavalue_39.setText(value + " "+unit);
+            break;
+        case 39:
+            da_datavalue_40.setText(value + " "+unit);
+            break;
+        case 40:
+            da_datavalue_41.setText(value + " "+unit);
+            break;
+        case 41:
+            da_datavalue_42.setText(value + " "+unit);
+            break;
+        case 42:
+            da_datavalue_43.setText(value + " "+unit);
+            break;
+        case 43:
+            da_datavalue_44.setText(value + " "+unit);
+            break;
+        case 44:
+            da_datavalue_45.setText(value + " "+unit);
+            break;
+        case 45:
+            da_datavalue_46.setText(value + " "+unit);
+            break;
+        case 46:
+            da_datavalue_47.setText(value + " "+unit);
+            break;
+        case 47:
+            da_datavalue_48.setText(value + " "+unit);
+            break;
     }
   }
 
@@ -11931,6 +12782,40 @@ if(evt.getStateChange()==evt.SELECTED){
 
          openURL.open(webAddr);
     }
+
+    private void jButton12ActionPerformed(java.awt.event.ActionEvent evt) {
+
+       soundThread.setAction("2,"+jTextField5.getText().trim()+","+jTextField3.getText().trim()+","+jTextField9.getText().trim()+",2");
+    }
+
+    private void jButton17ActionPerformed(java.awt.event.ActionEvent evt) {
+
+        soundThread.setAction("2,"+jTextField11.getText().trim()+","+jTextField10.getText().trim()+","+jTextField22.getText().trim()+",2");
+    }
+
+    private void jButton11ActionPerformed(java.awt.event.ActionEvent evt) {
+    String oldDir = jTextField3.getText().trim();
+    JFileChooser chooser = new JFileChooser(oldDir);
+    chooser.setDialogTitle(bundle2.getString("CrInstrument.xy.msg151"));
+    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+    int returnVal = chooser.showDialog(this, bundle2.getString("CrInstrument.xy.msg152"));
+    if (returnVal == JFileChooser.APPROVE_OPTION) {
+      jTextField3.setText(chooser.getSelectedFile().getAbsolutePath());
+    }
+    }
+
+    private void jButton13ActionPerformed(java.awt.event.ActionEvent evt) {
+    String oldDir = jTextField10.getText().trim();
+    JFileChooser chooser = new JFileChooser(oldDir);
+    chooser.setDialogTitle(bundle2.getString("CrInstrument.xy.msg153"));
+    chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+    int returnVal = chooser.showDialog(this, bundle2.getString("CrInstrument.xy.msg154"));
+    if (returnVal == JFileChooser.APPROVE_OPTION) {
+      jTextField10.setText(chooser.getSelectedFile().getAbsolutePath());
+    }
+    }
  private void changeReceiveListItem(){
   String datasrc=(String)receiveList.getSelectedValue();
 
@@ -13016,6 +13901,16 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel da_station_14;
     private javax.swing.JLabel da_station_15;
     private javax.swing.JLabel da_station_16;
+    private javax.swing.JLabel da_xlabel_01;
+    private javax.swing.JLabel da_xlabel_02;
+    private javax.swing.JLabel da_xlabel_03;
+    private javax.swing.JLabel da_xlabel_04;
+    private javax.swing.JLabel da_xlabel_05;
+    private javax.swing.JLabel da_xlabel_06;
+    private javax.swing.JLabel da_xlabel_07;
+    private javax.swing.JLabel da_xlabel_08;
+    private javax.swing.JLabel da_xlabel_09;
+    private javax.swing.JLabel da_xlabel_10;
     private javax.swing.JPanel dataPanel;
     private javax.swing.JTable deviceTable;
     private javax.swing.JList eventList;
@@ -13032,9 +13927,13 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JMenuItem helpMenuItem05;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton10;
+    private javax.swing.JButton jButton11;
+    private javax.swing.JButton jButton12;
+    private javax.swing.JButton jButton13;
     private javax.swing.JButton jButton14;
     private javax.swing.JButton jButton15;
     private javax.swing.JButton jButton16;
+    private javax.swing.JButton jButton17;
     private javax.swing.JButton jButton19;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton20;
@@ -13078,6 +13977,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JCheckBox jCheckBox27;
     private javax.swing.JCheckBox jCheckBox28;
     private javax.swing.JCheckBox jCheckBox29;
+    private javax.swing.JCheckBox jCheckBox3;
     private javax.swing.JCheckBox jCheckBox30;
     private javax.swing.JCheckBox jCheckBox31;
     private javax.swing.JCheckBox jCheckBox32;
@@ -13085,6 +13985,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JCheckBox jCheckBox34;
     private javax.swing.JCheckBox jCheckBox35;
     private javax.swing.JCheckBox jCheckBox36;
+    private javax.swing.JCheckBox jCheckBox37;
     private javax.swing.JCheckBox jCheckBox39;
     private javax.swing.JCheckBox jCheckBox4;
     private javax.swing.JCheckBox jCheckBox40;
@@ -13160,6 +14061,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel126;
     private javax.swing.JLabel jLabel127;
     private javax.swing.JLabel jLabel129;
+    private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel130;
     private javax.swing.JLabel jLabel131;
     private javax.swing.JLabel jLabel132;
@@ -13195,6 +14097,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel18;
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
@@ -13205,8 +14108,11 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel32;
     private javax.swing.JLabel jLabel33;
+    private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel36;
     private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
@@ -13234,6 +14140,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel77;
     private javax.swing.JLabel jLabel78;
     private javax.swing.JLabel jLabel79;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel80;
     private javax.swing.JLabel jLabel81;
     private javax.swing.JLabel jLabel82;
@@ -13312,6 +14219,8 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JPanel jPanel15;
     private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel17;
+    private javax.swing.JPanel jPanel18;
+    private javax.swing.JPanel jPanel19;
     public javax.swing.JPanel jPanel2;
     public javax.swing.JPanel jPanel20;
     private javax.swing.JPanel jPanel21;
@@ -13326,10 +14235,14 @@ class ShowStationChartThread extends Thread{
     public javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel30;
     private javax.swing.JPanel jPanel31;
+    private javax.swing.JPanel jPanel32;
+    private javax.swing.JPanel jPanel33;
     private javax.swing.JPanel jPanel34;
     private javax.swing.JPanel jPanel35;
+    private javax.swing.JPanel jPanel36;
     private javax.swing.JPanel jPanel37;
     private javax.swing.JPanel jPanel38;
+    private javax.swing.JPanel jPanel39;
     public javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel42;
     private javax.swing.JPanel jPanel43;
@@ -13433,6 +14346,8 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JTable jTable5;
     private javax.swing.JTable jTable6;
     private javax.swing.JTextField jTextField1;
+    private javax.swing.JTextField jTextField10;
+    private javax.swing.JTextField jTextField11;
     private javax.swing.JTextField jTextField12;
     private javax.swing.JTextField jTextField13;
     private javax.swing.JTextField jTextField14;
@@ -13444,9 +14359,11 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField20;
     private javax.swing.JTextField jTextField21;
+    private javax.swing.JTextField jTextField22;
     private javax.swing.JTextField jTextField27;
     private javax.swing.JTextField jTextField28;
     private javax.swing.JTextField jTextField29;
+    private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField30;
     private javax.swing.JTextField jTextField31;
     private javax.swing.JTextField jTextField32;
@@ -13464,6 +14381,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JTextField jTextField47;
     private javax.swing.JTextField jTextField48;
     private javax.swing.JTextField jTextField49;
+    private javax.swing.JTextField jTextField5;
     private javax.swing.JTextField jTextField50;
     private javax.swing.JTextField jTextField51;
     private javax.swing.JTextField jTextField52;
@@ -13488,6 +14406,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JTextField jTextField71;
     private javax.swing.JTextField jTextField72;
     private javax.swing.JTextField jTextField8;
+    private javax.swing.JTextField jTextField9;
     private ci.LightPanel lightPanel;
     public javax.swing.JMenuItem menuItemLoginAdmin;
     public javax.swing.JMenuItem menuItemLoginUser;

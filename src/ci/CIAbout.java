@@ -37,7 +37,7 @@ public class CIAbout extends javax.swing.JDialog {
           "without Cloud-Rain's permission. Oracle and Java are trademarks or registered trademarks of Oracle and/or its " +
           "affiliates. Other names may be trademarks of their respective owners.\n\n" +
           "This product includes software developed by other open source projects including " +
-          "Apache Software Foundation, RXTX for Java, and cr-WSN.");
+          "Apache Software Foundation, RXTX for Java, mp3spi, jLayer, Tritonus and cr-WSN.");
         setLocation((width-w2)/2,(h-h2)/2);
 
         setIconImage(instrument.iconImage);
