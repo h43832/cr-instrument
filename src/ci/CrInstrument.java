@@ -37,9 +37,9 @@ import javax.swing.text.StyleConstants;
  * @author Administrator
  */
 public class CrInstrument extends WSNApplication implements Runnable {
-  public static String version = "2.17.0031";
+  public static String version = "2.17.0032";
   public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-  String versionTime = "20170724-080000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
+  String versionTime = "20170730-080000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
           stationFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_stations.txt",
           sensorFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_sensors.txt",currentViewDSrc="",
           statusFile = System.getProperty("user.home") + File.separator + "ci_status.txt", 
@@ -48,6 +48,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
           eventFile ="apps" + File.separator + "cr-wsn" + File.separator + "ci_event.txt", 
           chartFile ="apps" + File.separator + "cr-wsn" + File.separator + "ci_chart.txt", 
           curveFile ="apps" + File.separator + "cr-wsn" + File.separator + "ci_curve.txt", logFileHead = "sys_log",allItemsName="全部",
+          allNodesName="全部",myNodeName="自己",
           uiFile ="apps" + File.separator + "cr-wsn" + File.separator + "ci_ui.txt", 
           conditionFile="",actionFile="",currentChartPara="",dataDir="ci-data",usedDataDir="",logDir="ci-log",
           smsSpFile="",emailSpFile="",currentEvent="",currentCondition2="",currentAction2="",currentCondition1="",currentAction1="";
@@ -58,7 +59,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
   StringBuffer emailMsg = new StringBuffer(), smsMsg = new StringBuffer();
 
                  boolean firstEmailMsg = true, firstSmsMsg = true;
-   public y.ylib.OpenURL openURL=new y.ylib.OpenURL();
+  public y.ylib.OpenURL openURL=new y.ylib.OpenURL();
   CIAbout about;
   NumberFormat numberFormat = new DecimalFormat("############0.0################################################");
   MgntDialog mgntDialog;
@@ -156,11 +157,15 @@ public class CrInstrument extends WSNApplication implements Runnable {
     readEmailSp();
     readDefaultUI();
     readUI();
+    allItemsName=bundle2.getString("CrInstrument.xy.msg100");
+    allNodesName=bundle2.getString("CrInstrument.xy.msg155");
+    myNodeName=bundle2.getString("CrInstrument.xy.msg156");
     editUI=(TreeMap)currentUI.clone();
     button01 = new JLabel(" Cloud-Rain ");
     initComponents();
     jPanel142.add(chartPanel3,BorderLayout.CENTER);
     uiPanel.add(uiPanel2,BorderLayout.CENTER);
+    nodeMgntPanel.add(nodeMgntPanel2,BorderLayout.CENTER);
     uiPanel2.setFromUITM();
     uiPanel2.updateDataAreaPanel();
     nodeMgntPanel.add(nodeMgntPanel2,BorderLayout.CENTER);
@@ -185,7 +190,6 @@ public class CrInstrument extends WSNApplication implements Runnable {
     sendList.setPrototypeCellValue("256.256.256.256-100 xxx.xxx");
     receiveList.setFixedCellHeight(18);
     sendList.setFixedCellHeight(18);
-    allItemsName=bundle2.getString("CrInstrument.xy.msg100");
     if(!(new File(logDir)).exists())  (new File(logDir)).mkdirs();
     waitThread.start();
     waitThread2.start();
@@ -212,6 +216,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     init3();
     beginToReceive=true;
     updateList();
+
     String cmdStr="performmessage wsn.WSN getdatasource ";
     wsn.w.sendToAll(cmdStr);
     da_device_01.setText("");
@@ -388,7 +393,6 @@ public class CrInstrument extends WSNApplication implements Runnable {
     fileUpLoadMenuItem.setVisible(false);
     if(!(System.getProperty("user.language").equalsIgnoreCase("zh") && System.getProperty("user.country").equalsIgnoreCase("TW"))) jMenuItem20.setVisible(false);
 
-    jTabbedPane3.remove(nodeMgntPanel);
     CBUseEngineerUnit.setVisible(false);
     jPanel23.setVisible(false);
     jPanel25.setVisible(false);
@@ -1325,6 +1329,13 @@ void updateChartProfile(){
   }
 }
 
+public String getPort(String name){
+
+    int inx=name.indexOf(":");
+    if(inx>-1) name=name.substring(inx+1);
+    return name;
+}
+
 public String getItemId(String name){
  String rtn="";
  switch(showType){
@@ -1335,7 +1346,27 @@ public String getItemId(String name){
      }
      break;
    case 2:
-    rtn=(String)nameIdMap.get(name);
+    if(nameIdMap.get(name)!=null){
+      rtn=(String)nameIdMap.get(name);
+    } else {
+        if(name.indexOf(":")==-1) rtn=wn.w.getGNS(1);
+        else {
+            int inx=name.indexOf(":");
+            String ip=name.substring(0,inx);
+            Iterator it=nameIdMap.keySet().iterator();
+            for(;it.hasNext();){
+                String key=(String)it.next();
+                int inx2=key.indexOf(":");
+                if(inx2>-1){
+                    String ip2=key.substring(0,inx2);
+                    if(ip2.equals(ip)){
+                        rtn=(String)nameIdMap.get(key);
+                        break;
+                    }
+                }
+            }
+        }
+      }  
     break;
  }
  return rtn;
@@ -2431,7 +2462,7 @@ String getFileHead(String station){
             }
             if (str1.length() > 11) {
               String info[] = ylib.csvlinetoarray(str1);
-              if (isNumeric(info[1])) {
+              if (info.length>1 && isNumeric(info[1])) {
                 rowNumber = Long.parseLong(info[0]);
               }
             }
@@ -2464,7 +2495,7 @@ String getFileHead(String station){
             }
             if (str1.length() > 11) {
               String info[] = ylib.csvlinetoarray(str1);
-              if (isNumeric(info[1])) {
+              if (info.length>1 && isNumeric(info[1])) {
                 rowNumber2 = Long.parseLong(info[0]);
               }
             }
@@ -4418,7 +4449,24 @@ public void setStatus(String nodeId,String dataSrc[],int statusCode){
       }
     }
     updateList();
+    nodeMgntPanel2.setStatus(nodeId, dataSrc, statusCode);
+    nodeMgntPanel2.updateList();
+
   }
+}
+public void setStatus3(String id,String stringx[]){
+    nodeMgntPanel2.setStatus3(id,stringx);
+}
+public void setNodeConfig(String id,String stringx[]){
+  nodeMgntPanel2.setNodeConfig(id, stringx);
+}
+
+public void setStatus3_1(String id,String stringx[]){
+    nodeMgntPanel2.setStatus3_1(id, stringx);
+}
+
+public void setStatus3_3(String id,String stringx[]){
+    nodeMgntPanel2.setStatus3_3(id, stringx);
 }
   
 
@@ -5820,6 +5868,12 @@ public void doLayout(){
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 formWindowClosing(evt);
+            }
+        });
+
+        jTabbedPane1.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jTabbedPane1StateChanged(evt);
             }
         });
 
@@ -7917,6 +7971,11 @@ public void doLayout(){
         jPanel3.setLayout(new java.awt.BorderLayout());
 
         jTabbedPane3.setFont(jTabbedPane3.getFont());
+        jTabbedPane3.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jTabbedPane3StateChanged(evt);
+            }
+        });
 
         jPanel44.setBackground(new java.awt.Color(255, 255, 255));
         jPanel44.setFont(jPanel44.getFont());
@@ -12815,6 +12874,20 @@ if(evt.getStateChange()==evt.SELECTED){
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       jTextField10.setText(chooser.getSelectedFile().getAbsolutePath());
     }
+    }
+
+    private void jTabbedPane3StateChanged(javax.swing.event.ChangeEvent evt) {
+       if(jTabbedPane3.getSelectedComponent().equals(nodeMgntPanel)){
+           nodeMgntPanel2.updateList();
+       }
+    }
+
+    private void jTabbedPane1StateChanged(javax.swing.event.ChangeEvent evt) {
+       if(jTabbedPane1.getSelectedComponent().equals(jPanel3)){ 
+        if(jTabbedPane3.getSelectedComponent().equals(nodeMgntPanel)){
+            nodeMgntPanel2.updateList();
+        }
+       }
     }
  private void changeReceiveListItem(){
   String datasrc=(String)receiveList.getSelectedValue();
