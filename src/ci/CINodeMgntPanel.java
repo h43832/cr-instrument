@@ -747,6 +747,9 @@ DefaultListModel listModel9 = new DefaultListModel();
         JOptionPane.showMessageDialog(this, bundle2.getString("CINodeMgntPanel.xy.msg13")); return;
       }
     }
+    if(socketPortList.getSelectedValue()==null){
+        JOptionPane.showMessageDialog(this, bundle2.getString("CINodeMgntPanel.xy.msg13")); return;
+    }
     if(jLabel21.getText().trim().length()<1){
         JOptionPane.showMessageDialog(this, bundle2.getString("CINodeMgntPanel.xy.msg5")); return;
     }
@@ -831,6 +834,9 @@ DefaultListModel listModel9 = new DefaultListModel();
       if(instrument.wn.getItemId(item).equals("0")){
         JOptionPane.showMessageDialog(this, bundle2.getString("CINodeMgntPanel.xy.msg6")); return;
       }
+    }
+    if(serialPortList.getSelectedValue()==null){
+        JOptionPane.showMessageDialog(this, bundle2.getString("CINodeMgntPanel.xy.msg6")); return;
     }
     if(jLabel4.getText().trim().length()<1){
         JOptionPane.showMessageDialog(this, bundle2.getString("CINodeMgntPanel.xy.msg11")); return;
