@@ -120,6 +120,11 @@ public class CICurveSetupPanel extends javax.swing.JPanel {
                 curveListMouseClicked(evt);
             }
         });
+        curveList.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                curveListKeyReleased(evt);
+            }
+        });
         jScrollPane10.setViewportView(curveList);
 
         add(jScrollPane10);
@@ -442,6 +447,10 @@ void showCurve(){
     private void jLabel59MouseClicked(java.awt.event.MouseEvent evt) {
         Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel59.getBackground());
         if(newColor!=null) jLabel59.setBackground(newColor);
+    }
+
+    private void curveListKeyReleased(java.awt.event.KeyEvent evt) {
+      if(evt.getKeyCode()==38 || evt.getKeyCode()==40 ) showCurve();
     }
 
     javax.swing.JList curveList;

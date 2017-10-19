@@ -92,6 +92,8 @@ CrInstrument instrument;
                                }
                             }
                           }
+                } else if(act[43].trim().equalsIgnoreCase("Byte string data")){
+                    column[0]=ylib.replace(dataStr," ","");
                 }
               if(instrument.wn.w.chkValue(act[46])){
                   if(act[43].trim().equalsIgnoreCase("Byte data")){
@@ -106,7 +108,7 @@ CrInstrument instrument;
                           } else gottenMasterId=column[0];
                   } else {
                       int colN=(instrument.isNumeric(act[47])? Integer.parseInt(act[47]):1);
-                      if(colN<1) colN=1;
+                      if(colN<1 || (act[43].trim().equalsIgnoreCase("Byte string data"))) colN=1;
                       if(column.length>=colN){
                           if(instrument.wn.w.chkValue(act[48]) && instrument.isNumeric(act[49]) && instrument.isNumeric(act[50])){
                               int from=Integer.parseInt(act[49]);
@@ -115,7 +117,7 @@ CrInstrument instrument;
                           } else gottenMasterId=column[colN-1];
                       }
 
-                  }
+                  } 
                   if(gottenMasterId.length()>0){
                     boolean update=false;
                     if(setMasterId.length()>0){
@@ -156,7 +158,7 @@ CrInstrument instrument;
                           } else gottenDeviceId=column[0];
                   } else {
                       int colN=(instrument.isNumeric(act[56])? Integer.parseInt(act[56]):1);
-                      if(colN<1) colN=1;
+                      if(colN<1 || (act[43].trim().equalsIgnoreCase("Byte string data"))) colN=1;
                       if(column.length>=colN){
                           if(instrument.wn.w.chkValue(act[57]) && instrument.isNumeric(act[58]) && instrument.isNumeric(act[59])){
                               int from=Integer.parseInt(act[58]);
@@ -270,7 +272,7 @@ CrInstrument instrument;
                           } else gottenDeviceId=column[0];
                   } else {
                       int colN=(instrument.isNumeric(act[66])? Integer.parseInt(act[66]):1);
-                      if(colN<1) colN=1;
+                      if(colN<1 || (act[43].trim().equalsIgnoreCase("Byte string data"))) colN=1;
                       if(column.length>=colN){
                           if(instrument.wn.w.chkValue(act[67]) && instrument.isNumeric(act[68]) && instrument.isNumeric(act[69])){
                               int from=Integer.parseInt(act[68]);
@@ -338,7 +340,7 @@ CrInstrument instrument;
                boolean alertSound=false,actionSound=false;
                byte b2[];
                 key=act[1]+","+act[39]+","+act[16]+","+SN+","+act[17];
-                       if(act[3].trim().equalsIgnoreCase("Byte data")){
+                if(act[3].trim().equalsIgnoreCase("Byte data")){
                          if(instrument.wn.w.chkValue(act[7])){
                            int from=Integer.parseInt(act[8]);
                            int to2=Integer.parseInt(act[9]);
@@ -349,8 +351,8 @@ CrInstrument instrument;
                            b2=new byte[to2 - from + 1];
                            for(int k=0,j=from-1;j<to2;k++,j++) b2[k]=hexData[j];
                          } else {
-                           b2=instrument.wn.getByteData(dataHex);
-                           dataX=dataHex;
+                           b2=hexData;
+
                          }
                          if(instrument.wn.w.chkValue(act[34])) dataValue=(double)instrument.wn.getIEEE754Float(b2);
                            else{
@@ -379,6 +381,18 @@ CrInstrument instrument;
                                if(columnN<1) columnN=1;
                                if(columnN<str.length+1) dataX=str[columnN-1];
                           }
+                           if(instrument.wn.w.chkValue(act[7])){
+                           int from=Integer.parseInt(act[8]);
+                           int to2=Integer.parseInt(act[9]);
+                           if(from<1) from=1;
+                           if(from>dataX.length()) from=dataX.length();
+                           if(to2<1) to2=1;
+                           if(to2>dataX.length()) to2=dataX.length();
+                           dataX=dataX.substring(from-1, to2);
+                           }
+                           if(WSN.isNumeric(dataX)) dataValue=Double.parseDouble(dataX);
+                       }  else if(act[3].trim().equalsIgnoreCase("Byte string data")){
+                           dataX=ylib.replace(dataHex, " ", "");
                            if(instrument.wn.w.chkValue(act[7])){
                            int from=Integer.parseInt(act[8]);
                            int to2=Integer.parseInt(act[9]);
@@ -705,6 +719,16 @@ CrInstrument instrument;
                 instrument.soundThread.setAction("2,"+instrument.getPropsString("alert-sound-times")+","+instrument.getPropsString("alert-sound-file")+","+instrument.getPropsString("alert-sound-interval")+",1");
             } else if(act[2].trim().equalsIgnoreCase("Action sound alarm")){
                 instrument.soundThread.setAction("2,"+instrument.getPropsString("action-sound-times")+","+instrument.getPropsString("action-sound-file")+","+instrument.getPropsString("action-sound-interval")+",1");
+            } else if(act[2].trim().equalsIgnoreCase("Pause")){
+                try{
+                    long p=0;
+                    if(act.length>71 && isNumeric(act[71])) p=Math.round(Double.parseDouble(act[71])* 1000.0);
+                    if(p>0){
+                    Thread.sleep(p);
+                    }
+                }catch(InterruptedException e){
+
+                }
             }
             }
             if(newActionTM.size()>0){

@@ -95,7 +95,19 @@ CrInstrument instrument;
                            dataX=dataX.substring(from-1, to2);
                            }
 
-                       } 
+                       }  else if(cond[3].trim().equalsIgnoreCase("Byte string data")){
+                            dataX=ylib.replace(dataHex," ","");
+
+                           if(instrument.wn.w.chkValue(cond[7])){
+                           int from=Integer.parseInt(cond[8]);
+                           int to2=Integer.parseInt(cond[9]);
+                           if(from<1) from=1;
+                           if(from>dataX.length()) from=dataX.length();
+                           if(to2<1) to2=1;
+                           if(to2>dataX.length()) to2=dataX.length();
+                           dataX=dataX.substring(from-1, to2);
+                           }
+
                        if(cond[12].trim().equalsIgnoreCase("Y")){
                          if(cond[10].trim().equals(">") && dataX.compareToIgnoreCase(cond[11])>0) {}
                          else if(cond[10].trim().equals("=") && dataX.compareToIgnoreCase(cond[11])>0) {}
@@ -105,7 +117,7 @@ CrInstrument instrument;
                          else if(cond[10].trim().equals("<=") &&  dataX.compareToIgnoreCase(cond[11])<=0) {}
                          else conditionOK=false;
                        }
-                        if(cond[15].trim().equalsIgnoreCase("Y")){
+                        if(cond[15].trim().equalsIgnoreCase("Y") && instrument.isNumeric(cond[17])){
                                if(cond[20].trim().equals(">") && dataX.length()> instrument.wn.w.getValueInt(cond[17])) {}
                                else if(cond[20].trim().equals("=") && dataX.length()== instrument.wn.w.getValueInt(cond[17])) {}
                                else if(cond[20].trim().equals("<") && dataX.length()< instrument.wn.w.getValueInt(cond[17])) {}
@@ -114,6 +126,7 @@ CrInstrument instrument;
                                else if(cond[20].trim().equals("<=") && dataX.length()<= instrument.wn.w.getValueInt(cond[17])) {}
                                else conditionOK=false;
                               }
+                       }
                      } else if(cond[2].trim().equalsIgnoreCase("Data checked by Java class")) {
                          if(((CIChkDataClass)instrument.jClasses.get(cond[13]))==null){
                            if(!instrument.loadClass(cond[13],3)) {instrument.sysLog("java check data class "+cond[13]+" not exist or not implements CIChkDataClass interface."); return;}
@@ -153,6 +166,7 @@ CrInstrument instrument;
               int cCnt=Integer.parseInt(evt[1]);
               int aCnt=Integer.parseInt(evt[2]);
               boolean conditionOK=true;
+              if(cCnt>0 && aCnt>0){
               TreeMap actionCodeTM=new TreeMap();
               String dataX="";
               for(int i=0;i<cCnt;i++){
@@ -208,6 +222,7 @@ CrInstrument instrument;
                 }
                 instrument.actionThread.setAction(actionCodeTM, dataClass);
               }
+            }
             }
             waitStatus.remove(0);
           }

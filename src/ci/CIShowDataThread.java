@@ -21,6 +21,17 @@ CrInstrument instrument;
           CIDataClass dataClass=(CIDataClass)waitV.get(0);
           String dataHex=dataClass.data,dataStr=instrument.wn.getStringData(dataHex,-1,-1,-1);
           String stringx[]=new String[7];
+          int inx2=dataClass.dataSrc.indexOf("tcpclient");
+          if(inx2>-1){
+            int inx=dataClass.dataSrc.indexOf(":");
+            stringx[1]=(inx>-1 && inx<inx2? dataClass.dataSrc.substring(0,inx):instrument.wn.w.getGNS(6));
+            stringx[2]="4";
+            stringx[3]=(inx>-1 && inx<inx2? dataClass.dataSrc.substring(inx+1):dataClass.dataSrc);
+            stringx[6]=(inx>-1 && inx<inx2?  dataClass.dataSrc.substring(0,inx):instrument.wn.w.getGNS(6));
+            inx=dataClass.dataSrc.indexOf("-");
+            stringx[4]=(inx>-1? stringx[3].substring(inx+1):"1");
+            stringx[3]=(inx>-1? stringx[3].substring(0,inx):stringx[3]);
+          } else {
           int inx=dataClass.dataSrc.indexOf(":");
           stringx[1]=(inx>-1? dataClass.dataSrc.substring(0,inx):instrument.wn.w.getGNS(6));
           stringx[2]=(dataClass.dataSrc.indexOf("COM")>-1? "2":"1");
@@ -29,6 +40,7 @@ CrInstrument instrument;
           inx=dataClass.dataSrc.indexOf("-");
           stringx[4]=(inx>-1? stringx[3].substring(inx+1):"1");
           stringx[3]=(inx>-1? stringx[3].substring(0,inx):stringx[3]);
+          }
           String fid=stringx[1];
           String dataType=stringx[2];
           String portName=stringx[3];

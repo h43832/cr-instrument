@@ -37,9 +37,9 @@ import javax.swing.text.StyleConstants;
  * @author Administrator
  */
 public class CrInstrument extends WSNApplication implements Runnable {
-  public static String version = "2.17.0034";
+  public static String version = "2.17.0042";
   public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-  String versionTime = "20170815-080000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
+  String versionTime = "20171020-080000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
           stationFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_stations.txt",
           sensorFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_sensors.txt",currentViewDSrc="",
           statusFile = System.getProperty("user.home") + File.separator + "ci_status.txt", 
@@ -78,6 +78,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
   Thread myThread;
   DefaultStyledDocument styleDoc=new DefaultStyledDocument();
   Vector displayV=new Vector();
+  JComboBox cbbSerial=new JComboBox(),cbbSocket=new JComboBox(),cbbTCPClient=new JComboBox();
   double roomValues[] = {0.01, 0.02, 0.03, 0.05, 0.1, 0.15, 0.2, 0.25, 0.5, 1.0, 1.5, 3.0, 10.0, 30.0, 90.0};
   public double dataAreaRatio=1.0;
   int roomIndex = 7,eventMaxArrCnt=15,condMaxArrCnt=40,actMaxArrCnt=80,chartMaxArrCnt=60,curveMaxArrCnt=60,
@@ -162,6 +163,21 @@ public class CrInstrument extends WSNApplication implements Runnable {
     myNodeName=bundle2.getString("CrInstrument.xy.msg156");
     editUI=(TreeMap)currentUI.clone();
     button01 = new JLabel(" Cloud-Rain ");
+    cbbSerial.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbbSerialActionPerformed(evt);
+            }
+    });
+    cbbSocket.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbbSocketActionPerformed(evt);
+            }
+    });
+    cbbTCPClient.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbbTCPClientActionPerformed(evt);
+            }
+    });
     initComponents();
     jPanel142.add(chartPanel3,BorderLayout.CENTER);
     uiPanel.add(uiPanel2,BorderLayout.CENTER);
@@ -186,8 +202,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     iconImage = new ImageIcon(getClass().getClassLoader().getResource("cr_instrument_t.gif")).getImage();
     setIconImage(iconImage);
 
-    receiveList.setPrototypeCellValue("256.256.256.256-100 yyy.yyy");
-    sendList.setPrototypeCellValue("256.256.256.256-100 xxx.xxx");
+    receiveList.setPrototypeCellValue("256.256.256.256:tcpclient@256.256.256.256:68999 -yyy");
+    sendList.setPrototypeCellValue("256.256.256.256:tcpclient@256.256.256.256:68999 -yyy");
     receiveList.setFixedCellHeight(18);
     sendList.setFixedCellHeight(18);
     if(!(new File(logDir)).exists())  (new File(logDir)).mkdirs();
@@ -204,6 +220,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     jPanel85.setVisible(false);
     jPanel126.setVisible(false);
     jPanel26.setVisible(false);
+    jPanel41.setVisible(false);
 
   }
 
@@ -245,7 +262,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     }
     updateHistoryFile(0);
     eventThread.setStatus(wn.w.getGNS(1),"",50);
-    sysLog("System start at " + format4.format(new Date(startTime)) + " (version=" + version + ", version time=" + versionTime + ",ci-demo="+props.getProperty("ci-demo")+", run_my_ap_only="+wn.getPropsString("run_my_ap_only")+")(This need "+(System.currentTimeMillis()-startTime)+" ms to start.)");
+    sysLog("System start at " + format4.format(new Date(startTime)) + " (version=" + version + ", version time=" + versionTime +", jversion="+System.getProperty("java.version")+", wsn version="+wsn.getVersion()+", glib version="+multiPanel.getVersion()+ ",ci-demo="+props.getProperty("ci-demo")+", run_my_ap_only="+wn.getPropsString("run_my_ap_only")+")(This need "+(System.currentTimeMillis()-startTime)+" ms to start.)");
   }
 
   void init3() {
@@ -305,7 +322,20 @@ public class CrInstrument extends WSNApplication implements Runnable {
       wn.w.startUpd("http://cloud-rain.com/web/ci_version.txt", apId, version, 10L);
 
     }
+    jComboBox15.removeAllItems();
+    jComboBox21.removeAllItems();
+    jComboBox15.addItem("");
+    jComboBox21.addItem("");
+        if(smsSpTM.size()>0){
+        Iterator it=smsSpTM.keySet().iterator();
+        for(;it.hasNext();){
+            String key=(String)it.next();
+            jComboBox15.addItem(key);
+            jComboBox21.addItem(key);
+        }
+    }
     updateUIFromProps();
+    updateUIFromStatuses();
     showCondition();
     showAction();
     showEvent();
@@ -384,6 +414,11 @@ public class CrInstrument extends WSNApplication implements Runnable {
       tc = tcm.getColumn(1);
       tc.setHeaderValue( bundle2.getString("CrInstrument.xy.msg138"));
       th.repaint();
+      th = jTable2.getTableHeader();
+      tcm = th.getColumnModel();
+      tc = tcm.getColumn(1);
+      tc.setHeaderValue( bundle2.getString("CrInstrument.xy.msg157"));
+      th.repaint();
 
       CIDT.EnumOS os=CIDT.getOs();
       if(!os.isWindows()) jMenuItem9.setVisible(false);
@@ -446,6 +481,24 @@ public class CrInstrument extends WSNApplication implements Runnable {
     }
    }
   }
+     private void cbbSerialActionPerformed(java.awt.event.ActionEvent evt) {                                           
+      if(cbbSerial.getSelectedItem()!=null){
+          String d=(String)cbbSerial.getSelectedItem();
+          if (((DefaultComboBoxModel) cbbSerial.getModel()).getIndexOf(d) == -1) {cbbSerial.addItem(d);}
+      } 
+    }  
+      private void cbbSocketActionPerformed(java.awt.event.ActionEvent evt) {                                           
+      if(cbbSocket.getSelectedItem()!=null){
+          String d=(String)cbbSocket.getSelectedItem();
+          if (((DefaultComboBoxModel) cbbSocket.getModel()).getIndexOf(d) == -1) {cbbSocket.addItem(d);}
+      } 
+    }  
+    private void cbbTCPClientActionPerformed(java.awt.event.ActionEvent evt) {                                           
+      if(cbbTCPClient.getSelectedItem()!=null){
+          String d=(String)cbbTCPClient.getSelectedItem();
+          if (((DefaultComboBoxModel) cbbTCPClient.getModel()).getIndexOf(d) == -1) {cbbTCPClient.addItem(d);}
+      } 
+    }  
 
   void setUpSerialPortColumnFromStationTM(){
       Object obj=(jTable5.getRowCount()<1? null:jTable5.getModel().getValueAt(0,0));
@@ -482,20 +535,19 @@ public class CrInstrument extends WSNApplication implements Runnable {
   }
   void setUpSerialPortColumnFromSerialTM(JTable table,TableColumn serialColumn) {
 
-    JComboBox comboBox = new JComboBox();
-    comboBox.setEditable(true);
-    comboBox.addItem("");
+    cbbSerial.setEditable(true);
+    cbbSerial.addItem("");
 
     String portArr[] = WSNSerial.getPorts();
     for (int i = 0; i < portArr.length; i++) {
       String port = portArr[i];
-      comboBox.addItem(port);
+      cbbSerial.addItem(port);
     }        
-    comboBox.setSelectedIndex(0);
-    serialColumn.setCellEditor(new DefaultCellEditor(comboBox));
+    cbbSerial.setSelectedIndex(0);
+    serialColumn.setCellEditor(new DefaultCellEditor(cbbSerial));
 
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
-        renderer.setToolTipText("Click for serial port list");
+        renderer.setToolTipText("1.Click for serial port list. 2.Port Name example: COM3 or 254.98.97.201:COM6");
         serialColumn.setCellRenderer(renderer);
   }
   
@@ -503,28 +555,27 @@ public class CrInstrument extends WSNApplication implements Runnable {
   public void setUpSocketPortColumnFromStationTM(JTable table,TableColumn socketColumn){
     int socketCnt=0;
 
-    JComboBox comboBox = new JComboBox();
-    comboBox.setEditable(true);
-    comboBox.addItem("");
+    cbbSocket.setEditable(true);
+    cbbSocket.addItem("");
     Iterator it = stations.keySet().iterator();
       for (; it.hasNext();) {
         String key = (String) it.next();
         String port = (String) stations.get(key);
-        if (port.toLowerCase().indexOf("com") == -1) {
-          comboBox.addItem(port);
+        if (port.toLowerCase().indexOf("com") == -1 && port.toLowerCase().indexOf("tcpclient") == -1) {
+          cbbSocket.addItem(port);
           socketCnt++;
         }
       }
 
-    socketColumn.setCellEditor(new DefaultCellEditor(comboBox));
+    socketColumn.setCellEditor(new DefaultCellEditor(cbbSocket));
 
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
-        renderer.setToolTipText("Click for socket port list");
+        renderer.setToolTipText("1.Click for socket port list. 2.Port Name example: 7045 or 210.54.65.23:8092");
         socketColumn.setCellRenderer(renderer);
 
       int rowCnt=jTable6.getRowCount();
       if(rowCnt<socketCnt+1){
-          for(int i=rowCnt;i<socketCnt+1;i++) ((DefaultTableModel) jTable5.getModel()).addRow(new Object[jTable5.getModel().getColumnCount()]);
+          for(int i=rowCnt;i<socketCnt+1;i++) ((DefaultTableModel) jTable6.getModel()).addRow(new Object[jTable6.getModel().getColumnCount()]);
       }
 
       it = stations.keySet().iterator();
@@ -532,9 +583,48 @@ public class CrInstrument extends WSNApplication implements Runnable {
       for (; it.hasNext();) {
         String key = (String) it.next();
         String port = (String) stations.get(key);
-        if (port.toLowerCase().indexOf("com") == -1) {
+        if (port.toLowerCase().indexOf("com") == -1 && port.toLowerCase().indexOf("tcpclient") == -1) {
           jTable6.getModel().setValueAt(port, socketInx, 0);
           jTable6.getModel().setValueAt(key, socketInx, 1);
+          socketInx++;
+        }
+      }
+  }
+
+  public void setUpTCPClientColumnFromStationTM(JTable table,TableColumn socketColumn){
+    int socketCnt=0;
+
+    cbbTCPClient.setEditable(true);
+    cbbTCPClient.addItem("");
+    Iterator it = stations.keySet().iterator();
+      for (; it.hasNext();) {
+        String key = (String) it.next();
+        String port = (String) stations.get(key);
+        if (port.toLowerCase().indexOf("tcpclient") != -1) {
+          cbbTCPClient.addItem(port);
+          socketCnt++;
+        }
+      }
+
+    socketColumn.setCellEditor(new DefaultCellEditor(cbbTCPClient));
+
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+        renderer.setToolTipText("1.Click for TCP Client list. 2.tcpclient name example: tcpclient@127.0.0.1:7684 or 234.19.56.21:tcpclient@87.24.56.102:9002");
+        socketColumn.setCellRenderer(renderer);
+
+      int rowCnt=jTable2.getRowCount();
+      if(rowCnt<socketCnt+1){
+          for(int i=rowCnt;i<socketCnt+1;i++) ((DefaultTableModel) jTable2.getModel()).addRow(new Object[jTable2.getModel().getColumnCount()]);
+      }
+
+      it = stations.keySet().iterator();
+      int socketInx=0;
+      for (; it.hasNext();) {
+        String key = (String) it.next();
+        String port = (String) stations.get(key);
+        if (port.toLowerCase().indexOf("tcpclient") != -1) {
+          jTable2.getModel().setValueAt(port, socketInx, 0);
+          jTable2.getModel().setValueAt(key, socketInx, 1);
           socketInx++;
         }
       }
@@ -549,7 +639,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     socketColumn.setCellEditor(new DefaultCellEditor(comboBox));
 
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
-        renderer.setToolTipText("Click for socket port list");
+        renderer.setToolTipText("1.Click for socket port list. 2.Port Name example: 7045 or 210.54.65.23:8092");
         socketColumn.setCellRenderer(renderer);
   }
 
@@ -1384,7 +1474,7 @@ public void updateList(){
   for(;it.hasNext();){
     String key=(String)it.next();
 
-    if(key.indexOf(":")==-1){
+    if(key.indexOf(":")==-1 || key.startsWith("tcpclient@")){
 
       if(!receiveListModel.contains(key)) receiveListModel.addElement(key);
       if(!sendListModel.contains(key)) sendListModel.addElement(key);
@@ -1394,7 +1484,7 @@ public void updateList(){
   for(;it.hasNext();){
     String key=(String)it.next();
 
-    if(key.indexOf(":")>-1 && !key.startsWith("device@")){
+    if(key.indexOf(":")>-1 && !key.startsWith("device@") && !key.startsWith("tcpclient@")){
 
       if(!receiveListModel.contains(key)) receiveListModel.addElement(key);
       if(!sendListModel.contains(key)) sendListModel.addElement(key);
@@ -1615,10 +1705,16 @@ public Status getStatus(String curveId){
       String key = (String) it.next();
       String port = (String) stationsC.get(key);
       if (port.length() > 0) {
-        if (port.indexOf(":") > -1) {
+        int inx=port.indexOf(":");
+        int inx2=port.indexOf("tcpclient");
+        if ((inx > -1 && inx2==-1) || (inx>-1 && inx < inx2)) {
           String id=(String)nameIdMap.get(port);
           if (port.toUpperCase().indexOf("COM") != -1) {
             String contCmd = "performcommand wsn.WSN openserialport " + port + " #brate# 8 n 1 null null null null null null null null 0 0 0 0 ? ? ? 0";
+            wn.w.sendToOne(contCmd, id);
+            openN++;
+          } else if (port.indexOf("tcpclient") != -1){
+            String contCmd = "performcommand wsn.WSN opentcpclient " + port + " 3 0 null null null null null null null 0 0 0 0 ? ? ? 0";
             wn.w.sendToOne(contCmd, id);
             openN++;
           } else {
@@ -1637,6 +1733,10 @@ public Status getStatus(String curveId){
                 openN++;
               }
            }
+          } else if (port.indexOf("tcpclient") == 0){
+                String contCmd = "performcommand wsn.WSN opentcpclient " + port + " 3 0 0 0 null null null null null null null null 0 0 0 0 ? ? ? 0";
+                wn.w.sendToOne(contCmd, wn.w.getGNS(1));
+                openN++;
           } else {
             String contCmd = "performcommand wsn.WSN opensocketport " + port + " 5 60 null null null null null null null 0 0 0 0 ? ? ? 0";
             wn.w.sendToOne(contCmd, wn.w.getGNS(1));
@@ -1732,6 +1832,7 @@ public Status getStatus(String curveId){
       curvePanel2.jComboBox40.setSelectedIndex(0);
       setUpSerialPortColumnFromStationTM();
       setUpSocketPortColumnFromStationTM(jTable6, jTable6.getColumnModel().getColumn(0));
+      setUpTCPClientColumnFromStationTM(jTable2, jTable2.getColumnModel().getColumn(0));      
       } else sysLog("station file "+stationFile+" not found.");
     } else sysLog("station file name not set.");
   }
@@ -1792,7 +1893,21 @@ public Status getStatus(String curveId){
            }
        }
     }
-
+    rowCnt=jTable2.getRowCount();
+    for(int i=0;i<rowCnt;i++){
+       if(jTable2.getModel().getValueAt(i,1)!=null){
+           String stationName=(String)jTable2.getModel().getValueAt(i,1);
+           stationName=stationName.trim();
+           if(stationName.length()>0){
+             String port="";
+             if(jTable2.getModel().getValueAt(i,0)!=null){
+                 port=(String)jTable2.getModel().getValueAt(i,0);
+                 port=port.trim();
+             }
+             stations.put(stationName,port);
+           }
+       }
+    }
     Iterator it = stations.keySet().iterator();
     for (; it.hasNext();) {
       String key = (String) it.next();
@@ -2025,9 +2140,28 @@ public Status getStatus(String curveId){
     jPasswordField7.setText(YB642D.decode(getPropsString("email-from-pw")));
     jTextField2.setText(getPropsString("sms-from"));
     jPasswordField5.setText(YB642D.decode(getPropsString("sms-from-pw")));
+    jComboBox15.setSelectedItem(getPropsString("sms-sp"));
 
     jLabel76.setText(((chkProps("recordwhenreceive")) ? getPropsInt("monitor-interval-h") + " hr " + getPropsInt("monitor-interval-m") + " min " + getPropsInt("monitor-interval-s") + " sec" : getPropsInt("record-interval-h") + " hr " + getPropsInt("record-interval-m") + " min " + getPropsInt("record-interval-s") + " sec"));
 
+  }
+  void updateUIFromStatuses(){
+       if(statuses.getProperty("savelog")!=null && statuses.getProperty("savelog").equalsIgnoreCase("Y")) saveFileCB.setSelected(true); else saveFileCB.setSelected(false); 
+       if(statuses.getProperty("show_received")!=null && statuses.getProperty("show_received").equalsIgnoreCase("Y")) showCB.setSelected(true); else showCB.setSelected(false);
+       if(statuses.getProperty("show_hex")!=null && statuses.getProperty("show_hex").equalsIgnoreCase("Y")) show16RB.setSelected(true); else showStrRB.setSelected(true);
+       if(statuses.getProperty("show_linebreak")!=null && statuses.getProperty("show_linebreak").equalsIgnoreCase("Y")) crnlCB.setSelected(true); else crnlCB.setSelected(false);
+       if(statuses.getProperty("show_time")!=null && statuses.getProperty("show_time").equalsIgnoreCase("Y")) showTimeCB.setSelected(true); else showTimeCB.setSelected(false);
+       if(statuses.getProperty("show_source")!=null && statuses.getProperty("show_source").equalsIgnoreCase("Y")) showSrcCB.setSelected(true); else showSrcCB.setSelected(false);
+       if(statuses.getProperty("show_msg")!=null && statuses.getProperty("show_msg").equalsIgnoreCase("Y")) showSysMsgCB.setSelected(true); else showSysMsgCB.setSelected(false);
+       if(statuses.getProperty("send_hex")!=null && statuses.getProperty("send_hex").equalsIgnoreCase("Y")) send16RB.setSelected(true); else sendStrRB.setSelected(true);
+       if(statuses.getProperty("send_addchecksumbysystem")!=null && statuses.getProperty("send_addchecksumbysystem").equalsIgnoreCase("Y")) chkSumCB.setSelected(true); else chkSumCB.setSelected(false);
+         statuses.put("send_addchecksumtype",(String)chkSumCBB.getSelectedItem());
+       if(statuses.getProperty("send_addchecksumtype")!=null) chkSumCBB.setSelectedItem(statuses.getProperty("send_addchecksumtype"));
+       if(statuses.getProperty("send_continuesend")!=null && statuses.getProperty("send_continuesend").equalsIgnoreCase("Y")) continueSendCB.setSelected(true); else continueSendCB.setSelected(false);
+       if(statuses.getProperty("send_intervaltimesecond")!=null) sendIntervalTF.setText(statuses.getProperty("send_intervaltimesecond"));
+       if(statuses.getProperty("selected_receive_item")!=null && statuses.getProperty("selected_receive_item").length()>0) receiveList.setSelectedValue(statuses.getProperty("selected_receive_item"), true);
+       if(statuses.getProperty("selected_sendout_item")!=null && statuses.getProperty("selected_sendout_item").length()>0) sendList.setSelectedValue(statuses.getProperty("selected_sendout_item"), true);
+       if(statuses.getProperty("send_data")!=null) sendTA.setText(wn.w.d642(statuses.getProperty("send_data")));
   }
 
   void updateProps() {
@@ -2057,7 +2191,7 @@ public Status getStatus(String curveId){
     props.put("email-from-pw", YB642E.encode(new String(jPasswordField7.getPassword())));
     props.put("sms-from", jTextField2.getText());
     props.put("sms-from-pw", YB642E.encode(new String(jPasswordField5.getPassword())));
-
+    props.setProperty("sms-sp", (String)jComboBox15.getSelectedItem());
   }
 
   void updateProps_miscellaneous() {
@@ -4363,6 +4497,22 @@ String getFileHead(String station){
   }
   void saveStatus() {
     if(wn.w.chkValue(props.getProperty("ci-demo")) && wn.chkProps("run_my_ap_only")) return;
+      if(saveFileCB.isSelected()) statuses.put("savelog","Y"); else statuses.put("savelog","N");
+  if(showCB.isSelected()) statuses.put("show_received","Y"); else statuses.put("show_received","N");
+  if(show16RB.isSelected()) statuses.put("show_hex","Y"); else statuses.put("show_hex","N");
+  if(crnlCB.isSelected()) statuses.put("show_linebreak","Y"); else statuses.put("show_linebreak","N");
+  if(showTimeCB.isSelected()) statuses.put("show_time","Y"); else statuses.put("show_time","N");
+  if(showSrcCB.isSelected()) statuses.put("show_source","Y"); else statuses.put("show_source","N");
+  if(showSysMsgCB.isSelected()) statuses.put("show_msg","Y"); else statuses.put("show_msg","N");
+  if(send16RB.isSelected()) statuses.put("send_hex","Y"); else statuses.put("send_hex","N");
+  if(chkSumCB.isSelected()) statuses.put("send_addchecksumbysystem","Y"); else statuses.put("send_addchecksumbysystem","N");
+  statuses.put("send_addchecksumtype",(String)chkSumCBB.getSelectedItem());
+  if(continueSendCB.isSelected()) statuses.put("send_continuesend","Y"); else statuses.put("send_continuesend","N");
+  if(receiveList.getSelectedValue()!=null) statuses.setProperty("selected_receive_item", (String)receiveList.getSelectedValue());
+  else statuses.setProperty("selected_receive_item","");
+  if(sendList.getSelectedValue()!=null) statuses.setProperty("selected_sendout_item", (String)sendList.getSelectedValue());
+  else statuses.setProperty("selected_sendout_item", "");
+  statuses.setProperty("send_data",wn.w.e642(sendTA.getText().trim()));
     try {
       FileOutputStream out = new FileOutputStream(statusFile);
       statuses.store(out, "");
@@ -4472,9 +4622,11 @@ public void setStatus3_3(String id,String stringx[]){
 
   public void setData(long time, String nodeId, String dataSrc, String data) {
     lastReceiveTime = time;
+
     dataSrc=wn.getPort(dataSrc);
+    if(showCB.isSelected()) showThread.setData(time, nodeId, dataSrc, data);
+    if(saveFileCB.isSelected()) fileThread.setData(time, nodeId, dataSrc, data);
     if(continueMonitor) {
-      if(showCB.isSelected()) showThread.setData(time, nodeId, dataSrc, data);
 
       try{
         String str1="";
@@ -4491,7 +4643,6 @@ public void setStatus3_3(String id,String stringx[]){
 	sin.close();
 	d.close();
      } catch (IOException e){e.printStackTrace();}
-      if(saveFileCB.isSelected()) fileThread.setData(time, nodeId, dataSrc, data);
     }
   }
   public void textPaneAppend(String temp2){
@@ -5324,16 +5475,6 @@ public void doLayout(){
         jButton9 = new javax.swing.JButton();
         btnLogoutUser = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
-        jPanel9 = new javax.swing.JPanel();
-        jScrollPane20 = new javax.swing.JScrollPane();
-        jTable6 = new javax.swing.JTable();
-        jButton27 = new javax.swing.JButton();
-        jButton43 = new javax.swing.JButton();
-        jPanel11 = new javax.swing.JPanel();
-        jScrollPane19 = new javax.swing.JScrollPane();
-        jTable5 = new javax.swing.JTable();
-        jButton19 = new javax.swing.JButton();
-        jButton26 = new javax.swing.JButton();
         btnApplySetting_ports = new javax.swing.JButton();
         jPanel15 = new javax.swing.JPanel();
         jPanel16 = new javax.swing.JPanel();
@@ -5391,6 +5532,22 @@ public void doLayout(){
         jLabel34 = new javax.swing.JLabel();
         jTextField22 = new javax.swing.JTextField();
         jButton17 = new javax.swing.JButton();
+        jTabbedPane4 = new javax.swing.JTabbedPane();
+        jPanel11 = new javax.swing.JPanel();
+        jScrollPane19 = new javax.swing.JScrollPane();
+        jTable5 = new javax.swing.JTable();
+        jButton19 = new javax.swing.JButton();
+        jButton26 = new javax.swing.JButton();
+        jPanel9 = new javax.swing.JPanel();
+        jScrollPane20 = new javax.swing.JScrollPane();
+        jTable6 = new javax.swing.JTable();
+        jButton27 = new javax.swing.JButton();
+        jButton43 = new javax.swing.JButton();
+        jPanel40 = new javax.swing.JPanel();
+        jScrollPane10 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
+        jButton18 = new javax.swing.JButton();
+        jButton23 = new javax.swing.JButton();
         jPanel20 = new javax.swing.JPanel();
         jPanel24 = new javax.swing.JPanel();
         jPanel25 = new javax.swing.JPanel();
@@ -5492,6 +5649,9 @@ public void doLayout(){
         jLabel7 = new javax.swing.JLabel();
         jPasswordField5 = new javax.swing.JPasswordField();
         jLabel19 = new javax.swing.JLabel();
+        jPanel84 = new javax.swing.JPanel();
+        jLabel56 = new javax.swing.JLabel();
+        jComboBox15 = new javax.swing.JComboBox();
         FTPPanel = new javax.swing.JPanel();
         jButton8 = new javax.swing.JButton();
         jButton10 = new javax.swing.JButton();
@@ -5521,6 +5681,20 @@ public void doLayout(){
         jLabel24 = new javax.swing.JLabel();
         jPasswordField9 = new javax.swing.JPasswordField();
         btnApplySetting_accounts = new javax.swing.JButton();
+        jPanel47 = new javax.swing.JPanel();
+        jPanel48 = new javax.swing.JPanel();
+        jComboBox21 = new javax.swing.JComboBox();
+        jLabel46 = new javax.swing.JLabel();
+        jTextField24 = new javax.swing.JTextField();
+        jLabel47 = new javax.swing.JLabel();
+        jTextField25 = new javax.swing.JTextField();
+        jLabel54 = new javax.swing.JLabel();
+        jTextField26 = new javax.swing.JTextField();
+        jButton24 = new javax.swing.JButton();
+        jButton25 = new javax.swing.JButton();
+        jPanel51 = new javax.swing.JPanel();
+        jLabel55 = new javax.swing.JLabel();
+        jTextField40 = new javax.swing.JTextField();
         uiPanel = new javax.swing.JPanel();
         jPanel109 = new javax.swing.JPanel();
         jPanel113 = new javax.swing.JPanel();
@@ -5694,6 +5868,10 @@ public void doLayout(){
         jPanel139 = new javax.swing.JPanel();
         jLabel22 = new javax.swing.JLabel();
         jTextField54 = new javax.swing.JTextField();
+        jPanel41 = new javax.swing.JPanel();
+        jLabel35 = new javax.swing.JLabel();
+        jTextField23 = new javax.swing.JTextField();
+        jLabel45 = new javax.swing.JLabel();
         jPanel69 = new javax.swing.JPanel();
         jScrollPane7 = new javax.swing.JScrollPane();
         conditionList = new javax.swing.JList(conditionListModel);
@@ -5888,6 +6066,11 @@ public void doLayout(){
         stationList.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
                 stationListMouseReleased(evt);
+            }
+        });
+        stationList.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                stationListKeyReleased(evt);
             }
         });
         jScrollPane2.setViewportView(stationList);
@@ -7198,88 +7381,6 @@ public void doLayout(){
         jPanel5.setFont(jPanel5.getFont());
         jPanel5.setLayout(null);
 
-        jPanel9.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel9.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel9.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 153, 153))); 
-        jPanel9.setFont(jPanel9.getFont());
-        jPanel9.setLayout(null);
-
-        jTable6.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null},
-                {null, null},
-                {null, null}
-            },
-            new String [] {
-                "Port Name", "Station Name"
-            }
-        ));
-        jScrollPane20.setViewportView(jTable6);
-
-        jPanel9.add(jScrollPane20);
-        jScrollPane20.setBounds(20, 30, 290, 100);
-
-        jButton27.setText(bundle.getString("CrInstrument.jButton27.text")); 
-        jButton27.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton27ActionPerformed(evt);
-            }
-        });
-        jPanel9.add(jButton27);
-        jButton27.setBounds(20, 140, 140, 23);
-
-        jButton43.setText(bundle.getString("CrInstrument.jButton43.text")); 
-        jButton43.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton43ActionPerformed(evt);
-            }
-        });
-        jPanel9.add(jButton43);
-        jButton43.setBounds(170, 140, 130, 23);
-
-        jPanel5.add(jPanel9);
-        jPanel9.setBounds(390, 30, 330, 180);
-
-        jPanel11.setBackground(new java.awt.Color(255, 255, 255));
-        jPanel11.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel11.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 153, 153))); 
-        jPanel11.setFont(jPanel11.getFont());
-        jPanel11.setLayout(null);
-
-        jTable5.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null},
-                {null, null},
-                {null, null}
-            },
-            new String [] {
-                "Port Name", "Station Name"
-            }
-        ));
-        jScrollPane19.setViewportView(jTable5);
-
-        jPanel11.add(jScrollPane19);
-        jScrollPane19.setBounds(20, 30, 320, 100);
-
-        jButton19.setText(bundle.getString("CrInstrument.jButton19.text")); 
-        jButton19.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton19ActionPerformed(evt);
-            }
-        });
-        jPanel11.add(jButton19);
-        jButton19.setBounds(20, 140, 160, 23);
-
-        jButton26.setText(bundle.getString("CrInstrument.jButton26.text")); 
-        jButton26.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton26ActionPerformed(evt);
-            }
-        });
-        jPanel11.add(jButton26);
-        jButton26.setBounds(200, 140, 130, 23);
-
-        jPanel5.add(jPanel11);
-        jPanel11.setBounds(18, 28, 360, 180);
-
         btnApplySetting_ports.setFont(btnApplySetting_ports.getFont().deriveFont(btnApplySetting_ports.getFont().getSize()+12f));
         btnApplySetting_ports.setText(bundle.getString("CrInstrument.btnApplySetting_ports.text")); 
         btnApplySetting_ports.addActionListener(new java.awt.event.ActionListener() {
@@ -7623,6 +7724,127 @@ public void doLayout(){
 
         jPanel5.add(jPanel19);
         jPanel19.setBounds(730, 390, 260, 150);
+
+        jTabbedPane4.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 153)), bundle.getString("CrInstrument.jTabbedPane4.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 153, 153))); 
+
+        jPanel11.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel11.setFont(jPanel11.getFont());
+        jPanel11.setLayout(null);
+
+        jTable5.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "Port Name", "Station Name"
+            }
+        ));
+        jScrollPane19.setViewportView(jTable5);
+
+        jPanel11.add(jScrollPane19);
+        jScrollPane19.setBounds(20, 10, 480, 110);
+
+        jButton19.setText(bundle.getString("CrInstrument.jButton19.text")); 
+        jButton19.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton19ActionPerformed(evt);
+            }
+        });
+        jPanel11.add(jButton19);
+        jButton19.setBounds(520, 70, 130, 23);
+
+        jButton26.setText(bundle.getString("CrInstrument.jButton26.text")); 
+        jButton26.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton26ActionPerformed(evt);
+            }
+        });
+        jPanel11.add(jButton26);
+        jButton26.setBounds(520, 100, 130, 23);
+
+        jTabbedPane4.addTab(bundle.getString("CrInstrument.jPanel11.TabConstraints.tabTitle"), jPanel11); 
+
+        jPanel9.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel9.setFont(jPanel9.getFont());
+        jPanel9.setLayout(null);
+
+        jTable6.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "Port Name", "Station Name"
+            }
+        ));
+        jScrollPane20.setViewportView(jTable6);
+
+        jPanel9.add(jScrollPane20);
+        jScrollPane20.setBounds(20, 10, 470, 110);
+
+        jButton27.setText(bundle.getString("CrInstrument.jButton27.text")); 
+        jButton27.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton27ActionPerformed(evt);
+            }
+        });
+        jPanel9.add(jButton27);
+        jButton27.setBounds(520, 70, 130, 23);
+
+        jButton43.setText(bundle.getString("CrInstrument.jButton43.text")); 
+        jButton43.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton43ActionPerformed(evt);
+            }
+        });
+        jPanel9.add(jButton43);
+        jButton43.setBounds(520, 100, 130, 23);
+
+        jTabbedPane4.addTab(bundle.getString("CrInstrument.jPanel9.TabConstraints.tabTitle"), jPanel9); 
+
+        jPanel40.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel40.setLayout(null);
+
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "TCP Client", "Station Name"
+            }
+        ));
+        jScrollPane10.setViewportView(jTable2);
+
+        jPanel40.add(jScrollPane10);
+        jScrollPane10.setBounds(20, 10, 470, 110);
+
+        jButton18.setText(bundle.getString("CrInstrument.jButton18.text_1")); 
+        jButton18.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton18ActionPerformed(evt);
+            }
+        });
+        jPanel40.add(jButton18);
+        jButton18.setBounds(520, 70, 140, 23);
+
+        jButton23.setText(bundle.getString("CrInstrument.jButton23.text_1")); 
+        jButton23.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton23ActionPerformed(evt);
+            }
+        });
+        jPanel40.add(jButton23);
+        jButton23.setBounds(520, 100, 140, 23);
+
+        jTabbedPane4.addTab(bundle.getString("CrInstrument.jPanel40.TabConstraints.tabTitle"), jPanel40); 
+
+        jPanel5.add(jTabbedPane4);
+        jTabbedPane4.setBounds(20, 20, 690, 190);
 
         jTabbedPane2.addTab(bundle.getString("CrInstrument.jPanel5.TabConstraints.tabTitle"), jPanel5); 
 
@@ -8058,6 +8280,7 @@ public void doLayout(){
 
         jLabel15.setFont(jLabel15.getFont());
         jLabel15.setText(bundle.getString("CrInstrument.jLabel15.text")); 
+        jLabel15.setToolTipText(bundle.getString("CrInstrument.jLabel15.toolTipText")); 
         jPanel57.add(jLabel15);
 
         jTextField6.setPreferredSize(new java.awt.Dimension(230, 25));
@@ -8089,10 +8312,10 @@ public void doLayout(){
         jPanel6.add(jPanel58);
         jPanel58.setBounds(10, 60, 220, 40);
         jPanel6.add(jLabel25);
-        jLabel25.setBounds(20, 160, 200, 20);
+        jLabel25.setBounds(20, 160, 280, 20);
 
         jPanel44.add(jPanel6);
-        jPanel6.setBounds(370, 30, 340, 210);
+        jPanel6.setBounds(370, 30, 340, 190);
 
         jPanel8.setBackground(new java.awt.Color(255, 255, 255));
         jPanel8.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel8.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 0, 255))); 
@@ -8107,7 +8330,7 @@ public void doLayout(){
             }
         });
         jPanel8.add(btnTestSMS);
-        btnTestSMS.setBounds(60, 110, 120, 30);
+        btnTestSMS.setBounds(60, 160, 120, 30);
 
         jPanel56.setBackground(new java.awt.Color(255, 255, 255));
         jPanel56.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -8120,7 +8343,7 @@ public void doLayout(){
         jPanel56.add(jTextField2);
 
         jPanel8.add(jPanel56);
-        jPanel56.setBounds(10, 20, 220, 35);
+        jPanel56.setBounds(10, 70, 220, 35);
 
         jPanel53.setBackground(new java.awt.Color(255, 255, 255));
         jPanel53.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -8133,12 +8356,23 @@ public void doLayout(){
         jPanel53.add(jPasswordField5);
 
         jPanel8.add(jPanel53);
-        jPanel53.setBounds(10, 60, 220, 40);
+        jPanel53.setBounds(10, 110, 220, 40);
         jPanel8.add(jLabel19);
-        jLabel19.setBounds(20, 160, 200, 20);
+        jLabel19.setBounds(20, 200, 200, 20);
+
+        jPanel84.setOpaque(false);
+        jPanel84.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel56.setText(bundle.getString("CrInstrument.jLabel56.text_1")); 
+        jPanel84.add(jLabel56);
+
+        jPanel84.add(jComboBox15);
+
+        jPanel8.add(jPanel84);
+        jPanel84.setBounds(10, 20, 220, 40);
 
         jPanel44.add(jPanel8);
-        jPanel8.setBounds(370, 260, 240, 190);
+        jPanel8.setBounds(370, 220, 240, 240);
 
         FTPPanel.setBackground(new java.awt.Color(255, 255, 255));
         FTPPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.FTPPanel.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 0, 204))); 
@@ -8239,7 +8473,7 @@ public void doLayout(){
         jPanel63.setBounds(190, 20, 100, 30);
 
         jPanel44.add(FTPPanel);
-        FTPPanel.setBounds(620, 250, 370, 220);
+        FTPPanel.setBounds(620, 230, 370, 230);
 
         onlyReceiveCB.setBackground(new java.awt.Color(255, 255, 255));
         onlyReceiveCB.setFont(onlyReceiveCB.getFont());
@@ -8250,7 +8484,7 @@ public void doLayout(){
             }
         });
         jPanel44.add(onlyReceiveCB);
-        onlyReceiveCB.setBounds(30, 450, 380, 23);
+        onlyReceiveCB.setBounds(30, 420, 340, 23);
 
         jPanel13.setBackground(new java.awt.Color(255, 255, 255));
         jPanel13.setBorder(javax.swing.BorderFactory.createTitledBorder(new javax.swing.border.LineBorder(new java.awt.Color(0, 153, 153), 1, true), bundle.getString("CrInstrument.jPanel13.border.title"), javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP, new java.awt.Font("新細明體", 0, 12), new java.awt.Color(0, 0, 255))); 
@@ -8305,6 +8539,77 @@ public void doLayout(){
         });
         jPanel44.add(btnApplySetting_accounts);
         btnApplySetting_accounts.setBounds(740, 100, 250, 50);
+
+        jPanel47.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 153, 153)), bundle.getString("CrInstrument.jPanel47.border.title"))); 
+        jPanel47.setOpaque(false);
+        jPanel47.setLayout(null);
+
+        jPanel48.setOpaque(false);
+        jPanel48.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jComboBox21.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBox21ItemStateChanged(evt);
+            }
+        });
+        jPanel48.add(jComboBox21);
+
+        jLabel46.setText(bundle.getString("CrInstrument.jLabel46.text_1")); 
+        jPanel48.add(jLabel46);
+
+        jTextField24.setText(bundle.getString("CrInstrument.jTextField24.text")); 
+        jTextField24.setPreferredSize(new java.awt.Dimension(106, 25));
+        jPanel48.add(jTextField24);
+
+        jLabel47.setText(bundle.getString("CrInstrument.jLabel47.text_1")); 
+        jPanel48.add(jLabel47);
+
+        jTextField25.setText(bundle.getString("CrInstrument.jTextField25.text")); 
+        jTextField25.setPreferredSize(new java.awt.Dimension(106, 25));
+        jPanel48.add(jTextField25);
+
+        jLabel54.setText(bundle.getString("CrInstrument.jLabel54.text_1")); 
+        jPanel48.add(jLabel54);
+
+        jTextField26.setText(bundle.getString("CrInstrument.jTextField26.text")); 
+        jTextField26.setPreferredSize(new java.awt.Dimension(190, 25));
+        jPanel48.add(jTextField26);
+
+        jButton24.setText(bundle.getString("CrInstrument.jButton24.text_1")); 
+        jButton24.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton24ActionPerformed(evt);
+            }
+        });
+        jPanel48.add(jButton24);
+
+        jButton25.setText(bundle.getString("CrInstrument.jButton25.text_1")); 
+        jButton25.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton25ActionPerformed(evt);
+            }
+        });
+        jPanel48.add(jButton25);
+
+        jPanel47.add(jPanel48);
+        jPanel48.setBounds(10, 20, 930, 40);
+
+        jPanel51.setOpaque(false);
+        jPanel51.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel55.setText(bundle.getString("CrInstrument.jLabel55.text_1")); 
+        jLabel55.setToolTipText(bundle.getString("CrInstrument.jLabel55.toolTipText")); 
+        jPanel51.add(jLabel55);
+
+        jTextField40.setText(bundle.getString("CrInstrument.jTextField40.text")); 
+        jTextField40.setPreferredSize(new java.awt.Dimension(606, 25));
+        jPanel51.add(jTextField40);
+
+        jPanel47.add(jPanel51);
+        jPanel51.setBounds(50, 65, 900, 40);
+
+        jPanel44.add(jPanel47);
+        jPanel47.setBounds(30, 460, 960, 120);
 
         jTabbedPane3.addTab(bundle.getString("CrInstrument.jPanel44.TabConstraints.tabTitle"), jPanel44); 
 
@@ -8450,7 +8755,7 @@ public void doLayout(){
         chkSumCB.setOpaque(false);
         jPanel119.add(chkSumCB);
 
-        chkSumCBB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "CheckSum", "Modbus CRC", "0x0D" }));
+        chkSumCBB.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "CheckSum_ADD", "CheckSum_XOR", "Modbus CRC", "0x0D", "0x0A", "0x0D0A" }));
         jPanel119.add(chkSumCBB);
 
         jPanel118.add(jPanel119);
@@ -8529,6 +8834,11 @@ public void doLayout(){
                 eventListMouseClicked(evt);
             }
         });
+        eventList.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                eventListKeyReleased(evt);
+            }
+        });
         jScrollPane6.setViewportView(eventList);
 
         jPanel71.add(jScrollPane6);
@@ -8589,6 +8899,11 @@ public void doLayout(){
                 conditionList2MouseClicked(evt);
             }
         });
+        conditionList2.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                conditionList2KeyReleased(evt);
+            }
+        });
         jScrollPane17.setViewportView(conditionList2);
 
         jPanel71.add(jScrollPane17);
@@ -8597,6 +8912,11 @@ public void doLayout(){
         actionList2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 actionList2MouseClicked(evt);
+            }
+        });
+        actionList2.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                actionList2KeyReleased(evt);
             }
         });
         jScrollPane18.setViewportView(actionList2);
@@ -8634,6 +8954,11 @@ public void doLayout(){
         actionList.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 actionListMouseClicked(evt);
+            }
+        });
+        actionList.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                actionListKeyReleased(evt);
             }
         });
         jScrollPane8.setViewportView(actionList);
@@ -8697,7 +9022,7 @@ public void doLayout(){
         jPanel77.add(jLabel83);
 
         jComboBox18.setFont(jComboBox18.getFont());
-        jComboBox18.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Set device SN", "Set data value", "Send email message", "Send SMS message to cell phone", "Send command", "Alert sound alarm", "Action sound alarm", "Next station send command", "Next device send command", "Stop continue send command", "Connect all port", "Disconnect all port", "Start monitor", "Stop monitor", "Open URL", "Exit application", "Restart application", "Java class" }));
+        jComboBox18.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Set device SN", "Set data value", "Send email message", "Send SMS message to cell phone", "Send command", "Alert sound alarm", "Action sound alarm", "Next station send command", "Next device send command", "Stop continue send command", "Connect all port", "Disconnect all port", "Start monitor", "Stop monitor", "Open URL", "Exit application", "Restart application", "Pause", "Java class" }));
         jComboBox18.setPreferredSize(new java.awt.Dimension(250, 25));
         jComboBox18.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -8719,7 +9044,7 @@ public void doLayout(){
         jLabel95.setText(bundle.getString("CrInstrument.jLabel95.text")); 
         jPanel83.add(jLabel95);
 
-        jComboBox28.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Byte data", "String data" }));
+        jComboBox28.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Byte data", "String data", "Byte string data" }));
         jComboBox28.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBox28ItemStateChanged(evt);
@@ -8876,7 +9201,7 @@ public void doLayout(){
         jPanel128.setBounds(10, 90, 410, 35);
 
         jPanel70.add(jPanel79);
-        jPanel79.setBounds(360, 20, 430, 270);
+        jPanel79.setBounds(360, 220, 430, 70);
 
         btnMoveUpAction1.setFont(btnMoveUpAction1.getFont());
         btnMoveUpAction1.setText(bundle.getString("CrInstrument.btnMoveUpAction1.text")); 
@@ -8918,7 +9243,7 @@ public void doLayout(){
         jLabel110.setText(bundle.getString("CrInstrument.jLabel110.text")); 
         jPanel94.add(jLabel110);
 
-        jComboBox32.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Byte data", "String data" }));
+        jComboBox32.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Byte data", "String data", "Byte string data" }));
         jComboBox32.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBox32ItemStateChanged(evt);
@@ -9054,7 +9379,7 @@ public void doLayout(){
         jPanel138.setBounds(10, 100, 410, 40);
 
         jPanel70.add(jPanel78);
-        jPanel78.setBounds(360, 30, 430, 190);
+        jPanel78.setBounds(360, 40, 430, 200);
 
         jPanel122.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -9134,7 +9459,7 @@ public void doLayout(){
         jCheckBox8.setText(bundle.getString("CrInstrument.jCheckBox8.text")); 
         jPanel90.add(jCheckBox8);
 
-        jComboBox31.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Checksum", "Modbus CRC", "0x0D" }));
+        jComboBox31.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "CheckSum_ADD", "CheckSum_XOR", "Modbus CRC", "0x0D", "0x0A", "0x0D0A" }));
         jPanel90.add(jComboBox31);
 
         jPanel85.add(jPanel90);
@@ -9169,7 +9494,7 @@ public void doLayout(){
         jPanel129.setBounds(90, 70, 290, 40);
 
         jPanel70.add(jPanel85);
-        jPanel85.setBounds(370, 70, 410, 220);
+        jPanel85.setBounds(370, 90, 410, 200);
 
         jPanel126.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(51, 0, 255)), bundle.getString("CrInstrument.jPanel126.border.title"))); 
         jPanel126.setFont(jPanel126.getFont());
@@ -9189,7 +9514,7 @@ public void doLayout(){
         jPanel127.setBounds(10, 20, 370, 40);
 
         jPanel70.add(jPanel126);
-        jPanel126.setBounds(360, 80, 430, 100);
+        jPanel126.setBounds(360, 100, 430, 80);
 
         jPanel26.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 255)), bundle.getString("CrInstrument.jPanel26.border.title"))); 
         jPanel26.setLayout(null);
@@ -9209,6 +9534,22 @@ public void doLayout(){
         jPanel70.add(jPanel26);
         jPanel26.setBounds(380, 50, 400, 90);
 
+        jPanel41.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 255)), bundle.getString("CrInstrument.jPanel41.border.title"))); 
+        jPanel41.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel35.setText(bundle.getString("CrInstrument.jLabel35.text")); 
+        jPanel41.add(jLabel35);
+
+        jTextField23.setText(bundle.getString("CrInstrument.jTextField23.text")); 
+        jTextField23.setPreferredSize(new java.awt.Dimension(86, 25));
+        jPanel41.add(jTextField23);
+
+        jLabel45.setText(bundle.getString("CrInstrument.jLabel45.text")); 
+        jPanel41.add(jLabel45);
+
+        jPanel70.add(jPanel41);
+        jPanel41.setBounds(390, 90, 380, 60);
+
         jPanel49.add(jPanel70);
         jPanel70.setBounds(210, 280, 800, 300);
 
@@ -9219,6 +9560,11 @@ public void doLayout(){
         conditionList.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 conditionListMouseClicked(evt);
+            }
+        });
+        conditionList.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                conditionListKeyReleased(evt);
             }
         });
         jScrollPane7.setViewportView(conditionList);
@@ -9272,7 +9618,7 @@ public void doLayout(){
         jLabel90.setText(bundle.getString("CrInstrument.jLabel90.text")); 
         jPanel80.add(jLabel90);
 
-        jComboBox20.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Byte data", "String data" }));
+        jComboBox20.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Byte data", "String data", "Byte string data" }));
         jComboBox20.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBox20ItemStateChanged(evt);
@@ -9537,6 +9883,11 @@ public void doLayout(){
         chartList.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 chartListMouseClicked(evt);
+            }
+        });
+        chartList.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                chartListKeyReleased(evt);
             }
         });
         jScrollPane9.setViewportView(chartList);
@@ -10934,12 +11285,39 @@ public void doLayout(){
   }
 
   private void btnTestEMailActionPerformed(java.awt.event.ActionEvent evt) {
-    jLabel25.setText(bundle2.getString("CrInstrument.xy.msg66"));
+    Vector em = new Vector();
+    String emailToNow="",emailTo=getPropsString("email-to");
+    int rcount = jTable4.getRowCount();
+    for (int i = 0; i < rcount; i++) {
+      String tm = (String) jTable4.getModel().getValueAt(i, 0);
+      if (tm != null && tm.length() > 0) {
+        em.addElement(tm);
+      }
+    }
+    if (em.size() > 0) {
+      String arr[] = new String[em.size()];
+      Object o[] = em.toArray();
+      for (int i = 0; i < arr.length; i++) {
+        arr[i] = (String) o[i];
+      }
+      emailToNow= ylib.arrayToCsvLine(arr);
+    } else {
+      emailToNow= "";
+    }
+    if(!emailTo.equals(emailToNow)){
+          int an=JOptionPane.showConfirmDialog(this, bundle2.getString("CrInstrument.xy.msg163")+" \""+emailTo+"\",\r\n"+bundle2.getString("CrInstrument.xy.msg164")+" \""+emailToNow+"\" ?", bundle2.getString("CrInstrument.xy.msg166"), JOptionPane.YES_NO_CANCEL_OPTION);
+          if(an==JOptionPane.YES_OPTION) props.setProperty("email-to", emailToNow);
+
+      }
+
+      jLabel25.setText(bundle2.getString("CrInstrument.xy.msg66"));
     if (sendEmail(2,"test '"+getPropsString("email-sp")+"' email","test email")) {
       jLabel25.setText("");
       JOptionPane.showMessageDialog(this, bundle2.getString("CrInstrument.xy.msg67")+" \"" + jTextField6.getText() + "\" "+bundle2.getString("CrInstrument.xy.msg68"));
     } else {
       jLabel25.setText("");
+
+      if(OneVar.check(props.getProperty("lky-n"), 2) && getPropsString("email-to").trim().length()>0){
       if(getPropsString("email-sp").equalsIgnoreCase("gmail")){
        JOptionPane.showMessageDialog(this, bundle2.getString("CrInstrument.xy.msg69")+"\r\n" 
               + bundle2.getString("CrInstrument.xy.msg70")+" \r\n"+bundle2.getString("CrInstrument.xy.msg71")+" \r\n"+bundle2.getString("CrInstrument.xy.msg72")+"\r\n" 
@@ -10949,11 +11327,45 @@ public void doLayout(){
               + bundle2.getString("CrInstrument.xy.msg76")+" \r\n"+bundle2.getString("CrInstrument.xy.msg77")+" \r\n"+bundle2.getString("CrInstrument.xy.msg78")+"\r\n"  
               + bundle2.getString("CrInstrument.xy.msg79")+"\r\n\t"+bundle2.getString("CrInstrument.xy.msg80"));  
       }
+      }
     }
   }
 
   private void btnTestSMSActionPerformed(java.awt.event.ActionEvent evt) {
-    jLabel19.setText(bundle2.getString("CrInstrument.xy.msg81"));
+      String smsSp=getPropsString("sms-sp");
+      String smsSpNow=(String)jComboBox15.getSelectedItem();
+      if(!smsSp.equals(smsSpNow)){
+          int an=JOptionPane.showConfirmDialog(this, bundle2.getString("CrInstrument.xy.msg159")+" \""+smsSp+"\",\r\n"+bundle2.getString("CrInstrument.xy.msg160")+" \""+smsSpNow+"\" ?", bundle2.getString("CrInstrument.xy.msg158"), JOptionPane.YES_NO_CANCEL_OPTION);
+          if(an==JOptionPane.YES_OPTION) props.setProperty("sms-sp", smsSpNow);
+
+      }
+
+    Vector sm = new Vector();
+    String smsToNow="",smsTo=getPropsString("sms-to");
+    int rcount3 = jTable3.getRowCount();
+    for (int i = 0; i < rcount3; i++) {
+      String tm = (String) jTable3.getModel().getValueAt(i, 0);
+      if (tm != null && tm.length() > 0) {
+        sm.addElement(tm);
+      }
+    }
+    if (sm.size() > 0) {
+      String arr[] = new String[sm.size()];
+      Object o[] = sm.toArray();
+      for (int i = 0; i < arr.length; i++) {
+        arr[i] = (String) o[i];
+      }
+      smsToNow=ylib.arrayToCsvLine(arr);
+    } else {
+      smsToNow="";
+    }
+    if(!smsTo.equals(smsToNow)){
+          int an=JOptionPane.showConfirmDialog(this, bundle2.getString("CrInstrument.xy.msg161")+" \""+smsTo+"\", \r\n"+bundle2.getString("CrInstrument.xy.msg162")+" \""+smsToNow+"\" ?", bundle2.getString("CrInstrument.xy.msg165"), JOptionPane.YES_NO_CANCEL_OPTION);
+          if(an==JOptionPane.YES_OPTION) props.setProperty("sms-to", smsToNow);
+
+      }
+
+      jLabel19.setText(bundle2.getString("CrInstrument.xy.msg81"));
     sendSms(2,"test '"+this.getPropsString("sms-sp")+"' sms");
     jLabel19.setText("");
     
@@ -11527,12 +11939,14 @@ void showActionItem(String sel){
     jPanel79.setVisible(false);
     jPanel85.setVisible(false);
     jPanel78.setVisible(false);
+    jPanel41.setVisible(false);
 
       if(sel.equalsIgnoreCase("Set data value")) jPanel79.setVisible(true);
       else if(sel.equalsIgnoreCase("Send command") || sel.equalsIgnoreCase("Next station send command") || sel.equalsIgnoreCase("Next device send command")) jPanel85.setVisible(true);
       else if(sel.equalsIgnoreCase("Set device SN")) jPanel78.setVisible(true);
       else if(sel.equalsIgnoreCase("Java class")) jPanel126.setVisible(true);
       else if(sel.equalsIgnoreCase("Open URL")) jPanel26.setVisible(true);
+      else if(sel.equalsIgnoreCase("Pause")) jPanel41.setVisible(true);
 
       jPanel76.setVisible(false);
       jPanel136.setVisible(false);
@@ -11666,8 +12080,24 @@ void updateConditionItem(){
   private void btnUpdateAction1ActionPerformed(java.awt.event.ActionEvent evt) {
     updateActionItem();
   }
-void updateActionItem(){
-       if(actionList.getSelectedIndex()>-1){
+boolean updateActionItem(){
+   boolean rtn=false;
+   if(jComboBox18.getSelectedItem()!=null && ((String)jComboBox18.getSelectedItem()).equalsIgnoreCase("Set data value") && jComboBox28.getSelectedItem()!=null && ((String)jComboBox28.getSelectedItem()).equalsIgnoreCase("Byte data") && jCheckBox34.isSelected() && jCheckBox27.isSelected()){
+       String from=jTextField16.getText();
+       String to=jTextField21.getText();
+       if(isNumeric(from) && isNumeric(to)){
+           int from2=(int)Double.parseDouble(from);
+           int to2=(int)Double.parseDouble(to);
+           if((to2-from2)!=1 ){
+             JOptionPane.showMessageDialog(this, "IEEE754 needs 2 bytes data as input data.\r\nBytes from \""+from+"\" to \""+to+"\" not a valid setup.");
+             return false;
+           }
+       } else {
+           JOptionPane.showMessageDialog(this, "IEEE754 needs 2 bytes data as input data.\r\nBytes from \""+from+"\" to \""+to+"\" not a valid setup.");
+           return false;
+       }
+   }
+    if(actionList.getSelectedIndex()>-1){
      String sel=(String)actionList.getSelectedValue();
        String data[]=new String[actMaxArrCnt];
        for(int i=0;i<data.length;i++) data[i]="";
@@ -11748,9 +12178,12 @@ void updateActionItem(){
        data[68]=jTextField68.getText();
        data[69]=jTextField69.getText();
        data[70]=jTextField54.getText();
+       data[71]=jTextField23.getText();
        actionTM.put(sel,ylib.arrayToCsvLine(data));
        chkAndAdjustEvents();
+       rtn=true;
   }
+    return rtn;
 }
   
 
@@ -11808,7 +12241,7 @@ void updateActionItem(){
       for(int i=0;i<cnt;i++){
         String item=(String)conditionList2.getModel().getElementAt(i);
 
-        tm.put(item, item);
+        if(item.length()>0) tm.put(item, item);
       }
       if(!tm.containsKey(cond)){
         tm.put(cond,cond);
@@ -11823,7 +12256,7 @@ void updateActionItem(){
     if(eventListModel.size()<1) {newEvent(); eventList.setSelectedIndex(0);}
     if(eventList.getSelectedIndex()==-1) { JOptionPane.showMessageDialog(this, "Please select which event to add to."); return;}
     if(actionList.getSelectedIndex()>-1){
-      updateActionItem();
+      if(updateActionItem()){
       String ev=(String)eventList.getSelectedValue();
       String act=(String)actionList.getSelectedValue();
       int cnt=actionList2.getModel().getSize();
@@ -11832,13 +12265,14 @@ void updateActionItem(){
       for(int i=0;i<cnt;i++){
         String item=(String)actionList2.getModel().getElementAt(i);
 
-        tm.put(item, item);
+        if(item.length()>0) tm.put(item, item);
       }
       if(!tm.containsKey(act)){
         tm.put(act, act);
         
 
         eventSetAction(ev,tm);
+      }
       }
     } else  { JOptionPane.showMessageDialog(this, "Please select which action to be added."); return;}
   }
@@ -11982,9 +12416,16 @@ if(evt.getKeyCode()==38 || evt.getKeyCode()==40 )  changeReceiveListItem();
                 String selected=(String)sendList.getSelectedValue();
                 if(selected!=null){
                 String id=getItemId(selected);
-                int inx=selected.indexOf(":");
                 String id2=selected;
-                if(inx>-1) id2=selected.substring(inx+1);
+                if(selected.indexOf("tcpclient")!=-1){
+                   int inx=selected.indexOf("tcpclient");
+                   if(inx>0){
+                       id2=selected.substring(inx);
+                   }
+                } else {
+                   int inx=selected.indexOf(":");
+                   if(inx>-1) id2=selected.substring(inx+1);
+                }
 
                 cmd=wn.w.e642(cmd);
                 if(selected.equals(allItemsName)){
@@ -12013,14 +12454,17 @@ public String getDataSrcFromStation(String station){
 }
   private void jComboBox20ItemStateChanged(java.awt.event.ItemEvent evt) {
     if(evt.getStateChange()==evt.SELECTED){
-      if(jComboBox20.getSelectedIndex()==0){
+      if(((String)jComboBox20.getSelectedItem()).trim().equalsIgnoreCase("Byte data")){
         jComboBox26.setVisible(false);
         da_datavalue_01.setVisible(false);
         jTextField46.setVisible(false);
         jLabel93.setVisible(false);
         jTextField13.setVisible(false);
+        jCheckBox31.setVisible(false);
+        jComboBox39.setVisible(false);
+        jTextField65.setVisible(false);
         jCheckBox35.setText("Byte from");
-      } else {
+      } else if(((String)jComboBox20.getSelectedItem()).trim().equalsIgnoreCase("String data")) {
         jComboBox26.setVisible(true);
         da_datavalue_01.setVisible(true);
         jTextField46.setVisible(true);
@@ -12029,18 +12473,33 @@ public String getDataSrcFromStation(String station){
         jCheckBox35.setText("Char from");
         String sel=(String)jComboBox26.getSelectedItem();
         if(sel.equalsIgnoreCase("whole line")){
-        da_datavalue_01.setVisible(false);
+
         jTextField46.setVisible(false);
         jLabel93.setVisible(false);
         jTextField13.setVisible(false);
+
+        jCheckBox31.setVisible(true);
+        jComboBox39.setVisible(true);
+        jTextField65.setVisible(true);
         }
+      }  else if(((String)jComboBox20.getSelectedItem()).trim().equalsIgnoreCase("Byte string data")) {
+        jLabel130.setVisible(false);
+        jCheckBox35.setText("Char from");
+        jComboBox26.setVisible(false);
+
+        jTextField46.setVisible(false);
+        jLabel93.setVisible(false);
+        jTextField13.setVisible(false);
+        jCheckBox31.setVisible(false);
+        jComboBox39.setVisible(false);
+        jTextField65.setVisible(false);
       }
     }
   }
 
   private void jComboBox28ItemStateChanged(java.awt.event.ItemEvent evt) {
     if(evt.getStateChange()==evt.SELECTED){
-      if(jComboBox28.getSelectedIndex()==0){
+      if(((String)jComboBox28.getSelectedItem()).trim().equalsIgnoreCase("Byte data")){
         jCheckBox27.setVisible(true);
         jComboBox29.setVisible(false);
         jLabel79.setVisible(false);
@@ -12048,7 +12507,7 @@ public String getDataSrcFromStation(String station){
         jLabel96.setVisible(false);
         jTextField15.setVisible(false);
         jCheckBox34.setText("Byte from");
-      } else {
+      } else if(((String)jComboBox28.getSelectedItem()).trim().equalsIgnoreCase("String data")) {
         jCheckBox27.setVisible(false);
         jComboBox29.setVisible(true);
         jCheckBox34.setText("Char from");
@@ -12063,10 +12522,17 @@ public String getDataSrcFromStation(String station){
         jTextField56.setVisible(true);
         jLabel96.setVisible(true);
         jTextField15.setVisible(true);
-        }
-      }
+        } 
+      } else if(((String)jComboBox28.getSelectedItem()).trim().equalsIgnoreCase("Byte string data")) {
+        jCheckBox27.setVisible(false);
+        jCheckBox34.setText("Char from");
+        jComboBox29.setVisible(false);
+        jLabel79.setVisible(false);
+        jTextField56.setVisible(false);
+        jLabel96.setVisible(false);
+        jTextField15.setVisible(false);
     }
-
+   }
   }
 
   private void btnMoveUpEventActionPerformed(java.awt.event.ActionEvent evt) {
@@ -12424,7 +12890,8 @@ void eventSwapItem(String item1,String item2){
    }
   if(adminLogin || userLogin){
     if(editFrame!=null && editFrame.isVisible()){
-        editFrame.requestFocusInWindow();
+            editFrame.setExtendedState(JFrame.NORMAL);
+            editFrame.requestFocusInWindow();
         return;
     }
   } else return;
@@ -12433,6 +12900,8 @@ void eventSwapItem(String item1,String item2){
 
     editFrame.setContent();
     editFrame.setVisible(true);
+    editFrame.setExtendedState(JFrame.NORMAL);
+    editFrame.requestFocusInWindow();
   }
 
   private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {
@@ -12706,7 +13175,7 @@ private void updateItem(){
 
     private void jComboBox32ItemStateChanged(java.awt.event.ItemEvent evt) {
 if(evt.getStateChange()==evt.SELECTED){
-      if(jComboBox32.getSelectedIndex()==0){
+    if(((String)jComboBox32.getSelectedItem()).trim().equalsIgnoreCase("Byte data")){
           jComboBox41.setVisible(false);
         jLabel111.setVisible(false);
         jTextField57.setVisible(false);
@@ -12719,7 +13188,7 @@ if(evt.getStateChange()==evt.SELECTED){
         jCheckBox36.setText("Byte from");
         jCheckBox42.setText("Byte from");
         jCheckBox40.setText("Byte from");
-      } else {
+      } else if(((String)jComboBox32.getSelectedItem()).trim().equalsIgnoreCase("String data")){
           jComboBox41.setVisible(true);
           if(((String)jComboBox41.getSelectedItem()).trim().equalsIgnoreCase("Fixed column length")){
         jLabel111.setVisible(true);
@@ -12743,6 +13212,19 @@ if(evt.getStateChange()==evt.SELECTED){
         jLabel164.setVisible(true);
         jTextField67.setVisible(true);
           }
+        jCheckBox36.setText("Char from");
+        jCheckBox42.setText("Char from");
+        jCheckBox40.setText("Char from");
+    }  else if(((String)jComboBox32.getSelectedItem()).trim().equalsIgnoreCase("Byte string data")){
+          jComboBox41.setVisible(false);
+          jLabel111.setVisible(false);
+        jTextField57.setVisible(false);
+        jLabel112.setVisible(false);
+        jTextField58.setVisible(false);
+        jLabel166.setVisible(false);
+        jTextField70.setVisible(false);
+        jLabel164.setVisible(false);
+        jTextField67.setVisible(false);
         jCheckBox36.setText("Char from");
         jCheckBox42.setText("Char from");
         jCheckBox40.setText("Char from");
@@ -12887,6 +13369,126 @@ if(evt.getStateChange()==evt.SELECTED){
         if(jTabbedPane3.getSelectedComponent().equals(nodeMgntPanel)){
             nodeMgntPanel2.updateList();
         }
+       }
+    }
+
+    private void jButton23ActionPerformed(java.awt.event.ActionEvent evt) {
+         DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+    int[] rows = jTable2.getSelectedRows();
+
+    for (int i = rows.length - 1; i > -1; i--) {
+      model.removeRow(rows[i]);
+    }
+    }
+
+    private void jButton18ActionPerformed(java.awt.event.ActionEvent evt) {
+    ((DefaultTableModel) jTable2.getModel()).addRow(new Object[jTable2.getModel().getColumnCount()]);
+    }
+
+    private void stationListKeyReleased(java.awt.event.KeyEvent evt) {
+      if(evt.getKeyCode()==38 || evt.getKeyCode()==40 )  showStation((String)stationList.getSelectedValue());
+    }
+
+    private void eventListKeyReleased(java.awt.event.KeyEvent evt) {
+      if(evt.getKeyCode()==38 || evt.getKeyCode()==40 ) showEvent();
+    }
+
+    private void conditionList2KeyReleased(java.awt.event.KeyEvent evt) {
+      if(evt.getKeyCode()==38 || evt.getKeyCode()==40 )  showCondition2("");
+    }
+
+    private void actionList2KeyReleased(java.awt.event.KeyEvent evt) {
+     if(evt.getKeyCode()==38 || evt.getKeyCode()==40 ) showAction2("");
+    }
+
+    private void conditionListKeyReleased(java.awt.event.KeyEvent evt) {
+      if(evt.getKeyCode()==38 || evt.getKeyCode()==40 ) showCondition1();
+    }
+
+    private void actionListKeyReleased(java.awt.event.KeyEvent evt) {
+      if(evt.getKeyCode()==38 || evt.getKeyCode()==40 ) showAction1();
+    }
+
+    private void chartListKeyReleased(java.awt.event.KeyEvent evt) {
+      if(evt.getKeyCode()==38 || evt.getKeyCode()==40 ) showChart();
+    }
+
+    private void jComboBox21ItemStateChanged(java.awt.event.ItemEvent evt) {
+    if(evt.getStateChange()==evt.SELECTED){
+      String smsSp=((String)jComboBox21.getSelectedItem()).trim();
+     if(smsSp.length()>0 && smsSpTM.get(smsSp)!=null){
+        String smsSpInfo[];
+        smsSpInfo=ylib.csvlinetoarray((String)smsSpTM.get(smsSp));
+        jTextField24.setText(smsSpInfo[0]);
+        jTextField25.setText(smsSpInfo[1]);
+        jTextField40.setText(smsSpInfo[2]);
+        jTextField26.setText(smsSpInfo[5]);
+     } else {
+         jTextField24.setText("");
+         jTextField25.setText("");
+         jTextField40.setText("");
+         jTextField26.setText("");
+     }
+    }
+    }
+
+    private void jButton24ActionPerformed(java.awt.event.ActionEvent evt) {
+      String smsSp=jTextField24.getText().trim();
+      String area=jTextField25.getText().trim();
+      String functionWeb=jTextField40.getText().trim();
+      String website=jTextField26.getText().trim();
+      if(smsSp.length()<1 || area.length()<1 || functionWeb.length()<1 || website.length()<1){
+          JOptionPane.showMessageDialog(this, "The information is incomplete.");
+          return;
+      }
+      if(functionWeb.indexOf("[#account#]")==-1 || functionWeb.indexOf("[#password#]")==-1 || functionWeb.indexOf("[#sendToPhone#]")==-1 || functionWeb.indexOf("[#message#]")==-1){
+          JOptionPane.showMessageDialog(this, "Error: SMS function address has no [#account#],[#password#],[#sendToPhone#] or [#message#] parmaeter.\r\n"+
+             "   Example: http://202.39.48.216/kotsmsapi-1.php?username=[#account#]&password=[#password#]&dstaddr=[#sendToPhone#]&smbody=[#message#]");
+          return;
+      }
+      String smsSpInfo[];
+     if(smsSpTM.get(smsSp)!=null){
+        smsSpInfo=ylib.csvlinetoarray((String)smsSpTM.get(smsSp));
+     } else {
+        smsSpInfo=new String[7];
+        for(int i=0;i<smsSpInfo.length;i++) smsSpInfo[i]="";
+     }
+     smsSpInfo[0]=smsSp;
+     smsSpInfo[1]=area;
+     smsSpInfo[2]=functionWeb;
+     smsSpInfo[5]=website;
+     smsSpTM.put(smsSp, ylib.arrayToCsvLine(smsSpInfo));
+     if (((DefaultComboBoxModel) jComboBox21.getModel()).getIndexOf(smsSp) == -1) {
+        jComboBox21.addItem(smsSp); 
+     }
+     jComboBox21.setSelectedItem(smsSp);
+
+     String sel=(String)jComboBox15.getSelectedItem();
+     jComboBox15.removeAllItems();
+     jComboBox15.addItem("");
+     Iterator it=smsSpTM.keySet().iterator();
+     for(;it.hasNext();){
+         String key=(String)it.next();
+         jComboBox15.addItem(key);
+     }
+     jComboBox15.setSelectedItem(sel);
+    }
+
+    private void jButton25ActionPerformed(java.awt.event.ActionEvent evt) {
+       String smsSp=(String)jComboBox21.getSelectedItem();
+       if(smsSp.length()>0){
+           int an=JOptionPane.showConfirmDialog(this, "Confirm to delete "+smsSp+" ?", "Confirm delete", JOptionPane.YES_NO_CANCEL_OPTION);
+           if(an==JOptionPane.YES_OPTION){
+           smsSpTM.remove(smsSp);
+           jComboBox21.removeItem(smsSp);
+
+           String sel=(String)jComboBox15.getSelectedItem();
+           jComboBox15.removeItem(smsSp);
+           if(sel.equals(smsSp)){
+               jComboBox15.setSelectedItem("");
+               props.setProperty("sms-sp", "");
+           }
+         }
        }
     }
  private void changeReceiveListItem(){
@@ -13275,6 +13877,7 @@ void showAction1(){
          if(data[2].equalsIgnoreCase("Open URL")) {
            jPanel26.setVisible(true);
           } else jPanel26.setVisible(true);
+         if(data.length>71) jTextField23.setText(data[71]);
          showActionItem(data[2]);
        }
       currentAction1=sel;
@@ -14007,11 +14610,15 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JButton jButton15;
     private javax.swing.JButton jButton16;
     private javax.swing.JButton jButton17;
+    private javax.swing.JButton jButton18;
     private javax.swing.JButton jButton19;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton20;
     private javax.swing.JButton jButton21;
     private javax.swing.JButton jButton22;
+    private javax.swing.JButton jButton23;
+    private javax.swing.JButton jButton24;
+    private javax.swing.JButton jButton25;
     private javax.swing.JButton jButton26;
     private javax.swing.JButton jButton27;
     private javax.swing.JButton jButton3;
@@ -14077,12 +14684,14 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JComboBox jComboBox12;
     private javax.swing.JComboBox jComboBox13;
     private javax.swing.JComboBox jComboBox14;
+    javax.swing.JComboBox jComboBox15;
     private javax.swing.JComboBox jComboBox16;
     private javax.swing.JComboBox jComboBox17;
     private javax.swing.JComboBox jComboBox18;
     private javax.swing.JComboBox jComboBox19;
     private javax.swing.JComboBox jComboBox2;
     private javax.swing.JComboBox jComboBox20;
+    private javax.swing.JComboBox jComboBox21;
     private javax.swing.JComboBox jComboBox26;
     private javax.swing.JComboBox jComboBox27;
     private javax.swing.JComboBox jComboBox28;
@@ -14186,6 +14795,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel32;
     private javax.swing.JLabel jLabel33;
     private javax.swing.JLabel jLabel34;
+    private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel36;
     private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
@@ -14196,6 +14806,9 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel42;
     private javax.swing.JLabel jLabel43;
     private javax.swing.JLabel jLabel44;
+    private javax.swing.JLabel jLabel45;
+    private javax.swing.JLabel jLabel46;
+    private javax.swing.JLabel jLabel47;
     private javax.swing.JLabel jLabel48;
     private javax.swing.JLabel jLabel49;
     private javax.swing.JLabel jLabel5;
@@ -14203,6 +14816,9 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JLabel jLabel51;
     private javax.swing.JLabel jLabel52;
     private javax.swing.JLabel jLabel53;
+    private javax.swing.JLabel jLabel54;
+    private javax.swing.JLabel jLabel55;
+    private javax.swing.JLabel jLabel56;
     private javax.swing.JLabel jLabel58;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel60;
@@ -14317,14 +14933,19 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JPanel jPanel38;
     private javax.swing.JPanel jPanel39;
     public javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel40;
+    private javax.swing.JPanel jPanel41;
     private javax.swing.JPanel jPanel42;
     private javax.swing.JPanel jPanel43;
     private javax.swing.JPanel jPanel44;
     private javax.swing.JPanel jPanel45;
     private javax.swing.JPanel jPanel46;
+    private javax.swing.JPanel jPanel47;
+    private javax.swing.JPanel jPanel48;
     private javax.swing.JPanel jPanel49;
     public javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel50;
+    private javax.swing.JPanel jPanel51;
     private javax.swing.JPanel jPanel52;
     private javax.swing.JPanel jPanel53;
     private javax.swing.JPanel jPanel54;
@@ -14360,6 +14981,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JPanel jPanel81;
     private javax.swing.JPanel jPanel82;
     private javax.swing.JPanel jPanel83;
+    private javax.swing.JPanel jPanel84;
     private javax.swing.JPanel jPanel85;
     private javax.swing.JPanel jPanel86;
     private javax.swing.JPanel jPanel87;
@@ -14394,6 +15016,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JRadioButton jRadioButton7;
     private javax.swing.JRadioButton jRadioButton8;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane10;
     private javax.swing.JScrollPane jScrollPane11;
     private javax.swing.JScrollPane jScrollPane12;
     private javax.swing.JScrollPane jScrollPane13;
@@ -14413,7 +15036,9 @@ class ShowStationChartThread extends Thread{
     javax.swing.JTabbedPane jTabbedPane1;
     public javax.swing.JTabbedPane jTabbedPane2;
     javax.swing.JTabbedPane jTabbedPane3;
+    private javax.swing.JTabbedPane jTabbedPane4;
     private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTable2;
     private javax.swing.JTable jTable3;
     private javax.swing.JTable jTable4;
     private javax.swing.JTable jTable5;
@@ -14433,6 +15058,10 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JTextField jTextField20;
     private javax.swing.JTextField jTextField21;
     private javax.swing.JTextField jTextField22;
+    private javax.swing.JTextField jTextField23;
+    private javax.swing.JTextField jTextField24;
+    private javax.swing.JTextField jTextField25;
+    private javax.swing.JTextField jTextField26;
     private javax.swing.JTextField jTextField27;
     private javax.swing.JTextField jTextField28;
     private javax.swing.JTextField jTextField29;
@@ -14448,6 +15077,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JTextField jTextField38;
     private javax.swing.JTextField jTextField39;
     private javax.swing.JTextField jTextField4;
+    private javax.swing.JTextField jTextField40;
     private javax.swing.JTextField jTextField43;
     private javax.swing.JTextField jTextField44;
     private javax.swing.JTextField jTextField46;

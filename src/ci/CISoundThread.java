@@ -120,8 +120,8 @@ public class CISoundThread extends Thread{
                 stopHit=false;
 
                 if(info[0].equals("1")){
-                    if(info[1].toLowerCase().endsWith(".mp3")) setSound2(info[1],(info.length>2 && info[2].length()>0? Integer.parseInt(info[2]):1));
-                    else setSound(info[1],(info.length>2 && info[2].length()>0? Integer.parseInt(info[2]):1));
+                    if(info[1].toLowerCase().endsWith(".mp3")) setMp3Sound(info[1],(info.length>2 && info[2].length()>0? Integer.parseInt(info[2]):1));
+                    else setNonMp3Sound(info[1],(info.length>2 && info[2].length()>0? Integer.parseInt(info[2]):1));
                 } else if(info[0].equals("2")){
                     if(info.length>2 && info[2].length()>0) {
                          if(info[2].toLowerCase().endsWith(".mp3")) setStart2(info[2],(info.length>1 && info[1].length()>0? Integer.parseInt(info[1]):1),(info.length>3 && info[3].length()>0? Double.parseDouble(info[3]):0.0),(info.length>4 && info[4].length()>0? Integer.parseInt(info[4]):1));
@@ -163,15 +163,18 @@ public class CISoundThread extends Thread{
         setContinue(2);
     }
 
-    public void setSound(String soundFile,int type){
+    public void setNonMp3Sound(String soundFile,int type){
      soundFile=ylib.replace(soundFile, "/", File.separator);
      soundFile=ylib.replace(soundFile, "\\", File.separator);
         try {
 
             if(mp3NameMap.get(soundFile)!=null) soundFile=(String)mp3NameMap.get(soundFile);
-            AudioInputStream fis = AudioSystem.getAudioInputStream(new File(soundFile));
+            File sFile=new File(soundFile);
+            AudioFormat fmt=AudioSystem.getAudioFileFormat(sFile).getFormat();
+            AudioInputStream fis = AudioSystem.getAudioInputStream(sFile);
 
-             ais = AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_SIGNED,fis);
+            if(soundFile.toLowerCase().endsWith(".au")) ais = AudioSystem.getAudioInputStream(AudioFormat.Encoding.PCM_SIGNED,fis);
+            else ais = AudioSystem.getAudioInputStream(fmt,fis);
              af = ais.getFormat();
              line = AudioSystem.getSourceDataLine(af);
 
@@ -188,6 +191,10 @@ public class CISoundThread extends Thread{
                e.printStackTrace();
             if(type==2) JOptionPane.showMessageDialog(null, "LineUnavailableException, sound file="+soundFile);
             else instrument.sysLog("LineUnavailableException, sound file="+soundFile);
+         } catch(IllegalArgumentException e){
+             e.printStackTrace();
+            if(type==2) JOptionPane.showMessageDialog(null, "IllegalArgumentException, sound file="+soundFile+", message="+e.getMessage());
+            else instrument.sysLog("IllegalArgumentException, sound file="+soundFile+", message="+e.getMessage());
          }catch(FileNotFoundException e){
              e.printStackTrace();
             if(type==2) JOptionPane.showMessageDialog(null, "FileNotFoundException, sound file="+soundFile);
@@ -222,7 +229,7 @@ public class CISoundThread extends Thread{
            try{
 
             if(line==null) {
-                if(true) setSound(soundfile,type);
+                if(true) setNonMp3Sound(soundfile,type);
                 else {
                   try{
 
@@ -286,7 +293,7 @@ public class CISoundThread extends Thread{
       if(line!=null) line.start();
     }
 
- public void setSound2(String filename,int type){
+ public void setMp3Sound(String filename,int type){
   filename=ylib.replace(filename, "/", File.separator);
   filename=ylib.replace(filename, "\\", File.separator);
   try {
@@ -323,7 +330,7 @@ private void setStart2(String soundfile,int times,double intervalSec,int type) {
         for(int i=0;i<times;i++){
 
             if(line==null) {
-                if(true) setSound2(soundfile,type);
+                if(true) setMp3Sound(soundfile,type);
                 else {
 
                 }

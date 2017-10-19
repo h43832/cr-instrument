@@ -33,7 +33,7 @@ DefaultListModel listModel9 = new DefaultListModel();
         
 
     }
-   public void updateList(){
+ public void updateList(){
   String sel="";
   if(jList3.getSelectedValue()!=null) sel=(String)jList3.getSelectedValue();
   listModel3.clear();
