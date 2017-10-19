@@ -37,7 +37,7 @@ import javax.swing.text.StyleConstants;
  * @author Administrator
  */
 public class CrInstrument extends WSNApplication implements Runnable {
-  public static String version = "2.17.0042";
+  public static String version = "2.17.0043";
   public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
   String versionTime = "20171020-080000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
           stationFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_stations.txt",
