@@ -15,12 +15,12 @@ import y.ende2003.d2003;
  */
 public class MgntDialog extends javax.swing.JDialog {
 
-    CrInstrument pro;
+    CrInstrument instrument;
     private ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
     public MgntDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-         this.pro=(CrInstrument)parent;
+         this.instrument=(CrInstrument)parent;
          int width=Toolkit.getDefaultToolkit().getScreenSize().width;
         int h=Toolkit.getDefaultToolkit().getScreenSize().height-20;
 
@@ -31,7 +31,7 @@ public class MgntDialog extends javax.swing.JDialog {
 
         setLocation((width-w2)/2,(h-h2)/2);
 
-        setIconImage(pro.iconImage);
+        setIconImage(instrument.iconImage);
     }
 
     /**
@@ -75,16 +75,16 @@ public class MgntDialog extends javax.swing.JDialog {
 
     private void jPasswordField1ActionPerformed(java.awt.event.ActionEvent evt) {
        String pw=new String(jPasswordField1.getPassword());
-       if(d2003.de(pw, pro.props.getProperty("mgnt-pw")).equals(pw)) {
+       if(d2003.de(pw, instrument.props.getProperty("mgnt-pw")).equals(pw)) {
 
            jPasswordField1.setText("");
            setVisible(false); 
-           pro.jTabbedPane1.add("Admin",pro.jPanel3);
-           pro.jTabbedPane1.setSelectedComponent(pro.jPanel3);
-           pro.adminLogin=true;
-           pro.menuItemLoginAdmin.setEnabled(false);
-           pro.menuItemLoginUser.setEnabled(false);
-           pro.updateTitle();
+           instrument.jTabbedPane1.add("Admin",instrument.jPanel3);
+           instrument.jTabbedPane1.setSelectedComponent(instrument.jPanel3);
+           instrument.adminLogin=true;
+           instrument.menuItemLoginAdmin.setEnabled(false);
+           instrument.menuItemLoginUser.setEnabled(false);
+           instrument.updateTitle();
        }
        else JOptionPane.showMessageDialog(this, bundle2.getString("CrInstrument.xy.msg104"));
     }

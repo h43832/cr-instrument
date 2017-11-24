@@ -43,8 +43,8 @@ public class CIUIPanel extends javax.swing.JPanel {
 void init(){
     
 
-    jPanel140.add(instrument.framePanel, BorderLayout.CENTER);
-    jPanel162.add(instrument.dataPanel2,BorderLayout.CENTER);
+    jPanel140.add(instrument.uiFramePanel, BorderLayout.CENTER);
+    jPanel162.add(instrument.uiDataPanel,BorderLayout.CENTER);
 
 }
 private void keyPress(java.awt.event.KeyEvent evt){
@@ -66,7 +66,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedUIAreaItem));
                                  info[4]=String.valueOf(Double.parseDouble(jTextField9.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedUIAreaItem, ylib.arrayToCsvLine(info));
-                                 instrument.framePanel.invalidate();
+                                 instrument.uiFramePanel.invalidate();
                                }
                               break;
                           case 40:
@@ -77,7 +77,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedUIAreaItem));
                                  info[4]=String.valueOf(Double.parseDouble(jTextField9.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedUIAreaItem, ylib.arrayToCsvLine(info));
-                                 instrument.framePanel.invalidate();
+                                 instrument.uiFramePanel.invalidate();
                                }
                               break;
                           case 37:
@@ -88,7 +88,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedUIAreaItem));
                                  info[3]=String.valueOf(Double.parseDouble(jTextField5.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedUIAreaItem, ylib.arrayToCsvLine(info));
-                                 instrument.framePanel.invalidate();
+                                 instrument.uiFramePanel.invalidate();
                                }
                               break;
                           case 39:
@@ -99,7 +99,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedUIAreaItem));
                                  info[3]=String.valueOf(Double.parseDouble(jTextField5.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedUIAreaItem, ylib.arrayToCsvLine(info));
-                                 instrument.framePanel.invalidate();
+                                 instrument.uiFramePanel.invalidate();
                                }
                               break;
                       }
@@ -120,7 +120,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info[4]=String.valueOf(Double.parseDouble(jTextField85.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedDataItem, ylib.arrayToCsvLine(info));
 
-                                 instrument.dataPanel2.invalidate();
+                                 instrument.uiDataPanel.invalidate();
                                }
                               break;
                           case 40:
@@ -131,7 +131,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedDataItem));
                                  info[4]=String.valueOf(Double.parseDouble(jTextField85.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedDataItem, ylib.arrayToCsvLine(info));
-                                 instrument.dataPanel2.invalidate();
+                                 instrument.uiDataPanel.invalidate();
                                }
                               break;
                           case 37:
@@ -142,7 +142,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedDataItem));
                                  info[3]=String.valueOf(Double.parseDouble(jTextField84.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedDataItem, ylib.arrayToCsvLine(info));
-                                 instrument.dataPanel2.invalidate();
+                                 instrument.uiDataPanel.invalidate();
                                }
                               break;
                           case 39:
@@ -153,7 +153,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedDataItem));
                                  info[3]=String.valueOf(Double.parseDouble(jTextField84.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedDataItem, ylib.arrayToCsvLine(info));
-                                 instrument.dataPanel2.invalidate();
+                                 instrument.uiDataPanel.invalidate();
                                }
                               break;
                       }
@@ -178,7 +178,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedUIAreaItem));
                                  info[6]=String.valueOf(Double.parseDouble(jTextField61.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedUIAreaItem, ylib.arrayToCsvLine(info));
-                                 instrument.framePanel.invalidate();
+                                 instrument.uiFramePanel.invalidate();
                                }
                               break;
                           case 40:
@@ -189,7 +189,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedUIAreaItem));
                                  info[6]=String.valueOf(Double.parseDouble(jTextField61.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedUIAreaItem, ylib.arrayToCsvLine(info));
-                                 instrument.framePanel.invalidate();
+                                 instrument.uiFramePanel.invalidate();
                                }
                               break;
                           case 37:
@@ -200,7 +200,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedUIAreaItem));
                                  info[5]=String.valueOf(Double.parseDouble(jTextField10.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedUIAreaItem, ylib.arrayToCsvLine(info));
-                                 instrument.framePanel.invalidate();
+                                 instrument.uiFramePanel.invalidate();
                                }
                               break;
                           case 39:
@@ -211,7 +211,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedUIAreaItem));
                                  info[5]=String.valueOf(Double.parseDouble(jTextField10.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedUIAreaItem, ylib.arrayToCsvLine(info));
-                                 instrument.framePanel.invalidate();
+                                 instrument.uiFramePanel.invalidate();
                                }
                               break;
                      }
@@ -231,7 +231,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedDataItem));
                                  info[6]=String.valueOf(Double.parseDouble(jTextField87.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedDataItem, ylib.arrayToCsvLine(info));
-                                 instrument.dataPanel2.invalidate();
+                                 instrument.uiDataPanel.invalidate();
                                }
                               break;
                           case 40:
@@ -242,7 +242,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedDataItem));
                                  info[6]=String.valueOf(Double.parseDouble(jTextField87.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedDataItem, ylib.arrayToCsvLine(info));
-                                 instrument.dataPanel2.invalidate();
+                                 instrument.uiDataPanel.invalidate();
                                }
                               break;
                           case 37:
@@ -253,7 +253,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedDataItem));
                                  info[5]=String.valueOf(Double.parseDouble(jTextField86.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedDataItem, ylib.arrayToCsvLine(info));
-                                 instrument.dataPanel2.invalidate();
+                                 instrument.uiDataPanel.invalidate();
                                }
                               break;
                           case 39:
@@ -264,7 +264,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                  info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedDataItem));
                                  info[5]=String.valueOf(Double.parseDouble(jTextField86.getText())/100.0);
                                  instrument.editUI.put(instrument.selectedDataItem, ylib.arrayToCsvLine(info));
-                                 instrument.dataPanel2.invalidate();
+                                 instrument.uiDataPanel.invalidate();
                                }
                               break;
                      }
@@ -292,7 +292,7 @@ void setFromUITM(){
      Iterator it=instrument.editUI.keySet().iterator();
      for(;it.hasNext();){
          String id=(String)it.next();
-         if(id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1){
+         if(id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1 || id.toLowerCase().indexOf("textlabel")!=-1 || id.toLowerCase().indexOf("textfield")!=-1 || id.toLowerCase().indexOf("combobox")!=-1 || id.toLowerCase().indexOf("checkbox")!=-1 || id.toLowerCase().indexOf("panel")!=-1){
             jComboBox36.addItem(id);
          }
          if(id.trim().toLowerCase().indexOf("da_")==0){
@@ -362,8 +362,12 @@ void setFrameItem(){
                  else jLabel61.setBackground(Color.white);
         if(info[2].trim().equals("%")) jCheckBox38.setSelected(true); else jCheckBox38.setSelected(false);
         if(info[8].toLowerCase().trim().equals("c")) jCheckBox43.setSelected(true); else jCheckBox43.setSelected(false);
+        if(info[10].toLowerCase().trim().equals("c")) jCheckBox9.setSelected(true); else jCheckBox9.setSelected(false);
+        if(info[11].toLowerCase().trim().equals("c")) jCheckBox8.setSelected(true); else jCheckBox8.setSelected(false);
+        jTextField46.setText(info[12]);
         if(info[13].toLowerCase().trim().equals("f")) jCheckBox44.setSelected(true); else jCheckBox44.setSelected(false);
         if(info[14].toLowerCase().trim().equals("r")) jCheckBox45.setSelected(true); else jCheckBox45.setSelected(false);
+        if(info[15].toLowerCase().trim().equals("s")) jCheckBox10.setSelected(true); else jCheckBox10.setSelected(false);
     }
 }
 void setDataAreaItem(){
@@ -404,6 +408,40 @@ void setDataAreaItem(){
         jPanel140 = new javax.swing.JPanel();
         jButton57 = new javax.swing.JButton();
         btnApplySetting_ui = new javax.swing.JButton();
+        jButton17 = new javax.swing.JButton();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jPanel145 = new javax.swing.JPanel();
+        jPanel110 = new javax.swing.JPanel();
+        jCheckBox9 = new javax.swing.JCheckBox();
+        jTextField45 = new javax.swing.JTextField();
+        jLabel8 = new javax.swing.JLabel();
+        jTextField11 = new javax.swing.JTextField();
+        jPanel146 = new javax.swing.JPanel();
+        jCheckBox38 = new javax.swing.JCheckBox();
+        jCheckBox44 = new javax.swing.JCheckBox();
+        jCheckBox45 = new javax.swing.JCheckBox();
+        jPanel147 = new javax.swing.JPanel();
+        jLabel97 = new javax.swing.JLabel();
+        jCheckBox43 = new javax.swing.JCheckBox();
+        jLabel105 = new javax.swing.JLabel();
+        jTextField74 = new javax.swing.JTextField();
+        jLabel107 = new javax.swing.JLabel();
+        jLabel108 = new javax.swing.JLabel();
+        jTextField75 = new javax.swing.JTextField();
+        jLabel139 = new javax.swing.JLabel();
+        jLabel140 = new javax.swing.JLabel();
+        jTextField76 = new javax.swing.JTextField();
+        jLabel156 = new javax.swing.JLabel();
+        jLabel141 = new javax.swing.JLabel();
+        jTextField77 = new javax.swing.JTextField();
+        jLabel154 = new javax.swing.JLabel();
+        jPanel5 = new javax.swing.JPanel();
+        jCheckBox8 = new javax.swing.JCheckBox();
+        jTextField46 = new javax.swing.JTextField();
+        jLabel75 = new javax.swing.JLabel();
+        jLabel61 = new javax.swing.JLabel();
+        jPanel8 = new javax.swing.JPanel();
+        jCheckBox10 = new javax.swing.JCheckBox();
         jPanel144 = new javax.swing.JPanel();
         jPanel141 = new javax.swing.JPanel();
         jLabel46 = new javax.swing.JLabel();
@@ -428,39 +466,20 @@ void setDataAreaItem(){
         jCheckBox46 = new javax.swing.JCheckBox();
         jPanel1 = new javax.swing.JPanel();
         jComboBox36 = new javax.swing.JComboBox();
-        jCheckBox37 = new javax.swing.JCheckBox();
         jLabel31 = new javax.swing.JLabel();
         jTextField3 = new javax.swing.JTextField();
+        cbShowFrameItem = new javax.swing.JCheckBox();
+        jCheckBox5 = new javax.swing.JCheckBox();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jPanel145 = new javax.swing.JPanel();
-        jPanel110 = new javax.swing.JPanel();
-        jLabel147 = new javax.swing.JLabel();
-        jTextField45 = new javax.swing.JTextField();
-        jLabel8 = new javax.swing.JLabel();
-        jTextField11 = new javax.swing.JTextField();
-        jLabel75 = new javax.swing.JLabel();
-        jLabel61 = new javax.swing.JLabel();
-        jPanel146 = new javax.swing.JPanel();
-        jCheckBox38 = new javax.swing.JCheckBox();
-        jCheckBox44 = new javax.swing.JCheckBox();
-        jCheckBox45 = new javax.swing.JCheckBox();
-        jPanel147 = new javax.swing.JPanel();
-        jLabel97 = new javax.swing.JLabel();
-        jCheckBox43 = new javax.swing.JCheckBox();
-        jLabel105 = new javax.swing.JLabel();
-        jTextField74 = new javax.swing.JTextField();
-        jLabel107 = new javax.swing.JLabel();
-        jLabel108 = new javax.swing.JLabel();
-        jTextField75 = new javax.swing.JTextField();
-        jLabel139 = new javax.swing.JLabel();
-        jLabel140 = new javax.swing.JLabel();
-        jTextField76 = new javax.swing.JTextField();
-        jLabel156 = new javax.swing.JLabel();
-        jLabel141 = new javax.swing.JLabel();
-        jTextField77 = new javax.swing.JTextField();
-        jLabel154 = new javax.swing.JLabel();
-        jButton17 = new javax.swing.JButton();
+        jLabel17 = new javax.swing.JLabel();
+        jComboBox2 = new javax.swing.JComboBox();
+        jCheckBox7 = new javax.swing.JCheckBox();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel18 = new javax.swing.JLabel();
+        jTextField8 = new javax.swing.JTextField();
+        jLabel19 = new javax.swing.JLabel();
+        jTextField12 = new javax.swing.JTextField();
         dataPanel = new javax.swing.JPanel();
         jButton18 = new javax.swing.JButton();
         jButton23 = new javax.swing.JButton();
@@ -492,6 +511,8 @@ void setDataAreaItem(){
         jComboBox15 = new javax.swing.JComboBox();
         jCheckBox64 = new javax.swing.JCheckBox();
         jCheckBox1 = new javax.swing.JCheckBox();
+        jLabel21 = new javax.swing.JLabel();
+        jLabel22 = new javax.swing.JLabel();
         jPanel7 = new javax.swing.JPanel();
         jPanel4 = new javax.swing.JPanel();
         jLabel15 = new javax.swing.JLabel();
@@ -505,6 +526,7 @@ void setDataAreaItem(){
         jLabel7 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        jCheckBox6 = new javax.swing.JCheckBox();
         jPanel6 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
@@ -582,8 +604,253 @@ void setDataAreaItem(){
         mainPanel.add(btnApplySetting_ui);
         btnApplySetting_ui.setBounds(20, 170, 260, 60);
 
-        jPanel144.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 255)), bundle.getString("CrInstrument.jPanel144.border.title"))); 
-        jPanel144.setFont(jPanel144.getFont());
+        jButton17.setFont(jButton17.getFont().deriveFont(jButton17.getFont().getSize()+12f));
+        jButton17.setText(bundle.getString("CrInstrument.jButton17.text")); 
+        jButton17.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton17ActionPerformed(evt);
+            }
+        });
+        mainPanel.add(jButton17);
+        jButton17.setBounds(20, 100, 260, 60);
+
+        jPanel145.setFont(jPanel145.getFont().deriveFont(jPanel145.getFont().getSize()+6f));
+        jPanel145.setLayout(null);
+
+        jPanel110.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox9.setText(bundle.getString("CIUIPanel.jCheckBox9.text")); 
+        jCheckBox9.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox9ActionPerformed(evt);
+            }
+        });
+        jPanel110.add(jCheckBox9);
+
+        jTextField45.setText(bundle.getString("CrInstrument.jTextField45.text")); 
+        jTextField45.setPreferredSize(new java.awt.Dimension(306, 21));
+        jTextField45.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextField45FocusLost(evt);
+            }
+        });
+        jTextField45.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField45ActionPerformed(evt);
+            }
+        });
+        jPanel110.add(jTextField45);
+
+        jLabel8.setText(bundle.getString("CrInstrument.jLabel8.text")); 
+        jPanel110.add(jLabel8);
+
+        jTextField11.setText(bundle.getString("CrInstrument.jTextField11.text")); 
+        jTextField11.setPreferredSize(new java.awt.Dimension(106, 21));
+        jTextField11.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextField11FocusLost(evt);
+            }
+        });
+        jTextField11.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField11ActionPerformed(evt);
+            }
+        });
+        jPanel110.add(jTextField11);
+
+        jPanel145.add(jPanel110);
+        jPanel110.setBounds(20, 20, 890, 30);
+
+        jPanel146.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox38.setFont(jCheckBox38.getFont());
+        jCheckBox38.setText(bundle.getString("CrInstrument.jCheckBox38.text")); 
+        jCheckBox38.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox38ActionPerformed(evt);
+            }
+        });
+        jPanel146.add(jCheckBox38);
+
+        jCheckBox44.setFont(jCheckBox44.getFont());
+        jCheckBox44.setText(bundle.getString("CrInstrument.jCheckBox44.text")); 
+        jCheckBox44.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox44ActionPerformed(evt);
+            }
+        });
+        jPanel146.add(jCheckBox44);
+
+        jCheckBox45.setFont(jCheckBox45.getFont());
+        jCheckBox45.setText(bundle.getString("CrInstrument.jCheckBox45.text")); 
+        jCheckBox45.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox45ActionPerformed(evt);
+            }
+        });
+        jPanel146.add(jCheckBox45);
+
+        jPanel145.add(jPanel146);
+        jPanel146.setBounds(20, 130, 890, 30);
+
+        jPanel147.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel97.setFont(jLabel97.getFont());
+        jLabel97.setText(bundle.getString("CrInstrument.jLabel97.text")); 
+        jPanel147.add(jLabel97);
+
+        jCheckBox43.setFont(jCheckBox43.getFont());
+        jCheckBox43.setText(bundle.getString("CrInstrument.jCheckBox43.text")); 
+        jCheckBox43.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox43ActionPerformed(evt);
+            }
+        });
+        jPanel147.add(jCheckBox43);
+
+        jLabel105.setText(bundle.getString("CrInstrument.jLabel105.text")); 
+        jPanel147.add(jLabel105);
+
+        jTextField74.setText(bundle.getString("CrInstrument.jTextField74.text")); 
+        jTextField74.setPreferredSize(new java.awt.Dimension(76, 21));
+        jTextField74.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextField74FocusLost(evt);
+            }
+        });
+        jTextField74.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField74ActionPerformed(evt);
+            }
+        });
+        jPanel147.add(jTextField74);
+
+        jLabel107.setText(bundle.getString("CrInstrument.jLabel107.text")); 
+        jPanel147.add(jLabel107);
+
+        jLabel108.setText(bundle.getString("CrInstrument.jLabel108.text")); 
+        jPanel147.add(jLabel108);
+
+        jTextField75.setText(bundle.getString("CrInstrument.jTextField75.text")); 
+        jTextField75.setPreferredSize(new java.awt.Dimension(76, 21));
+        jTextField75.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextField75FocusLost(evt);
+            }
+        });
+        jTextField75.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField75ActionPerformed(evt);
+            }
+        });
+        jPanel147.add(jTextField75);
+
+        jLabel139.setText(bundle.getString("CrInstrument.jLabel139.text")); 
+        jPanel147.add(jLabel139);
+
+        jLabel140.setFont(jLabel140.getFont());
+        jLabel140.setText(bundle.getString("CrInstrument.jLabel140.text")); 
+        jPanel147.add(jLabel140);
+
+        jTextField76.setText(bundle.getString("CrInstrument.jTextField76.text")); 
+        jTextField76.setPreferredSize(new java.awt.Dimension(76, 21));
+        jTextField76.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextField76FocusLost(evt);
+            }
+        });
+        jTextField76.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField76ActionPerformed(evt);
+            }
+        });
+        jPanel147.add(jTextField76);
+
+        jLabel156.setText(bundle.getString("CrInstrument.jLabel156.text")); 
+        jPanel147.add(jLabel156);
+
+        jLabel141.setFont(jLabel141.getFont());
+        jLabel141.setText(bundle.getString("CrInstrument.jLabel141.text")); 
+        jPanel147.add(jLabel141);
+
+        jTextField77.setText(bundle.getString("CrInstrument.jTextField77.text")); 
+        jTextField77.setPreferredSize(new java.awt.Dimension(76, 21));
+        jTextField77.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextField77FocusLost(evt);
+            }
+        });
+        jTextField77.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField77ActionPerformed(evt);
+            }
+        });
+        jPanel147.add(jTextField77);
+
+        jLabel154.setText(bundle.getString("CrInstrument.jLabel154.text")); 
+        jPanel147.add(jLabel154);
+
+        jPanel145.add(jPanel147);
+        jPanel147.setBounds(20, 160, 890, 30);
+
+        jPanel5.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox8.setText(bundle.getString("CIUIPanel.jCheckBox8.text")); 
+        jCheckBox8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox8ActionPerformed(evt);
+            }
+        });
+        jPanel5.add(jCheckBox8);
+
+        jTextField46.setText(bundle.getString("CIUIPanel.jTextField46.text")); 
+        jTextField46.setPreferredSize(new java.awt.Dimension(306, 21));
+        jTextField46.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextField46FocusLost(evt);
+            }
+        });
+        jTextField46.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField46ActionPerformed(evt);
+            }
+        });
+        jPanel5.add(jTextField46);
+
+        jLabel75.setFont(jLabel75.getFont());
+        jLabel75.setText(bundle.getString("CrInstrument.jLabel75.text")); 
+        jPanel5.add(jLabel75);
+
+        jLabel61.setBackground(new java.awt.Color(255, 51, 153));
+        jLabel61.setText(bundle.getString("CrInstrument.jLabel61.text")); 
+        jLabel61.setOpaque(true);
+        jLabel61.setPreferredSize(new java.awt.Dimension(40, 25));
+        jLabel61.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel61MouseClicked(evt);
+            }
+        });
+        jPanel5.add(jLabel61);
+
+        jPanel145.add(jPanel5);
+        jPanel5.setBounds(20, 60, 830, 30);
+
+        jPanel8.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox10.setText(bundle.getString("CIUIPanel.jCheckBox10.text")); 
+        jCheckBox10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox10ActionPerformed(evt);
+            }
+        });
+        jPanel8.add(jCheckBox10);
+
+        jPanel145.add(jPanel8);
+        jPanel8.setBounds(20, 100, 850, 30);
+
+        jTabbedPane1.addTab(bundle.getString("CIUIPanel.jPanel145.TabConstraints.tabTitle"), jPanel145); 
+
+        jPanel144.setFont(jPanel144.getFont().deriveFont(jPanel144.getFont().getSize()+6f));
         jPanel144.setLayout(null);
 
         jPanel141.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
@@ -761,15 +1028,6 @@ void setDataAreaItem(){
         });
         jPanel1.add(jComboBox36);
 
-        jCheckBox37.setFont(jCheckBox37.getFont());
-        jCheckBox37.setText(bundle.getString("CrInstrument.jCheckBox37.text")); 
-        jCheckBox37.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox37ActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jCheckBox37);
-
         jLabel31.setFont(jLabel31.getFont());
         jLabel31.setText(bundle.getString("CrInstrument.jLabel31.text")); 
         jPanel1.add(jLabel31);
@@ -788,6 +1046,23 @@ void setDataAreaItem(){
         });
         jPanel1.add(jTextField3);
 
+        cbShowFrameItem.setFont(cbShowFrameItem.getFont());
+        cbShowFrameItem.setText(bundle.getString("CrInstrument.jCheckBox37.text")); 
+        cbShowFrameItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbShowFrameItemActionPerformed(evt);
+            }
+        });
+        jPanel1.add(cbShowFrameItem);
+
+        jCheckBox5.setText(bundle.getString("CIUIPanel.jCheckBox5.text")); 
+        jCheckBox5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox5ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jCheckBox5);
+
         jLabel1.setText(bundle.getString("CIUIPanel.jLabel1.text")); 
         jPanel1.add(jLabel1);
 
@@ -802,215 +1077,74 @@ void setDataAreaItem(){
         });
         jPanel1.add(jLabel2);
 
+        jLabel17.setText(bundle.getString("CIUIPanel.jLabel17.text")); 
+        jPanel1.add(jLabel17);
+
+        jComboBox2.setFont(jComboBox2.getFont());
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "01", "02", "03", "04", "05", "06", "07", "08", "09", "10" }));
+        jComboBox2.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                jComboBox2ItemStateChanged(evt);
+            }
+        });
+        jPanel1.add(jComboBox2);
+
+        jCheckBox7.setFont(jCheckBox7.getFont());
+        jCheckBox7.setText(bundle.getString("CIUIPanel.jCheckBox7.text")); 
+        jCheckBox7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox7ActionPerformed(evt);
+            }
+        });
+        jPanel1.add(jCheckBox7);
+
         jPanel144.add(jPanel1);
         jPanel1.setBounds(10, 20, 890, 35);
 
-        mainPanel.add(jPanel144);
-        jPanel144.setBounds(30, 410, 940, 140);
+        jPanel3.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        jPanel145.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 204)), bundle.getString("CrInstrument.jPanel145.border.title"))); 
-        jPanel145.setFont(jPanel145.getFont());
-        jPanel145.setLayout(null);
+        jLabel18.setText(bundle.getString("CIUIPanel.jLabel18.text")); 
+        jLabel18.setToolTipText(bundle.getString("CIUIPanel.jLabel18.tip.text")); 
+        jPanel3.add(jLabel18);
 
-        jPanel110.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel147.setFont(jLabel147.getFont());
-        jLabel147.setText(bundle.getString("CrInstrument.jLabel147.text")); 
-        jPanel110.add(jLabel147);
-
-        jTextField45.setText(bundle.getString("CrInstrument.jTextField45.text")); 
-        jTextField45.setPreferredSize(new java.awt.Dimension(306, 21));
-        jTextField45.addFocusListener(new java.awt.event.FocusAdapter() {
+        jTextField8.setText(bundle.getString("CIUIPanel.jTextField8.text")); 
+        jTextField8.setPreferredSize(new java.awt.Dimension(406, 25));
+        jTextField8.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
-                jTextField45FocusLost(evt);
+                jTextField8FocusLost(evt);
             }
         });
-        jTextField45.addActionListener(new java.awt.event.ActionListener() {
+        jTextField8.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField45ActionPerformed(evt);
+                jTextField8ActionPerformed(evt);
             }
         });
-        jPanel110.add(jTextField45);
+        jPanel3.add(jTextField8);
 
-        jLabel8.setText(bundle.getString("CrInstrument.jLabel8.text")); 
-        jPanel110.add(jLabel8);
+        jLabel19.setText(bundle.getString("CIUIPanel.jLabel19.text")); 
+        jPanel3.add(jLabel19);
 
-        jTextField11.setText(bundle.getString("CrInstrument.jTextField11.text")); 
-        jTextField11.setPreferredSize(new java.awt.Dimension(106, 21));
-        jTextField11.addFocusListener(new java.awt.event.FocusAdapter() {
+        jTextField12.setText(bundle.getString("CIUIPanel.jTextField12.text")); 
+        jTextField12.setPreferredSize(new java.awt.Dimension(106, 25));
+        jTextField12.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusLost(java.awt.event.FocusEvent evt) {
-                jTextField11FocusLost(evt);
+                jTextField12FocusLost(evt);
             }
         });
-        jTextField11.addActionListener(new java.awt.event.ActionListener() {
+        jTextField12.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField11ActionPerformed(evt);
+                jTextField12ActionPerformed(evt);
             }
         });
-        jPanel110.add(jTextField11);
+        jPanel3.add(jTextField12);
 
-        jLabel75.setFont(jLabel75.getFont());
-        jLabel75.setText(bundle.getString("CrInstrument.jLabel75.text")); 
-        jPanel110.add(jLabel75);
+        jPanel144.add(jPanel3);
+        jPanel3.setBounds(20, 130, 870, 40);
 
-        jLabel61.setBackground(new java.awt.Color(255, 51, 153));
-        jLabel61.setText(bundle.getString("CrInstrument.jLabel61.text")); 
-        jLabel61.setOpaque(true);
-        jLabel61.setPreferredSize(new java.awt.Dimension(40, 25));
-        jLabel61.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jLabel61MouseClicked(evt);
-            }
-        });
-        jPanel110.add(jLabel61);
+        jTabbedPane1.addTab(bundle.getString("CIUIPanel.jPanel144.TabConstraints.tabTitle"), jPanel144); 
 
-        jPanel145.add(jPanel110);
-        jPanel110.setBounds(20, 20, 890, 30);
-
-        jPanel146.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jCheckBox38.setFont(jCheckBox38.getFont());
-        jCheckBox38.setText(bundle.getString("CrInstrument.jCheckBox38.text")); 
-        jCheckBox38.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox38ActionPerformed(evt);
-            }
-        });
-        jPanel146.add(jCheckBox38);
-
-        jCheckBox44.setFont(jCheckBox44.getFont());
-        jCheckBox44.setText(bundle.getString("CrInstrument.jCheckBox44.text")); 
-        jCheckBox44.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox44ActionPerformed(evt);
-            }
-        });
-        jPanel146.add(jCheckBox44);
-
-        jCheckBox45.setFont(jCheckBox45.getFont());
-        jCheckBox45.setText(bundle.getString("CrInstrument.jCheckBox45.text")); 
-        jCheckBox45.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox45ActionPerformed(evt);
-            }
-        });
-        jPanel146.add(jCheckBox45);
-
-        jPanel145.add(jPanel146);
-        jPanel146.setBounds(20, 50, 890, 30);
-
-        jPanel147.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-
-        jLabel97.setFont(jLabel97.getFont());
-        jLabel97.setText(bundle.getString("CrInstrument.jLabel97.text")); 
-        jPanel147.add(jLabel97);
-
-        jCheckBox43.setFont(jCheckBox43.getFont());
-        jCheckBox43.setText(bundle.getString("CrInstrument.jCheckBox43.text")); 
-        jCheckBox43.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox43ActionPerformed(evt);
-            }
-        });
-        jPanel147.add(jCheckBox43);
-
-        jLabel105.setText(bundle.getString("CrInstrument.jLabel105.text")); 
-        jPanel147.add(jLabel105);
-
-        jTextField74.setText(bundle.getString("CrInstrument.jTextField74.text")); 
-        jTextField74.setPreferredSize(new java.awt.Dimension(76, 21));
-        jTextField74.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                jTextField74FocusLost(evt);
-            }
-        });
-        jTextField74.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField74ActionPerformed(evt);
-            }
-        });
-        jPanel147.add(jTextField74);
-
-        jLabel107.setText(bundle.getString("CrInstrument.jLabel107.text")); 
-        jPanel147.add(jLabel107);
-
-        jLabel108.setText(bundle.getString("CrInstrument.jLabel108.text")); 
-        jPanel147.add(jLabel108);
-
-        jTextField75.setText(bundle.getString("CrInstrument.jTextField75.text")); 
-        jTextField75.setPreferredSize(new java.awt.Dimension(76, 21));
-        jTextField75.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                jTextField75FocusLost(evt);
-            }
-        });
-        jTextField75.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField75ActionPerformed(evt);
-            }
-        });
-        jPanel147.add(jTextField75);
-
-        jLabel139.setText(bundle.getString("CrInstrument.jLabel139.text")); 
-        jPanel147.add(jLabel139);
-
-        jLabel140.setFont(jLabel140.getFont());
-        jLabel140.setText(bundle.getString("CrInstrument.jLabel140.text")); 
-        jPanel147.add(jLabel140);
-
-        jTextField76.setText(bundle.getString("CrInstrument.jTextField76.text")); 
-        jTextField76.setPreferredSize(new java.awt.Dimension(76, 21));
-        jTextField76.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                jTextField76FocusLost(evt);
-            }
-        });
-        jTextField76.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField76ActionPerformed(evt);
-            }
-        });
-        jPanel147.add(jTextField76);
-
-        jLabel156.setText(bundle.getString("CrInstrument.jLabel156.text")); 
-        jPanel147.add(jLabel156);
-
-        jLabel141.setFont(jLabel141.getFont());
-        jLabel141.setText(bundle.getString("CrInstrument.jLabel141.text")); 
-        jPanel147.add(jLabel141);
-
-        jTextField77.setText(bundle.getString("CrInstrument.jTextField77.text")); 
-        jTextField77.setPreferredSize(new java.awt.Dimension(76, 21));
-        jTextField77.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusLost(java.awt.event.FocusEvent evt) {
-                jTextField77FocusLost(evt);
-            }
-        });
-        jTextField77.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField77ActionPerformed(evt);
-            }
-        });
-        jPanel147.add(jTextField77);
-
-        jLabel154.setText(bundle.getString("CrInstrument.jLabel154.text")); 
-        jPanel147.add(jLabel154);
-
-        jPanel145.add(jPanel147);
-        jPanel147.setBounds(20, 80, 890, 30);
-
-        mainPanel.add(jPanel145);
-        jPanel145.setBounds(30, 280, 940, 120);
-
-        jButton17.setFont(jButton17.getFont().deriveFont(jButton17.getFont().getSize()+12f));
-        jButton17.setText(bundle.getString("CrInstrument.jButton17.text")); 
-        jButton17.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton17ActionPerformed(evt);
-            }
-        });
-        mainPanel.add(jButton17);
-        jButton17.setBounds(20, 100, 260, 60);
+        mainPanel.add(jTabbedPane1);
+        jTabbedPane1.setBounds(30, 300, 930, 250);
 
         jTabbedPane4.addTab(bundle.getString("CIUIPanel.mainPanel.TabConstraints.tabTitle"), mainPanel); 
 
@@ -1247,6 +1381,22 @@ void setDataAreaItem(){
         });
         jPanel2.add(jCheckBox1);
 
+        jLabel21.setFont(jLabel21.getFont());
+        jLabel21.setText(bundle.getString("CIUIPanel.jLabel21.text")); 
+        jPanel2.add(jLabel21);
+
+        jLabel22.setBackground(new java.awt.Color(255, 0, 51));
+        jLabel22.setFont(jLabel22.getFont());
+        jLabel22.setText(bundle.getString("CIUIPanel.jLabel22.text")); 
+        jLabel22.setOpaque(true);
+        jLabel22.setPreferredSize(new java.awt.Dimension(40, 25));
+        jLabel22.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel22MouseClicked(evt);
+            }
+        });
+        jPanel2.add(jLabel22);
+
         jPanel163.add(jPanel2);
         jPanel2.setBounds(20, 17, 820, 40);
 
@@ -1343,6 +1493,15 @@ void setDataAreaItem(){
             }
         });
         jPanel4.add(jLabel4);
+
+        jCheckBox6.setFont(jCheckBox6.getFont());
+        jCheckBox6.setText(bundle.getString("CIUIPanel.jCheckBox6.text")); 
+        jCheckBox6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox6ActionPerformed(evt);
+            }
+        });
+        jPanel4.add(jCheckBox6);
 
         jPanel7.add(jPanel4);
         jPanel4.setBounds(20, 20, 910, 35);
@@ -1667,10 +1826,11 @@ void setDataAreaItem(){
 
     private void jButton57ActionPerformed(java.awt.event.ActionEvent evt) {
 
+        instrument.updateLayoutAll=true;
         Iterator it=instrument.defaultUI.keySet().iterator();
         for(;it.hasNext();){
             String id=(String)it.next();
-            if(id.equalsIgnoreCase("frame") || id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1){
+            if(id.equalsIgnoreCase("frame") || id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1  || id.toLowerCase().indexOf("textlabel")!=-1 || id.toLowerCase().indexOf("textfield")!=-1 || id.toLowerCase().indexOf("combobox")!=-1 || id.toLowerCase().indexOf("checkbox")!=-1 || id.toLowerCase().indexOf("panel")!=-1){
                 instrument.currentUI.put(id, (String)instrument.defaultUI.get(id));
                 instrument.editUI.put(id, (String)instrument.defaultUI.get(id));
             }
@@ -1682,9 +1842,11 @@ void setDataAreaItem(){
         instrument.selectedUIAreaItem="";
         jComboBox36.setSelectedItem("");
         updateFramePanel();
-        instrument.framePanel.invalidate();
+        instrument.updateUILayoutAll=true;
+        instrument.uiFramePanel.invalidate();
         updateDataAreaPanel();
-        instrument.dataPanel2.invalidate();
+        instrument.updateUIDALayoutAll=true;
+        instrument.uiDataPanel.invalidate();
 
         instrument.resetFrameSize=true;
         instrument.validate();
@@ -1692,29 +1854,31 @@ void setDataAreaItem(){
     }
 
     private void btnApplySetting_uiActionPerformed(java.awt.event.ActionEvent evt) {
+        instrument.updateLayoutAll=true;
         Iterator it=instrument.editUI.keySet().iterator();
         for(;it.hasNext();){
             String id=(String)it.next();
-            if(id.equalsIgnoreCase("frame") || id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1){
+            if(id.equalsIgnoreCase("frame") || id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1  || id.toLowerCase().indexOf("textlabel")!=-1 || id.toLowerCase().indexOf("textfield")!=-1 || id.toLowerCase().indexOf("combobox")!=-1 || id.toLowerCase().indexOf("checkbox")!=-1 || id.toLowerCase().indexOf("panel")!=-1){
                 if(instrument.editUI.get(id)!=null) instrument.currentUI.put(id, (String)instrument.editUI.get(id));
             }
         }
 
         setDataAreaItem();
         updateDataAreaPanel();
-        instrument.dataPanel2.invalidate();
+        instrument.updateUIDALayoutAll=true;
+        instrument.uiDataPanel.invalidate();
 
         instrument.resetFrameSize=true;
+        instrument.updateLayoutAll=true;
         instrument.validate();
         instrument.jTabbedPane1.setSelectedComponent(instrument.jPanel1);
-
     }
 
     private void jLabel63MouseClicked(java.awt.event.MouseEvent evt) {
         Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel63.getBackground());
         if(newColor!=null) {
             jLabel63.setBackground(newColor);
-            instrument.framePanel.updateAreaItem();
+            instrument.uiFramePanel.updateAreaItem();
         }
     }
 
@@ -1722,7 +1886,7 @@ void setDataAreaItem(){
         Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel62.getBackground());
         if(newColor!=null) {
             jLabel62.setBackground(newColor);
-            instrument.framePanel.updateAreaItem();
+            instrument.uiFramePanel.updateAreaItem();
         }
     }
 
@@ -1735,10 +1899,11 @@ void setDataAreaItem(){
     }
 
     private void jButton17ActionPerformed(java.awt.event.ActionEvent evt) {
+        instrument.updateLayoutAll=true;
         Iterator it=instrument.currentUI.keySet().iterator();
         for(;it.hasNext();){
             String id=(String)it.next();
-            if(id.equalsIgnoreCase("frame") || id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1){
+            if(id.equalsIgnoreCase("frame") || id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1  || id.toLowerCase().indexOf("textlabel")!=-1 || id.toLowerCase().indexOf("textfield")!=-1 || id.toLowerCase().indexOf("combobox")!=-1 || id.toLowerCase().indexOf("checkbox")!=-1 || id.toLowerCase().indexOf("panel")!=-1){
                 instrument.editUI.put(id, (String)instrument.currentUI.get(id));
             }
         }
@@ -1746,8 +1911,10 @@ void setDataAreaItem(){
       updateFramePanel();
       setDataAreaItem();
       updateDataAreaPanel();
-      instrument.framePanel.invalidate();
-      instrument.dataPanel2.invalidate();
+      instrument.updateUILayoutAll=true;
+      instrument.uiFramePanel.invalidate();
+      instrument.updateUIDALayoutAll=true;
+      instrument.uiDataPanel.invalidate();
 
     }
 
@@ -1755,7 +1922,8 @@ void setDataAreaItem(){
         Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel324.getBackground());
         if(newColor!=null) {
             jLabel324.setBackground(newColor);
-            instrument.dataPanel2.updateDataItem();
+            instrument.updateUIDALayoutAll=true;
+            instrument.uiDataPanel.updateDataItem();
         }
     }
 
@@ -1763,7 +1931,8 @@ void setDataAreaItem(){
         Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel328.getBackground());
         if(newColor!=null) {
             jLabel328.setBackground(newColor);
-            instrument.dataPanel2.updateDataItem();
+            instrument.updateUIDALayoutAll=true;
+            instrument.uiDataPanel.updateDataItem();
         }
     }
 
@@ -1810,7 +1979,8 @@ void setDataAreaItem(){
       String sel=((String)jComboBox15.getSelectedItem()).trim();
       if(sel.length()>0) showDataItem(sel); 
       instrument.selectedDataItem=sel;
-      instrument.dataPanel2.invalidate();
+      instrument.updateUIDALayoutAll=true;
+      instrument.uiDataPanel.invalidate();
     }
     }
 void showDataItem(String sel){
@@ -1839,13 +2009,14 @@ void showDataItem(String sel){
       if(sel.length()>0) showAreaItem(sel); 
       instrument.selectedUIAreaItem=sel;
 
-      instrument.framePanel.invalidate();
+      instrument.updateUILayoutAll=true;
+      instrument.uiFramePanel.invalidate();
     }
     }
 void showAreaItem(String sel){
     if(instrument.editUI.get(sel)==null) return;
     String info[]=ylib.csvlinetoarray((String)instrument.editUI.get(sel));
-    if(info[2].toLowerCase().trim().equals("s")) jCheckBox37.setSelected(true); else jCheckBox37.setSelected(false);
+    if(info[2].toLowerCase().trim().equals("s")) cbShowFrameItem.setSelected(true); else cbShowFrameItem.setSelected(false);
     jTextField3.setText(info[1]);
     jTextField5.setText((instrument.isNumeric(info[3])? String.valueOf(Double.parseDouble(info[3])*100.0):"0.0"));
     jTextField9.setText((instrument.isNumeric(info[4])? String.valueOf(Double.parseDouble(info[4])*100.0):"0.0"));
@@ -1857,12 +2028,51 @@ void showAreaItem(String sel){
     jTextField73.setText(info[9]);
     if(info[11].toLowerCase().trim().equals("b")) jCheckBox3.setSelected(true); else jCheckBox3.setSelected(false);
     if(info[12].toLowerCase().trim().equals("i")) jCheckBox46.setSelected(true); else jCheckBox46.setSelected(false);
+    if(info[13].toLowerCase().trim().equals("o")) jCheckBox5.setSelected(true); else jCheckBox5.setSelected(false);
     if(instrument.isNumeric(info[7])) jLabel63.setBackground( new Color(Integer.parseInt(info[7])));
-                 else jLabel63.setBackground(Color.darkGray);
+                 else jLabel63.setBackground(Color.white);
     if(instrument.isNumeric(info[10])) jLabel62.setBackground( new Color(Integer.parseInt(info[10])));
-                 else jLabel62.setBackground(Color.darkGray);
-    if(instrument.isNumeric(info[13])) jLabel2.setBackground( new Color(Integer.parseInt(info[13])));
+                 else jLabel62.setBackground(Color.black);
+    if(instrument.isNumeric(info[18])) jLabel2.setBackground( new Color(Integer.parseInt(info[18])));
                  else jLabel2.setBackground(Color.darkGray);
+    if(sel.indexOf("radiobutton")>-1) {
+        jLabel17.setVisible(true); jComboBox2.setVisible(true);
+    } else {
+        jLabel17.setVisible(false);  jComboBox2.setVisible(false);
+    }
+    if(sel.indexOf("combobox")>-1) {
+        jPanel3.setVisible(true);
+    } else {
+        jPanel3.setVisible(false);
+    }
+    if(sel.indexOf("combobox")>-1 || sel.indexOf("button")>-1 ) {
+        jCheckBox5.setVisible(false);
+    } else {
+        jCheckBox5.setVisible(true);
+    }
+    if(sel.indexOf("checkbox")>-1 || sel.indexOf("radiobutton")>-1 ) {
+        jCheckBox7.setVisible(true);
+    } else {
+        jCheckBox7.setVisible(false);
+    }
+    if(sel.indexOf("combobox")>-1 || sel.indexOf("button")>-1  || sel.indexOf("textfield")>-1  || sel.indexOf("label")>-1) {
+        jLabel1.setVisible(false); jLabel2.setVisible(false);
+    } else {
+        jLabel1.setVisible(true); jLabel2.setVisible(true);
+    }
+    if(sel.indexOf("button")>-1) {
+        jLabel57.setVisible(false); 
+        jLabel63.setVisible(false);
+    } else {
+        jLabel57.setVisible(true); jLabel63.setVisible(true);
+    }
+    if(sel.indexOf("panel")>-1){
+
+    }
+    jComboBox2.setSelectedItem(info[15]);
+    jTextField8.setText(ylib.totext(info[16]));
+    jTextField12.setText(info[17]);
+    jCheckBox7.setSelected(info[19].equalsIgnoreCase("s"));
 }
     private void jComboBox21ItemStateChanged(java.awt.event.ItemEvent evt) {
     if(evt.getStateChange()==evt.SELECTED){
@@ -1895,7 +2105,7 @@ int[] getFrameSizeFromEditUI(){
 
         if(newColor!=null) {
             jLabel2.setBackground(newColor);
-            instrument.framePanel.updateAreaItem();
+            instrument.uiFramePanel.updateAreaItem();
         }
     }
 
@@ -2039,12 +2249,13 @@ int[] getFrameSizeFromEditUI(){
       updateFrameItem();
     }
 
-    private void jCheckBox37ActionPerformed(java.awt.event.ActionEvent evt) {
-       instrument.framePanel.updateAreaItem();
+    private void cbShowFrameItemActionPerformed(java.awt.event.ActionEvent evt) {
+       instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jTextField3ActionPerformed(java.awt.event.ActionEvent evt) {
       updateButtonName();
+      instrument.uiFramePanel.updateAreaItem();
     }
 void updateButtonName(){
            if(jComboBox36.getSelectedItem()!=null){
@@ -2058,78 +2269,79 @@ void updateButtonName(){
        }
 }
     private void jTextField5ActionPerformed(java.awt.event.ActionEvent evt) {
-        instrument.framePanel.updateAreaItem();
+        instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jTextField9ActionPerformed(java.awt.event.ActionEvent evt) {
-       instrument.framePanel.updateAreaItem();
+       instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jTextField10ActionPerformed(java.awt.event.ActionEvent evt) {
-       instrument.framePanel.updateAreaItem();
+       instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jTextField61ActionPerformed(java.awt.event.ActionEvent evt) {
-      instrument.framePanel.updateAreaItem();
+      instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jComboBox53ItemStateChanged(java.awt.event.ItemEvent evt) {
       if(evt.getStateChange()==evt.SELECTED && !instrument.skipUICBBChanged){
-         instrument.framePanel.updateAreaItem();
+         instrument.uiFramePanel.updateAreaItem();
       }
     }
 
     private void jTextField73ActionPerformed(java.awt.event.ActionEvent evt) {
-      instrument.framePanel.updateAreaItem();
+      instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jCheckBox3ActionPerformed(java.awt.event.ActionEvent evt) {
-      instrument.framePanel.updateAreaItem();
+      instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jCheckBox46ActionPerformed(java.awt.event.ActionEvent evt) {
-      instrument.framePanel.updateAreaItem();
+      instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jCheckBox64ActionPerformed(java.awt.event.ActionEvent evt) {
-       instrument.dataPanel2.updateDataItem();
+       instrument.uiDataPanel.updateDataItem();
     }
 
     private void jTextField84ActionPerformed(java.awt.event.ActionEvent evt) {
-      instrument.dataPanel2.updateDataItem();
+      instrument.uiDataPanel.updateDataItem();
     }
 
     private void jTextField85ActionPerformed(java.awt.event.ActionEvent evt) {
-      instrument.dataPanel2.updateDataItem();
+      instrument.uiDataPanel.updateDataItem();
     }
 
     private void jTextField86ActionPerformed(java.awt.event.ActionEvent evt) {
-      instrument.dataPanel2.updateDataItem();
+      instrument.uiDataPanel.updateDataItem();
     }
 
     private void jTextField87ActionPerformed(java.awt.event.ActionEvent evt) {
-     instrument.dataPanel2.updateDataItem();
+     instrument.uiDataPanel.updateDataItem();
     }
 
     private void jComboBox54ItemStateChanged(java.awt.event.ItemEvent evt) {
       if(evt.getStateChange()==evt.SELECTED && !instrument.skipUICBBChanged){
-          instrument.dataPanel2.updateDataItem();
+          instrument.uiDataPanel.updateDataItem();
       }
     }
 
     private void jTextField88ActionPerformed(java.awt.event.ActionEvent evt) {
-       instrument.dataPanel2.updateDataItem();
+       instrument.uiDataPanel.updateDataItem();
     }
 
     private void jCheckBox65ActionPerformed(java.awt.event.ActionEvent evt) {
-      instrument.dataPanel2.updateDataItem();
+      instrument.uiDataPanel.updateDataItem();
     }
 
     private void jCheckBox66ActionPerformed(java.awt.event.ActionEvent evt) {
-      instrument.dataPanel2.updateDataItem();
+      instrument.uiDataPanel.updateDataItem();
     }
 
     private void jButton24ActionPerformed(java.awt.event.ActionEvent evt) {
+        instrument.updateLayoutAll=true;
         Iterator it=instrument.editUI.keySet().iterator();
         for(;it.hasNext();){
             String id=(String)it.next();
@@ -2146,6 +2358,7 @@ void updateButtonName(){
     }
 
     private void jButton23ActionPerformed(java.awt.event.ActionEvent evt) {
+        instrument.updateLayoutAll=true;
         Iterator it=instrument.currentUI.keySet().iterator();
         for(;it.hasNext();){
             String id=(String)it.next();
@@ -2160,6 +2373,7 @@ void updateButtonName(){
     }
 
     private void jButton18ActionPerformed(java.awt.event.ActionEvent evt) {
+        instrument.updateLayoutAll=true;
 
         Iterator it=instrument.defaultUI.keySet().iterator();
         for(;it.hasNext();){
@@ -2175,8 +2389,10 @@ void updateButtonName(){
 
         setDataAreaItem();
         instrument.resetFrameSize=true;
+        instrument.updateLayoutAll=true;
         instrument.validate();
-        instrument.dataPanel2.invalidate();
+        instrument.updateUIDALayoutAll=true;
+        instrument.uiDataPanel.invalidate();
     }
 
     private void jButton29ActionPerformed(java.awt.event.ActionEvent evt) {
@@ -2331,76 +2547,77 @@ void updateButtonName(){
     }
 
     private void jTextField3FocusLost(java.awt.event.FocusEvent evt) {
-       updateButtonName();
+
+              instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jTextField5FocusLost(java.awt.event.FocusEvent evt) {
-       instrument.framePanel.updateAreaItem();
+       instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jTextField9FocusLost(java.awt.event.FocusEvent evt) {
-       instrument.framePanel.updateAreaItem();
+       instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jTextField10FocusLost(java.awt.event.FocusEvent evt) {
-       instrument.framePanel.updateAreaItem();
+       instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jTextField61FocusLost(java.awt.event.FocusEvent evt) {
-        instrument.framePanel.updateAreaItem();
+        instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jTextField73FocusLost(java.awt.event.FocusEvent evt) {
-       instrument.framePanel.updateAreaItem();
+       instrument.uiFramePanel.updateAreaItem();
     }
 
     private void jTextField84FocusLost(java.awt.event.FocusEvent evt) {
-       instrument.dataPanel2.updateDataItem();
+       instrument.uiDataPanel.updateDataItem();
     }
 
     private void jTextField85FocusLost(java.awt.event.FocusEvent evt) {
-       instrument.dataPanel2.updateDataItem();
+       instrument.uiDataPanel.updateDataItem();
     }
 
     private void jTextField86FocusLost(java.awt.event.FocusEvent evt) {
-      instrument.dataPanel2.updateDataItem();
+      instrument.uiDataPanel.updateDataItem();
     }
 
     private void jTextField87FocusLost(java.awt.event.FocusEvent evt) {
-       instrument.dataPanel2.updateDataItem();
+       instrument.uiDataPanel.updateDataItem();
     }
 
     private void jTextField88FocusLost(java.awt.event.FocusEvent evt) {
-       instrument.dataPanel2.updateDataItem();
+       instrument.uiDataPanel.updateDataItem();
     }
 
     private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {
-       instrument.dataPanel2.updateDataItem();
+       instrument.uiDataPanel.updateDataItem();
     }
 
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {
-      instrument.framePanel.updateAreaItem_DataArea();
+      instrument.uiFramePanel.updateAreaItem_DataArea();
     }
 
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {
-      instrument.framePanel.updateAreaItem_DataArea();
+      instrument.uiFramePanel.updateAreaItem_DataArea();
     }
 
     private void jCheckBox2ActionPerformed(java.awt.event.ActionEvent evt) {
-       instrument.framePanel.updateAreaItem_DataArea();
+       instrument.uiFramePanel.updateAreaItem_DataArea();
     }
 
     private void jCheckBox4ActionPerformed(java.awt.event.ActionEvent evt) {
-      instrument.framePanel.updateAreaItem_DataArea();
+      instrument.uiFramePanel.updateAreaItem_DataArea();
     }
 
     private void jTextField4ActionPerformed(java.awt.event.ActionEvent evt) {
-       instrument.framePanel.updateAreaItem_DataArea();
+       instrument.uiFramePanel.updateAreaItem_DataArea();
     }
 
     private void jComboBox1ItemStateChanged(java.awt.event.ItemEvent evt) {
       if(evt.getStateChange()==evt.SELECTED && !instrument.skipUICBBChanged){
-          instrument.framePanel.updateAreaItem_DataArea();
+          instrument.uiFramePanel.updateAreaItem_DataArea();
       }
     }
 
@@ -2408,7 +2625,7 @@ void updateButtonName(){
         Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel14.getBackground());
         if(newColor!=null) {
             jLabel14.setBackground(newColor);
-            instrument.framePanel.updateAreaItem_DataArea();
+            instrument.uiFramePanel.updateAreaItem_DataArea();
         }
     }
 
@@ -2416,7 +2633,7 @@ void updateButtonName(){
         Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel4.getBackground());
         if(newColor!=null) {
             jLabel4.setBackground(newColor);
-            instrument.framePanel.updateAreaItem_DataArea();
+            instrument.uiFramePanel.updateAreaItem_DataArea();
         }
     }
 
@@ -2424,32 +2641,94 @@ void updateButtonName(){
          Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel10.getBackground());
         if(newColor!=null) {
             jLabel10.setBackground(newColor);
-            instrument.framePanel.updateAreaItem_DataArea();
+            instrument.uiFramePanel.updateAreaItem_DataArea();
         }
     }
 
     private void jTextField1FocusLost(java.awt.event.FocusEvent evt) {
-      instrument.framePanel.updateAreaItem_DataArea();
+      instrument.uiFramePanel.updateAreaItem_DataArea();
     }
 
     private void jTextField2FocusLost(java.awt.event.FocusEvent evt) {
-      instrument.framePanel.updateAreaItem_DataArea();
+      instrument.uiFramePanel.updateAreaItem_DataArea();
     }
 
     private void jTextField4FocusLost(java.awt.event.FocusEvent evt) {
-      instrument.framePanel.updateAreaItem_DataArea();
+      instrument.uiFramePanel.updateAreaItem_DataArea();
     }
 
     private void jTextField6ActionPerformed(java.awt.event.ActionEvent evt) {
-       instrument.framePanel.updateAreaItem_DataArea();
+       instrument.uiFramePanel.updateAreaItem_DataArea();
     }
 
     private void jTextField7ActionPerformed(java.awt.event.ActionEvent evt) {
-        instrument.framePanel.updateAreaItem_DataArea();
+        instrument.uiFramePanel.updateAreaItem_DataArea();
     }
 
     private void byDevice1ActionPerformed(java.awt.event.ActionEvent evt) {
              updateDataAreaType();
+    }
+
+    private void jTextField8ActionPerformed(java.awt.event.ActionEvent evt) {
+      instrument.uiFramePanel.updateAreaItem();
+    }
+
+    private void jTextField12ActionPerformed(java.awt.event.ActionEvent evt) {
+        instrument.uiFramePanel.updateAreaItem();
+    }
+
+    private void jTextField8FocusLost(java.awt.event.FocusEvent evt) {
+       instrument.uiFramePanel.updateAreaItem();
+    }
+
+    private void jTextField12FocusLost(java.awt.event.FocusEvent evt) {
+       instrument.uiFramePanel.updateAreaItem();
+    }
+
+    private void jComboBox2ItemStateChanged(java.awt.event.ItemEvent evt) {
+          if(evt.getStateChange()==evt.SELECTED){
+              instrument.uiFramePanel.updateAreaItem();
+          }
+    }
+
+    private void jCheckBox6ActionPerformed(java.awt.event.ActionEvent evt) {
+         instrument.uiFramePanel.updateAreaItem_DataArea();
+    }
+
+    private void jLabel22MouseClicked(java.awt.event.MouseEvent evt) {
+        Color newColor = JColorChooser.showDialog(null, "Choose a color", jLabel22.getBackground());
+        if(newColor!=null) {
+            jLabel22.setBackground(newColor);
+            instrument.uiDataPanel.updateDataItem();
+        }
+    }
+
+    private void jCheckBox5ActionPerformed(java.awt.event.ActionEvent evt) {
+       instrument.uiFramePanel.updateAreaItem();
+    }
+
+    private void jTextField46FocusLost(java.awt.event.FocusEvent evt) {
+     updateFrameItem();
+    }
+
+    private void jTextField46ActionPerformed(java.awt.event.ActionEvent evt) {
+     updateFrameItem();
+    }
+
+    private void jCheckBox9ActionPerformed(java.awt.event.ActionEvent evt) {
+          updateFrameItem();
+    }
+
+    private void jCheckBox8ActionPerformed(java.awt.event.ActionEvent evt) {
+     updateFrameItem();
+    }
+
+    private void jCheckBox10ActionPerformed(java.awt.event.ActionEvent evt) {
+         updateFrameItem();
+    }
+
+    private void jCheckBox7ActionPerformed(java.awt.event.ActionEvent evt) {
+        instrument.uiFramePanel.updateAreaItem();
     }
 void showMenuItem(String sel){
     if(instrument.editUI.get(sel)==null) return;
@@ -2603,17 +2882,24 @@ void updateDataAreaType(){
     info[6]= (instrument.isNumeric(jTextField77.getText())? jTextField77.getText():"0.0");
     }
 
-    info[7]=""+instrument.uiPanel2.jLabel61.getBackground().getRGB();
+    info[7]=""+jLabel61.getBackground().getRGB();
     if(jCheckBox43.isSelected()) info[8]="c"; else info[8]="e";
-    info[9]= instrument.uiPanel2.jTextField11.getText().trim();
+    info[9]= jTextField11.getText().trim();
+    if(jCheckBox9.isSelected()) info[10]="c"; else info[10]="e";
+    if(jCheckBox8.isSelected()) info[11]="c"; else info[11]="e";
+    info[12]= jTextField46.getText().trim();
     if(jCheckBox44.isSelected()) info[13]="f"; else info[13]="e";
     if(jCheckBox45.isSelected()) info[14]="r"; else info[14]="e";
+    if(jCheckBox10.isSelected()) info[15]="s"; else info[15]="e";
+
     instrument.editUI.put("frame",ylib.arrayToCsvLine(info));
 
     updateFramePanel();
     updateDataAreaPanel();
-    instrument.framePanel.invalidate();
-    instrument.dataPanel2.invalidate();
+    instrument.updateUILayoutAll=true;
+    instrument.uiFramePanel.invalidate();
+    instrument.updateUIDALayoutAll=true;
+    instrument.uiDataPanel.invalidate();
   }
 
     private javax.swing.JButton btnApplySetting_ui;
@@ -2629,6 +2915,7 @@ void updateDataAreaType(){
     javax.swing.JRadioButton byModel1;
     javax.swing.JRadioButton byStation;
     javax.swing.JRadioButton byStation1;
+    javax.swing.JCheckBox cbShowFrameItem;
     javax.swing.JComboBox chartGroupCB;
     javax.swing.JPanel dataPanel;
     private javax.swing.JButton jButton17;
@@ -2640,9 +2927,9 @@ void updateDataAreaType(){
     private javax.swing.JButton jButton29;
     private javax.swing.JButton jButton57;
     javax.swing.JCheckBox jCheckBox1;
+    private javax.swing.JCheckBox jCheckBox10;
     javax.swing.JCheckBox jCheckBox2;
     javax.swing.JCheckBox jCheckBox3;
-    javax.swing.JCheckBox jCheckBox37;
     javax.swing.JCheckBox jCheckBox38;
     javax.swing.JCheckBox jCheckBox4;
     javax.swing.JCheckBox jCheckBox43;
@@ -2650,11 +2937,17 @@ void updateDataAreaType(){
     javax.swing.JCheckBox jCheckBox45;
     javax.swing.JCheckBox jCheckBox46;
     javax.swing.JCheckBox jCheckBox49;
+    public javax.swing.JCheckBox jCheckBox5;
+    javax.swing.JCheckBox jCheckBox6;
     javax.swing.JCheckBox jCheckBox64;
     javax.swing.JCheckBox jCheckBox65;
     javax.swing.JCheckBox jCheckBox66;
+    public javax.swing.JCheckBox jCheckBox7;
+    private javax.swing.JCheckBox jCheckBox8;
+    private javax.swing.JCheckBox jCheckBox9;
     javax.swing.JComboBox jComboBox1;
     javax.swing.JComboBox jComboBox15;
+    public javax.swing.JComboBox jComboBox2;
     javax.swing.JComboBox jComboBox21;
     javax.swing.JComboBox jComboBox36;
     javax.swing.JComboBox jComboBox53;
@@ -2672,14 +2965,18 @@ void updateDataAreaType(){
     javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel140;
     private javax.swing.JLabel jLabel141;
-    private javax.swing.JLabel jLabel147;
     private javax.swing.JLabel jLabel15;
     javax.swing.JLabel jLabel154;
     javax.swing.JLabel jLabel156;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel168;
+    private javax.swing.JLabel jLabel17;
+    public javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
@@ -2720,8 +3017,8 @@ void updateDataAreaType(){
     javax.swing.JPanel jPanel140;
     private javax.swing.JPanel jPanel141;
     private javax.swing.JPanel jPanel143;
-    private javax.swing.JPanel jPanel144;
-    private javax.swing.JPanel jPanel145;
+    public javax.swing.JPanel jPanel144;
+    public javax.swing.JPanel jPanel145;
     private javax.swing.JPanel jPanel146;
     private javax.swing.JPanel jPanel147;
     javax.swing.JPanel jPanel162;
@@ -2731,19 +3028,25 @@ void updateDataAreaType(){
     private javax.swing.JPanel jPanel166;
     private javax.swing.JPanel jPanel167;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel32;
     private javax.swing.JPanel jPanel4;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
+    private javax.swing.JPanel jPanel8;
+    public javax.swing.JTabbedPane jTabbedPane1;
     javax.swing.JTabbedPane jTabbedPane4;
     javax.swing.JTextField jTextField1;
     javax.swing.JTextField jTextField10;
     javax.swing.JTextField jTextField11;
+    public javax.swing.JTextField jTextField12;
     javax.swing.JTextField jTextField2;
     javax.swing.JTextField jTextField22;
     javax.swing.JTextField jTextField3;
     javax.swing.JTextField jTextField4;
     javax.swing.JTextField jTextField45;
+    javax.swing.JTextField jTextField46;
     javax.swing.JTextField jTextField5;
     javax.swing.JTextField jTextField6;
     javax.swing.JTextField jTextField61;
@@ -2753,6 +3056,7 @@ void updateDataAreaType(){
     javax.swing.JTextField jTextField75;
     javax.swing.JTextField jTextField76;
     javax.swing.JTextField jTextField77;
+    public javax.swing.JTextField jTextField8;
     javax.swing.JTextField jTextField84;
     javax.swing.JTextField jTextField85;
     javax.swing.JTextField jTextField86;

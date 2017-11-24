@@ -105,6 +105,9 @@ DefaultListModel listModel9 = new DefaultListModel();
         jLabel5 = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
+        jPanel10 = new javax.swing.JPanel();
+        jLabel39 = new javax.swing.JLabel();
+        jLabel40 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         jButton2 = new javax.swing.JButton();
         jComboBox5 = new javax.swing.JComboBox();
@@ -117,6 +120,10 @@ DefaultListModel listModel9 = new DefaultListModel();
         jLabel16 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
         jLabel18 = new javax.swing.JLabel();
+        jPanel11 = new javax.swing.JPanel();
+        jLabel38 = new javax.swing.JLabel();
+        jTextField6 = new javax.swing.JTextField();
+        jLabel41 = new javax.swing.JLabel();
         jPanel9 = new javax.swing.JPanel();
         jLabel28 = new javax.swing.JLabel();
         jLabel29 = new javax.swing.JLabel();
@@ -138,11 +145,15 @@ DefaultListModel listModel9 = new DefaultListModel();
         jComboBox7 = new javax.swing.JComboBox();
         jComboBox8 = new javax.swing.JComboBox();
         jComboBox9 = new javax.swing.JComboBox();
-        jButton9 = new javax.swing.JButton();
+        btnSetDefault = new javax.swing.JButton();
         jLabel45 = new javax.swing.JLabel();
         jLabel49 = new javax.swing.JLabel();
         jTextField15 = new javax.swing.JTextField();
         jButton10 = new javax.swing.JButton();
+        jPanel13 = new javax.swing.JPanel();
+        jLabel57 = new javax.swing.JLabel();
+        jTextField20 = new javax.swing.JTextField();
+        jLabel58 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         jList3 = new javax.swing.JList();
 
@@ -371,7 +382,7 @@ DefaultListModel listModel9 = new DefaultListModel();
         jScrollPane4.setViewportView(serialPortList);
 
         jPanel3.add(jScrollPane4);
-        jScrollPane4.setBounds(10, 40, 100, 210);
+        jScrollPane4.setBounds(10, 40, 100, 240);
 
         jPanel4.setLayout(null);
 
@@ -433,7 +444,7 @@ DefaultListModel listModel9 = new DefaultListModel();
             }
         });
         jPanel4.add(jButton3);
-        jButton3.setBounds(10, 140, 240, 29);
+        jButton3.setBounds(20, 170, 240, 29);
 
         jButton7.setFont(jButton7.getFont().deriveFont(jButton7.getFont().getSize()+6f));
         jButton7.setText(bundle.getString("CINodeMgntPanel.jButton7.text")); 
@@ -443,10 +454,23 @@ DefaultListModel listModel9 = new DefaultListModel();
             }
         });
         jPanel4.add(jButton7);
-        jButton7.setBounds(10, 170, 240, 31);
+        jButton7.setBounds(20, 200, 240, 31);
+
+        jPanel10.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel39.setFont(jLabel39.getFont().deriveFont(jLabel39.getFont().getSize()+6f));
+        jLabel39.setText(bundle.getString("CINodeMgntPanel.jLabel39.text")); 
+        jPanel10.add(jLabel39);
+
+        jLabel40.setFont(jLabel40.getFont().deriveFont(jLabel40.getFont().getSize()+6f));
+        jLabel40.setText(bundle.getString("CINodeMgntPanel.jLabel40.text")); 
+        jPanel10.add(jLabel40);
+
+        jPanel4.add(jPanel10);
+        jPanel10.setBounds(20, 140, 290, 30);
 
         jPanel3.add(jPanel4);
-        jPanel4.setBounds(150, 40, 270, 210);
+        jPanel4.setBounds(150, 40, 320, 240);
 
         jPanel5.setLayout(null);
 
@@ -458,7 +482,7 @@ DefaultListModel listModel9 = new DefaultListModel();
             }
         });
         jPanel5.add(jButton2);
-        jButton2.setBounds(20, 170, 260, 29);
+        jButton2.setBounds(20, 200, 260, 29);
 
         jComboBox5.setFont(jComboBox5.getFont().deriveFont(jComboBox5.getFont().getSize()+6f));
         jComboBox5.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "1", "1.5", "2" }));
@@ -468,7 +492,7 @@ DefaultListModel listModel9 = new DefaultListModel();
         jLabel14.setFont(jLabel14.getFont().deriveFont(jLabel14.getFont().getSize()+6f));
         jLabel14.setText(bundle.getString("CINodeMgntPanel.jLabel14.text")); 
         jPanel5.add(jLabel14);
-        jLabel14.setBounds(10, 130, 140, 30);
+        jLabel14.setBounds(20, 130, 140, 30);
 
         jComboBox3.setFont(jComboBox3.getFont().deriveFont(jComboBox3.getFont().getSize()+6f));
         jComboBox3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "NONE", "ODD", "EVEN", "MARK", "SPACE" }));
@@ -478,7 +502,7 @@ DefaultListModel listModel9 = new DefaultListModel();
         jLabel15.setFont(jLabel15.getFont().deriveFont(jLabel15.getFont().getSize()+6f));
         jLabel15.setText(bundle.getString("CINodeMgntPanel.jLabel15.text")); 
         jPanel5.add(jLabel15);
-        jLabel15.setBounds(10, 100, 140, 30);
+        jLabel15.setBounds(20, 100, 140, 30);
 
         jComboBox2.setFont(jComboBox2.getFont().deriveFont(jComboBox2.getFont().getSize()+6f));
         jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "50", "75", "110", "134", "150", "200", "300", "600", "1200", "1800", "2400", "4800", "9600", "19200", "38400", "57600", "115200", "230400", "460800", "921600" }));
@@ -501,20 +525,38 @@ DefaultListModel listModel9 = new DefaultListModel();
         jLabel16.setFont(jLabel16.getFont().deriveFont(jLabel16.getFont().getSize()+6f));
         jLabel16.setText(bundle.getString("CINodeMgntPanel.jLabel16.text")); 
         jPanel5.add(jLabel16);
-        jLabel16.setBounds(10, 70, 130, 30);
+        jLabel16.setBounds(20, 70, 130, 30);
 
         jLabel17.setFont(jLabel17.getFont().deriveFont(jLabel17.getFont().getSize()+6f));
         jLabel17.setText(bundle.getString("CINodeMgntPanel.jLabel17.text")); 
         jPanel5.add(jLabel17);
-        jLabel17.setBounds(10, 10, 140, 20);
+        jLabel17.setBounds(20, 10, 140, 20);
 
         jLabel18.setFont(jLabel18.getFont().deriveFont(jLabel18.getFont().getSize()+6f));
         jLabel18.setText(bundle.getString("CINodeMgntPanel.jLabel18.text")); 
         jPanel5.add(jLabel18);
-        jLabel18.setBounds(10, 42, 140, 23);
+        jLabel18.setBounds(20, 40, 140, 23);
+
+        jPanel11.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel38.setFont(jLabel38.getFont().deriveFont(jLabel38.getFont().getSize()+6f));
+        jLabel38.setText(bundle.getString("CINodeMgntPanel.jLabel38.text")); 
+        jPanel11.add(jLabel38);
+
+        jTextField6.setFont(jTextField6.getFont().deriveFont(jTextField6.getFont().getSize()+6f));
+        jTextField6.setText(bundle.getString("CINodeMgntPanel.jTextField6.text")); 
+        jTextField6.setPreferredSize(new java.awt.Dimension(56, 29));
+        jPanel11.add(jTextField6);
+
+        jLabel41.setFont(jLabel41.getFont().deriveFont(jLabel41.getFont().getSize()+6f));
+        jLabel41.setText(bundle.getString("CINodeMgntPanel.jLabel41.text")); 
+        jPanel11.add(jLabel41);
+
+        jPanel5.add(jPanel11);
+        jPanel11.setBounds(20, 160, 260, 40);
 
         jPanel3.add(jPanel5);
-        jPanel5.setBounds(440, 40, 300, 210);
+        jPanel5.setBounds(490, 40, 300, 240);
 
         jPanel1.add(jPanel3);
 
@@ -632,15 +674,15 @@ DefaultListModel listModel9 = new DefaultListModel();
         jPanel9.add(jComboBox9);
         jComboBox9.setBounds(190, 200, 120, 30);
 
-        jButton9.setFont(jButton9.getFont().deriveFont(jButton9.getFont().getSize()+12f));
-        jButton9.setText(bundle.getString("CINodeMgntPanel.jButton9.text")); 
-        jButton9.addActionListener(new java.awt.event.ActionListener() {
+        btnSetDefault.setFont(btnSetDefault.getFont().deriveFont(btnSetDefault.getFont().getSize()+12f));
+        btnSetDefault.setText(bundle.getString("CINodeMgntPanel.btnSetDefault.text")); 
+        btnSetDefault.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton9ActionPerformed(evt);
+                btnSetDefaultActionPerformed(evt);
             }
         });
-        jPanel9.add(jButton9);
-        jButton9.setBounds(370, 370, 220, 40);
+        jPanel9.add(btnSetDefault);
+        btnSetDefault.setBounds(370, 380, 220, 40);
 
         jLabel45.setBackground(new java.awt.Color(0, 0, 153));
         jLabel45.setFont(jLabel45.getFont().deriveFont(jLabel45.getFont().getSize()+6f));
@@ -663,7 +705,25 @@ DefaultListModel listModel9 = new DefaultListModel();
         jButton10.setFont(jButton10.getFont().deriveFont(jButton10.getFont().getSize()+12f));
         jButton10.setText(bundle.getString("CINodeMgntPanel.jButton10.text")); 
         jPanel9.add(jButton10);
-        jButton10.setBounds(120, 370, 210, 40);
+        jButton10.setBounds(120, 380, 210, 40);
+
+        jPanel13.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel57.setFont(jLabel57.getFont().deriveFont(jLabel57.getFont().getSize()+6f));
+        jLabel57.setText(bundle.getString("CINodeMgntPanel.jLabel57.text")); 
+        jPanel13.add(jLabel57);
+
+        jTextField20.setFont(jTextField20.getFont().deriveFont(jTextField20.getFont().getSize()+6f));
+        jTextField20.setText(bundle.getString("CINodeMgntPanel.jTextField20.text")); 
+        jTextField20.setPreferredSize(new java.awt.Dimension(50, 29));
+        jPanel13.add(jTextField20);
+
+        jLabel58.setFont(jLabel58.getFont().deriveFont(jLabel58.getFont().getSize()+6f));
+        jLabel58.setText(bundle.getString("CINodeMgntPanel.jLabel58.text")); 
+        jPanel13.add(jLabel58);
+
+        jPanel9.add(jPanel13);
+        jPanel13.setBounds(80, 330, 360, 40);
 
         jTabbedPane1.addTab(bundle.getString("CINodeMgntPanel.jPanel9.TabConstraints.tabTitle"), jPanel9); 
 
@@ -864,7 +924,7 @@ DefaultListModel listModel9 = new DefaultListModel();
     instrument.wn.w.sendToOne(contCmd,instrument.wn.getItemId((String)jList3.getSelectedValue()));
     }
 
-    private void jButton9ActionPerformed(java.awt.event.ActionEvent evt) {
+    private void btnSetDefaultActionPerformed(java.awt.event.ActionEvent evt) {
         if(serialPortList.getSelectedValue()==null){
             JOptionPane.showMessageDialog(this, bundle2.getString("CINodeMgntPanel.xy.msg13")); return;
         } else {
@@ -896,6 +956,14 @@ DefaultListModel listModel9 = new DefaultListModel();
         else if(conf[12].substring(0,1).equalsIgnoreCase("S")) jComboBox3.setSelectedItem("SPACE");
         jComboBox5.setSelectedItem(conf[13]);
         if(jRadioButton3.isSelected()) conf[14]="1"; else conf[14]="0";
+              if(conf.length>17){
+          if(instrument.isNumeric(jTextField20.getText().trim())){
+            conf[17]=jTextField20.getText().trim();
+          }else {conf[17]="500";jTextField20.setText(conf[17]);}
+      } else {
+          System.out.println("Warning: conf.length < 17");
+      }
+      jTextField6.setText(jTextField20.getText().trim());
         nodeConfig=instrument.wn.w.arrayToCsvLine(conf);
         String contCmd="performcommand wsn.WSN setdefaultconfig "+nodeConfig+" null null null null null null null null 0 0 0 0 ? ? ? 0";
         instrument.wn.w.sendToOne(contCmd,instrument.getItemId((String)serialPortList.getSelectedValue()));
@@ -936,7 +1004,7 @@ public void changeListItem3(){
       jButton6.setEnabled(false);
       jButton7.setEnabled(false);
       jButton8.setEnabled(false);
-      jButton9.setEnabled(false);
+      btnSetDefault.setEnabled(false);
       jButton10.setEnabled(false);
   } else {
 
@@ -948,7 +1016,7 @@ public void changeListItem3(){
       jButton6.setEnabled(true);
       jButton7.setEnabled(true);
       jButton8.setEnabled(true);
-      jButton9.setEnabled(true);
+      btnSetDefault.setEnabled(true);
       jButton10.setEnabled(true);
   if(currentItemData3.length>0){};
   if(currentItemData3.length>4){};
@@ -1170,6 +1238,8 @@ public void setNodeConfig(String id,String stringx[]){
       else if(conf[12].substring(0,1).equalsIgnoreCase("S")) jComboBox7.setSelectedItem("SPACE");
       jComboBox6.setSelectedItem(conf[13]);
       if(conf[14].equals("1")) jRadioButton3.setSelected(true); else jRadioButton4.setSelected(true);
+      jTextField6.setText(conf[17]);
+      jTextField20.setText(conf[17]);
       
 
   }
@@ -1211,11 +1281,13 @@ public void setStatus3_3(String id,String stringx[]){
     jLabel12.setText(tmp[2]);
     jLabel6.setText(tmp[3]);
     jLabel13.setText(tmp[4]);
+    if(tmp.length>7) jLabel13.setText(tmp[7]+" ms");
 
     }
 
 }
 
+    private javax.swing.JButton btnSetDefault;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.ButtonGroup buttonGroup2;
     javax.swing.JList connectionList;
@@ -1228,7 +1300,6 @@ public void setStatus3_3(String id,String stringx[]){
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
     private javax.swing.JButton jButton8;
-    private javax.swing.JButton jButton9;
     javax.swing.JComboBox jComboBox1;
     javax.swing.JComboBox jComboBox2;
     javax.swing.JComboBox jComboBox3;
@@ -1269,18 +1340,27 @@ public void setStatus3_3(String id,String stringx[]){
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel36;
     private javax.swing.JLabel jLabel37;
+    private javax.swing.JLabel jLabel38;
+    private javax.swing.JLabel jLabel39;
     public javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel40;
+    private javax.swing.JLabel jLabel41;
     private javax.swing.JLabel jLabel45;
     private javax.swing.JLabel jLabel47;
     private javax.swing.JLabel jLabel48;
     private javax.swing.JLabel jLabel49;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel57;
+    private javax.swing.JLabel jLabel58;
     javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     javax.swing.JList jList3;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel13;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -1302,9 +1382,11 @@ public void setStatus3_3(String id,String stringx[]){
     javax.swing.JTextField jTextField14;
     private javax.swing.JTextField jTextField15;
     javax.swing.JTextField jTextField2;
+    private javax.swing.JTextField jTextField20;
     javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextField5;
+    private javax.swing.JTextField jTextField6;
     javax.swing.JList serialPortList;
     javax.swing.JList socketPortList;
 

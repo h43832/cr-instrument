@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.Vector;
+import javax.swing.JOptionPane;
 import wsn.WSN;
 import y.ylib.ylib;
 
@@ -42,8 +43,9 @@ CrInstrument instrument;
             Iterator it=actionDataClass.actionCodeTM.keySet().iterator();
             boolean sendEmail=false,sendSms=false;
             TreeMap newActionTM=new TreeMap();
-            String SN="01";
+            String SN="01",textValue="",replace="",with="";
             boolean foundSN=false;
+            double dataValue= -0.001;
             for(;it.hasNext();){
               String actionCode=(String)it.next();
              String act[]=ylib.csvlinetoarray((String)instrument.actionTM.get(actionCode));
@@ -75,9 +77,13 @@ CrInstrument instrument;
               }
                 if(act[43].trim().equalsIgnoreCase("Byte data")){
                     column[0]=dataHex;
+                    act[47]="1";
+                    act[56]="1";
+                    act[66]="1";
                 } else if(act[43].trim().equalsIgnoreCase("String data")){
                      if(act[44].trim().equalsIgnoreCase("Whole line")){
                             column[0]=dataStr;
+                            act[47]="1";
                           } else {
                             if(act[44].trim().equalsIgnoreCase("Separated by space")){
                               column=dataStr.split(" ");
@@ -94,6 +100,9 @@ CrInstrument instrument;
                           }
                 } else if(act[43].trim().equalsIgnoreCase("Byte string data")){
                     column[0]=ylib.replace(dataStr," ","");
+                    act[47]="1";
+                    act[56]="1";
+                    act[66]="1";
                 }
               if(instrument.wn.w.chkValue(act[46])){
                   if(act[43].trim().equalsIgnoreCase("Byte data")){
@@ -110,10 +119,17 @@ CrInstrument instrument;
                       int colN=(instrument.isNumeric(act[47])? Integer.parseInt(act[47]):1);
                       if(colN<1 || (act[43].trim().equalsIgnoreCase("Byte string data"))) colN=1;
                       if(column.length>=colN){
-                          if(instrument.wn.w.chkValue(act[48]) && instrument.isNumeric(act[49]) && instrument.isNumeric(act[50])){
-                              int from=Integer.parseInt(act[49]);
-                              int to=Integer.parseInt(act[50]);
-                              if(from>0 && from<to && to<=column[colN-1].length()) gottenMasterId=column[colN-1].substring(from-1, to);
+                          if(instrument.wn.w.chkValue(act[48])){
+                              int from=(instrument.isNumeric(act[49])? Integer.parseInt(act[49]):1);
+                              int to=(instrument.isNumeric(act[50])? Integer.parseInt(act[50]):column[colN-1].length());
+                              if(from<1 || from>column[colN-1].length()) from=1;
+                              if(to<1 || to>column[colN-1].length()) to=column[colN-1].length();
+                              if(from >to) {
+                                int tmp=from;
+                                from=to;
+                                to=tmp;
+                              }
+                              gottenMasterId=column[colN-1].substring(from-1, to);
                           } else gottenMasterId=column[colN-1];
                       }
 
@@ -160,10 +176,18 @@ CrInstrument instrument;
                       int colN=(instrument.isNumeric(act[56])? Integer.parseInt(act[56]):1);
                       if(colN<1 || (act[43].trim().equalsIgnoreCase("Byte string data"))) colN=1;
                       if(column.length>=colN){
-                          if(instrument.wn.w.chkValue(act[57]) && instrument.isNumeric(act[58]) && instrument.isNumeric(act[59])){
-                              int from=Integer.parseInt(act[58]);
-                              int to=Integer.parseInt(act[59]);
-                              if(from>0 && from<to && to<=column[colN-1].length()) gottenDeviceId=column[colN-1].substring(from-1, to);
+                          if(instrument.wn.w.chkValue(act[57])){
+                              int from=(instrument.isNumeric(act[58])? Integer.parseInt(act[58]):1);
+                              int to=(instrument.isNumeric(act[59])? Integer.parseInt(act[59]):column[colN-1].length());
+                              if(from<1 || from>column[colN-1].length()) from=1;
+                              if(to<1 || to>column[colN-1].length()) to=column[colN-1].length();
+                              if(from >to) {
+                                int tmp=from;
+                                from=to;
+                                to=tmp;
+                              }
+                              gottenDeviceId=column[colN-1].substring(from-1, to);
+
                           } else gottenDeviceId=column[colN-1];
                       }
                   }
@@ -274,10 +298,18 @@ CrInstrument instrument;
                       int colN=(instrument.isNumeric(act[66])? Integer.parseInt(act[66]):1);
                       if(colN<1 || (act[43].trim().equalsIgnoreCase("Byte string data"))) colN=1;
                       if(column.length>=colN){
-                          if(instrument.wn.w.chkValue(act[67]) && instrument.isNumeric(act[68]) && instrument.isNumeric(act[69])){
-                              int from=Integer.parseInt(act[68]);
-                              int to=Integer.parseInt(act[69]);
-                              if(from>0 && from<to && to<=column[colN-1].length()) gottenDeviceId=column[colN-1].substring(from-1, to);
+                          if(instrument.wn.w.chkValue(act[67])){
+                              int from=(instrument.isNumeric(act[68])? Integer.parseInt(act[68]):1);
+                              int to=(instrument.isNumeric(act[69])? Integer.parseInt(act[69]):column[colN-1].length());
+                              if(from<1 || from>column[colN-1].length()) from=1;
+                              if(to<1 || to>column[colN-1].length()) to=column[colN-1].length();
+                              if(from >to) {
+                                int tmp=from;
+                                from=to;
+                                to=tmp;
+                              }
+                              gottenMasterId=column[colN-1].substring(from-1, to);
+
                           } else gottenDeviceId=column[colN-1];
                       }
                   }
@@ -336,7 +368,7 @@ CrInstrument instrument;
             }
             else if(act[2].trim().equalsIgnoreCase("Set data value")){
                String dataX="";
-               double dataValue=0.0;
+               dataValue=0.0;
                boolean alertSound=false,actionSound=false;
                byte b2[];
                 key=act[1]+","+act[39]+","+act[16]+","+SN+","+act[17];
@@ -624,6 +656,67 @@ CrInstrument instrument;
                }
 
             }
+            else if(act[2].trim().equalsIgnoreCase("Set text value")){
+              String column[]=new String[]{""};
+                if(act[73].trim().equalsIgnoreCase("Byte data")){
+                    column[0]=dataHex;
+                    act[77]="1";
+                } else if(act[73].trim().equalsIgnoreCase("String data")){
+                     if(act[74].trim().equalsIgnoreCase("Whole line")){
+                            column[0]=dataStr;
+                            act[77]="1";
+                          } else {
+                            if(act[74].trim().equalsIgnoreCase("Separated by space")){
+                              column=dataStr.split(" ");
+                            } else if(act[74].trim().equalsIgnoreCase("Separated by ','")){
+                              column=ylib.csvlinetoarray(dataStr);
+                            } else if(act[74].trim().equalsIgnoreCase("Fixed column length")){
+                               int len=Integer.parseInt(act[75]);
+                               int cnt=dataStr.length()/len + (dataStr.length()%len >0 ? 1:0);
+                               column=new String[cnt];
+                               for(int j=0;j<cnt;j++){
+                                 column[j]=dataStr.substring(j*len, (j*len+len >dataStr.length() ? dataStr.length():j*len+len));
+                               }
+                            }
+                          }
+                } else if(act[73].trim().equalsIgnoreCase("Byte string data")){
+                    column[0]=ylib.replace(dataStr," ","");
+                }
+                if(act[73].trim().equalsIgnoreCase("Byte data")){
+                          if(instrument.wn.w.chkValue(act[78]) && instrument.isNumeric(act[79]) && instrument.isNumeric(act[80])){
+                              int from=Integer.parseInt(act[79]);
+                              int to=Integer.parseInt(act[80]);
+                              if(from>0 && from<to && to<=column[0].length()) {
+                                  from=3*(from-1);
+                                  to=3*(to-1)+2;
+                                  textValue=column[0].substring(from, to);
+                              }
+                          } else textValue=column[0];
+                  } else {
+                      int colN=(instrument.isNumeric(act[77])? Integer.parseInt(act[77]):1);
+                      if(colN<1 || (act[73].trim().equalsIgnoreCase("Byte string data"))) colN=1;
+                      if(column.length>=colN){
+                          if(instrument.wn.w.chkValue(act[78])){
+                              int from=(instrument.isNumeric(act[79])? Integer.parseInt(act[79]):1);
+                              int to=(instrument.isNumeric(act[80])? Integer.parseInt(act[80]):column[colN-1].length());
+                              if(from<1 || from>column[colN-1].length()) from=1;
+                              if(to<1 || to>column[colN-1].length()) to=column[colN-1].length();
+                              if(from >to) {
+                                int tmp=from;
+                                from=to;
+                                to=tmp;
+                              }
+                              textValue=column[colN-1].substring(from-1, to);
+                          } else textValue=column[colN-1];
+                      }
+                      else textValue="";
+                  } 
+
+                  
+
+                if(textValue.length()>0 && act[81].length()>0) textValue=ylib.replace(textValue,act[81], act[82]);
+                instrument.textValue=textValue;
+            }
 
             else if(act[2].trim().equalsIgnoreCase("Send email message")){
               if(instrument.emailMsg.toString().length()>0){
@@ -652,6 +745,7 @@ CrInstrument instrument;
               }
             }
             else if(act[2].trim().equalsIgnoreCase("Send command")){
+
               if(act[11].toUpperCase().indexOf("[#MASTERID#]")!=-1 || act[11].toUpperCase().indexOf("[#DEVICEID#]")!=-1){
                 key=act[1]+","+act[39]+","+act[16]+","+SN+","+act[17];
                 if(instrument.sensors.get(key)!=null){
@@ -729,7 +823,119 @@ CrInstrument instrument;
                 }catch(InterruptedException e){
 
                 }
+            } 
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 01 value")) instrument.framePanel2.textField01.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 02 value")) instrument.framePanel2.textField02.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 03 value")) instrument.framePanel2.textField03.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 04 value")) instrument.framePanel2.textField04.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 05 value")) instrument.framePanel2.textField05.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 06 value")) instrument.framePanel2.textField06.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 07 value")) instrument.framePanel2.textField07.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 08 value")) instrument.framePanel2.textField08.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 09 value")) instrument.framePanel2.textField09.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 10 value")) instrument.framePanel2.textField10.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 11 value")) instrument.framePanel2.textField11.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 12 value")) instrument.framePanel2.textField12.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 13 value")) instrument.framePanel2.textField13.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 14 value")) instrument.framePanel2.textField14.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 15 value")) instrument.framePanel2.textField15.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 16 value")) instrument.framePanel2.textField16.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 17 value")) instrument.framePanel2.textField17.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 18 value")) instrument.framePanel2.textField18.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 19 value")) instrument.framePanel2.textField19.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 20 value")) instrument.framePanel2.textField20.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 21 value")) instrument.framePanel2.textField21.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 22 value")) instrument.framePanel2.textField22.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 23 value")) instrument.framePanel2.textField23.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 24 value")) instrument.framePanel2.textField24.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 25 value")) instrument.framePanel2.textField25.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 26 value")) instrument.framePanel2.textField26.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 27 value")) instrument.framePanel2.textField27.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 28 value")) instrument.framePanel2.textField28.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 29 value")) instrument.framePanel2.textField29.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textfield 30 value")) instrument.framePanel2.textField30.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 01 value")) instrument.framePanel2.textLabel01.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 02 value")) instrument.framePanel2.textLabel02.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 03 value")) instrument.framePanel2.textLabel03.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 04 value")) instrument.framePanel2.textLabel04.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 05 value")) instrument.framePanel2.textLabel05.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 06 value")) instrument.framePanel2.textLabel06.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 07 value")) instrument.framePanel2.textLabel07.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 08 value")) instrument.framePanel2.textLabel08.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 09 value")) instrument.framePanel2.textLabel09.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 10 value")) instrument.framePanel2.textLabel10.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 11 value")) instrument.framePanel2.textLabel11.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 12 value")) instrument.framePanel2.textLabel12.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 13 value")) instrument.framePanel2.textLabel13.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 14 value")) instrument.framePanel2.textLabel14.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 15 value")) instrument.framePanel2.textLabel15.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 16 value")) instrument.framePanel2.textLabel16.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 17 value")) instrument.framePanel2.textLabel17.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 18 value")) instrument.framePanel2.textLabel18.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 19 value")) instrument.framePanel2.textLabel19.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 20 value")) instrument.framePanel2.textLabel20.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 21 value")) instrument.framePanel2.textLabel21.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 22 value")) instrument.framePanel2.textLabel22.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 23 value")) instrument.framePanel2.textLabel23.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 24 value")) instrument.framePanel2.textLabel24.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 25 value")) instrument.framePanel2.textLabel25.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 26 value")) instrument.framePanel2.textLabel26.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 27 value")) instrument.framePanel2.textLabel27.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 28 value")) instrument.framePanel2.textLabel28.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 29 value")) instrument.framePanel2.textLabel29.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Set textlabel 30 value")) instrument.framePanel2.textLabel30.setText(getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Show message dialog")) JOptionPane.showMessageDialog(instrument, getTextValue(act[63],""+dataValue,textValue));
+            else if(act[2].trim().equalsIgnoreCase("Show confirm message dialog 01")){
+                int an=JOptionPane.showConfirmDialog(instrument, getTextValue(act[63],""+dataValue,textValue), "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+                if(an==JOptionPane.YES_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",72);
+                else if(an==JOptionPane.NO_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",82);
             }
+            else if(act[2].trim().equalsIgnoreCase("Show confirm message dialog 02")){
+                int an=JOptionPane.showConfirmDialog(instrument, getTextValue(act[63],""+dataValue,textValue), "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+                if(an==JOptionPane.YES_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",73);
+                else if(an==JOptionPane.NO_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",83);
+            }
+            else if(act[2].trim().equalsIgnoreCase("Show confirm message dialog 03")){
+                int an=JOptionPane.showConfirmDialog(instrument, getTextValue(act[63],""+dataValue,textValue), "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+                if(an==JOptionPane.YES_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",74);
+                else if(an==JOptionPane.NO_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",84);
+            }
+            else if(act[2].trim().equalsIgnoreCase("Show confirm message dialog 04")){
+                int an=JOptionPane.showConfirmDialog(instrument, getTextValue(act[63],""+dataValue,textValue), "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+                if(an==JOptionPane.YES_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",75);
+                else if(an==JOptionPane.NO_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",85);
+            }
+            else if(act[2].trim().equalsIgnoreCase("Show confirm message dialog 05")){
+                int an=JOptionPane.showConfirmDialog(instrument, getTextValue(act[63],""+dataValue,textValue), "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+                if(an==JOptionPane.YES_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",76);
+                else if(an==JOptionPane.NO_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",86);
+            }
+            else if(act[2].trim().equalsIgnoreCase("Show confirm message dialog 06")){
+                int an=JOptionPane.showConfirmDialog(instrument, getTextValue(act[63],""+dataValue,textValue), "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+                if(an==JOptionPane.YES_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",77);
+                else if(an==JOptionPane.NO_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",87);
+            }
+            else if(act[2].trim().equalsIgnoreCase("Show confirm message dialog 07")){
+                int an=JOptionPane.showConfirmDialog(instrument, getTextValue(act[63],""+dataValue,textValue), "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+                if(an==JOptionPane.YES_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",78);
+                else if(an==JOptionPane.NO_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",88);
+            }
+            else if(act[2].trim().equalsIgnoreCase("Show confirm message dialog 08")){
+                int an=JOptionPane.showConfirmDialog(instrument, getTextValue(act[63],""+dataValue,textValue), "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+                if(an==JOptionPane.YES_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",79);
+                else if(an==JOptionPane.NO_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",89);
+            }
+            else if(act[2].trim().equalsIgnoreCase("Show confirm message dialog 09")){
+                int an=JOptionPane.showConfirmDialog(instrument, getTextValue(act[63],""+dataValue,textValue), "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+                if(an==JOptionPane.YES_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",80);
+                else if(an==JOptionPane.NO_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",90);
+            }
+            else if(act[2].trim().equalsIgnoreCase("Show confirm message dialog 10")){
+                int an=JOptionPane.showConfirmDialog(instrument, getTextValue(act[63],""+dataValue,textValue), "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+                if(an==JOptionPane.YES_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",81);
+                else if(an==JOptionPane.NO_OPTION) instrument.eventThread.setStatus(instrument.wn.w.getGNS(1),"",91);
+            }
+
             }
             if(newActionTM.size()>0){
 
@@ -749,6 +955,69 @@ CrInstrument instrument;
              isSleep=false;
           }
       }
+  }
+
+  String getTextValue(String value,String dataValue,String textValue){
+    if(value.indexOf("[#")>-1){
+    value=ylib.replace(value, "[#datavalue#]", dataValue);
+    value=ylib.replace(value, "[#textvalue#]", textValue);
+    value=ylib.replace(value, "[#date#]", instrument.format9.format(new java.util.Date()).substring(0, 10));
+    value=ylib.replace(value, "[#datetime#]", instrument.format9.format(new java.util.Date()));
+    value=ylib.replace(value, "[#time#]", instrument.format9.format(new java.util.Date()).substring(11));
+    if(value.indexOf("[#")>-1){
+      value=ylib.replace(value, "[#textfield01#]", instrument.framePanel2.textField01.getText().trim());
+      value=ylib.replace(value, "[#textfield02#]", instrument.framePanel2.textField02.getText().trim());
+      value=ylib.replace(value, "[#textfield03#]", instrument.framePanel2.textField03.getText().trim());
+      value=ylib.replace(value, "[#textfield04#]", instrument.framePanel2.textField04.getText().trim());
+      value=ylib.replace(value, "[#textfield05#]", instrument.framePanel2.textField05.getText().trim());
+      value=ylib.replace(value, "[#textfield06#]", instrument.framePanel2.textField06.getText().trim());
+      value=ylib.replace(value, "[#textfield07#]", instrument.framePanel2.textField07.getText().trim());
+      value=ylib.replace(value, "[#textfield08#]", instrument.framePanel2.textField08.getText().trim());
+      value=ylib.replace(value, "[#textfield09#]", instrument.framePanel2.textField09.getText().trim());
+      value=ylib.replace(value, "[#textfield10#]", instrument.framePanel2.textField10.getText().trim());
+      value=ylib.replace(value, "[#textfield11#]", instrument.framePanel2.textField11.getText().trim());
+      value=ylib.replace(value, "[#textfield12#]", instrument.framePanel2.textField12.getText().trim());
+      value=ylib.replace(value, "[#textfield13#]", instrument.framePanel2.textField13.getText().trim());
+      value=ylib.replace(value, "[#textfield14#]", instrument.framePanel2.textField14.getText().trim());
+      value=ylib.replace(value, "[#textfield15#]", instrument.framePanel2.textField15.getText().trim());
+      value=ylib.replace(value, "[#textfield16#]", instrument.framePanel2.textField16.getText().trim());
+      value=ylib.replace(value, "[#textfield17#]", instrument.framePanel2.textField17.getText().trim());
+      value=ylib.replace(value, "[#textfield18#]", instrument.framePanel2.textField18.getText().trim());
+      value=ylib.replace(value, "[#textfield19#]", instrument.framePanel2.textField19.getText().trim());
+      value=ylib.replace(value, "[#textfield20#]", instrument.framePanel2.textField20.getText().trim());
+      value=ylib.replace(value, "[#textfield21#]", instrument.framePanel2.textField21.getText().trim());
+      value=ylib.replace(value, "[#textfield22#]", instrument.framePanel2.textField22.getText().trim());
+      value=ylib.replace(value, "[#textfield23#]", instrument.framePanel2.textField23.getText().trim());
+      value=ylib.replace(value, "[#textfield24#]", instrument.framePanel2.textField24.getText().trim());
+      value=ylib.replace(value, "[#textfield25#]", instrument.framePanel2.textField25.getText().trim());
+      value=ylib.replace(value, "[#textfield26#]", instrument.framePanel2.textField26.getText().trim());
+      value=ylib.replace(value, "[#textfield27#]", instrument.framePanel2.textField27.getText().trim());
+      value=ylib.replace(value, "[#textfield28#]", instrument.framePanel2.textField28.getText().trim());
+      value=ylib.replace(value, "[#textfield29#]", instrument.framePanel2.textField29.getText().trim());
+      value=ylib.replace(value, "[#textfield30#]", instrument.framePanel2.textField30.getText().trim());
+      value=ylib.replace(value, "[#combobox01#]", (instrument.framePanel2.comboBox01.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox01.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox02#]", (instrument.framePanel2.comboBox02.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox02.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox03#]", (instrument.framePanel2.comboBox03.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox03.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox04#]", (instrument.framePanel2.comboBox04.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox04.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox05#]", (instrument.framePanel2.comboBox05.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox05.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox06#]", (instrument.framePanel2.comboBox06.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox06.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox07#]", (instrument.framePanel2.comboBox07.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox07.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox08#]", (instrument.framePanel2.comboBox08.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox08.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox09#]", (instrument.framePanel2.comboBox09.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox09.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox10#]", (instrument.framePanel2.comboBox10.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox10.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox11#]", (instrument.framePanel2.comboBox11.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox11.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox12#]", (instrument.framePanel2.comboBox12.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox12.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox13#]", (instrument.framePanel2.comboBox13.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox13.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox14#]", (instrument.framePanel2.comboBox14.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox14.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox15#]", (instrument.framePanel2.comboBox15.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox15.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox16#]", (instrument.framePanel2.comboBox16.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox16.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox17#]", (instrument.framePanel2.comboBox17.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox17.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox18#]", (instrument.framePanel2.comboBox18.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox18.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox19#]", (instrument.framePanel2.comboBox19.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox19.getSelectedItem():""));
+      value=ylib.replace(value, "[#combobox20#]", (instrument.framePanel2.comboBox20.getSelectedItem()!=null? (String)instrument.framePanel2.comboBox20.getSelectedItem():""));
+    }
+    }
+     return value;
   }
   String [] getActions(String key,String cond){
     String rtn[]={};

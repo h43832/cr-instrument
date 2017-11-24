@@ -17,11 +17,11 @@ import y.ylib.ylib;
  *
  * @author peter
  */
-public class CIDataAreaPanel extends javax.swing.JPanel {
+public class CIUIDataAreaPanel extends javax.swing.JPanel {
 
     CrInstrument instrument;
     ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-    public CIDataAreaPanel(CrInstrument ci) {
+    public CIUIDataAreaPanel(CrInstrument ci) {
         initComponents();
         this.instrument=ci;
     }
@@ -63,6 +63,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
       }
     }
     setDataArea(frameWidth,frameHeight);
+      if(!instrument.initStage) instrument.updateUIDALayoutAll=false;
     }
     void setDataArea(int frameWidth,int frameHeight){
 
@@ -271,8 +272,10 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
     info[7]=""+instrument.uiPanel2.jLabel324.getBackground().getRGB();
     info[10]=""+instrument.uiPanel2.jLabel328.getBackground().getRGB();
     if(instrument.uiPanel2.jCheckBox1.isSelected()) info[13]="o"; else info[13]="e";
+    info[18]=""+instrument.uiPanel2.jLabel22.getBackground().getRGB();
 
     instrument.editUI.put(sel,ylib.arrayToCsvLine(info));
+    instrument.updateUIDALayoutAll=true;
     invalidate();
      }
    }
@@ -449,8 +452,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_01.setFont(da2_datavalue_01.getFont().deriveFont(da2_datavalue_01.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_01.getFont().getSize()+36));
         da2_datavalue_01.setForeground(new java.awt.Color(255, 0, 51));
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("ci/Bundle"); 
-        da2_datavalue_01.setText(bundle.getString("CrInstrument.da2_datavalue_01.text")); 
+        da2_datavalue_01.setText("A:+00.0000 ¢X");
         da2_datavalue_01.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_01MouseClicked(evt);
@@ -461,7 +463,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_01.setFont(da2_device_01.getFont().deriveFont(da2_device_01.getFont().getStyle() | java.awt.Font.BOLD, da2_device_01.getFont().getSize()+6));
         da2_device_01.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_01.setText(bundle.getString("CrInstrument.da2_device_01.text")); 
+        da2_device_01.setText("Temp:+0.0");
         da2_device_01.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_01MouseClicked(evt);
@@ -472,7 +474,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_01.setFont(da2_dataname_01.getFont().deriveFont(da2_dataname_01.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_01.getFont().getSize()+6));
         da2_dataname_01.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_01.setText(bundle.getString("CrInstrument.da2_dataname_01.text")); 
+        da2_dataname_01.setText("Volt:+0.0");
         da2_dataname_01.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_01MouseClicked(evt);
@@ -483,7 +485,8 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_01.setFont(da2_station_01.getFont().deriveFont(da2_station_01.getFont().getStyle() | java.awt.Font.BOLD, da2_station_01.getFont().getSize()+6));
         da2_station_01.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_01.setText(bundle.getString("CrInstrument.da2_station_01.text")); 
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("ci/Bundle"); 
+        da2_station_01.setText(bundle.getString("CIUIDataAreaPanel.da2_station_01.text")); 
         da2_station_01.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_01MouseClicked(evt);
@@ -494,7 +497,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_02.setFont(da2_station_02.getFont().deriveFont(da2_station_02.getFont().getStyle() | java.awt.Font.BOLD, da2_station_02.getFont().getSize()+6));
         da2_station_02.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_02.setText(bundle.getString("CrInstrument.da2_station_02.text")); 
+        da2_station_02.setText(bundle.getString("CIUIDataAreaPanel.da2_station_02.text")); 
         da2_station_02.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_02MouseClicked(evt);
@@ -505,7 +508,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_03.setFont(da2_station_03.getFont().deriveFont(da2_station_03.getFont().getStyle() | java.awt.Font.BOLD, da2_station_03.getFont().getSize()+6));
         da2_station_03.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_03.setText(bundle.getString("CrInstrument.da2_station_03.text")); 
+        da2_station_03.setText(bundle.getString("CIUIDataAreaPanel.da2_station_03.text")); 
         da2_station_03.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_03MouseClicked(evt);
@@ -516,7 +519,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_04.setFont(da2_station_04.getFont().deriveFont(da2_station_04.getFont().getStyle() | java.awt.Font.BOLD, da2_station_04.getFont().getSize()+6));
         da2_station_04.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_04.setText(bundle.getString("CrInstrument.da2_station_04.text")); 
+        da2_station_04.setText(bundle.getString("CIUIDataAreaPanel.da2_station_04.text")); 
         da2_station_04.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_04MouseClicked(evt);
@@ -527,7 +530,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_05.setFont(da2_station_05.getFont().deriveFont(da2_station_05.getFont().getStyle() | java.awt.Font.BOLD, da2_station_05.getFont().getSize()+6));
         da2_station_05.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_05.setText(bundle.getString("CrInstrument.da2_station_05.text")); 
+        da2_station_05.setText(bundle.getString("CIUIDataAreaPanel.da2_station_05.text")); 
         da2_station_05.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_05MouseClicked(evt);
@@ -538,7 +541,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_06.setFont(da2_station_06.getFont().deriveFont(da2_station_06.getFont().getStyle() | java.awt.Font.BOLD, da2_station_06.getFont().getSize()+6));
         da2_station_06.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_06.setText(bundle.getString("CrInstrument.da2_station_06.text")); 
+        da2_station_06.setText(bundle.getString("CIUIDataAreaPanel.da2_station_06.text")); 
         da2_station_06.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_06MouseClicked(evt);
@@ -549,7 +552,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_07.setFont(da2_station_07.getFont().deriveFont(da2_station_07.getFont().getStyle() | java.awt.Font.BOLD, da2_station_07.getFont().getSize()+6));
         da2_station_07.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_07.setText(bundle.getString("CrInstrument.da2_station_07.text")); 
+        da2_station_07.setText(bundle.getString("CIUIDataAreaPanel.da2_station_07.text")); 
         da2_station_07.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_07MouseClicked(evt);
@@ -560,7 +563,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_08.setFont(da2_station_08.getFont().deriveFont(da2_station_08.getFont().getStyle() | java.awt.Font.BOLD, da2_station_08.getFont().getSize()+6));
         da2_station_08.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_08.setText(bundle.getString("CrInstrument.da2_station_08.text")); 
+        da2_station_08.setText(bundle.getString("CIUIDataAreaPanel.da2_station_08.text")); 
         da2_station_08.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_08MouseClicked(evt);
@@ -571,7 +574,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_09.setFont(da2_station_09.getFont().deriveFont(da2_station_09.getFont().getStyle() | java.awt.Font.BOLD, da2_station_09.getFont().getSize()+6));
         da2_station_09.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_09.setText(bundle.getString("CrInstrument.da2_station_09.text")); 
+        da2_station_09.setText("Station 09");
         da2_station_09.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_09MouseClicked(evt);
@@ -582,7 +585,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_10.setFont(da2_station_10.getFont().deriveFont(da2_station_10.getFont().getStyle() | java.awt.Font.BOLD, da2_station_10.getFont().getSize()+6));
         da2_station_10.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_10.setText(bundle.getString("CrInstrument.da2_station_10.text")); 
+        da2_station_10.setText("Station 10");
         da2_station_10.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_10MouseClicked(evt);
@@ -593,7 +596,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_11.setFont(da2_station_11.getFont().deriveFont(da2_station_11.getFont().getStyle() | java.awt.Font.BOLD, da2_station_11.getFont().getSize()+6));
         da2_station_11.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_11.setText(bundle.getString("CrInstrument.da2_station_11.text")); 
+        da2_station_11.setText("Station 11");
         da2_station_11.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_11MouseClicked(evt);
@@ -604,7 +607,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_12.setFont(da2_station_12.getFont().deriveFont(da2_station_12.getFont().getStyle() | java.awt.Font.BOLD, da2_station_12.getFont().getSize()+6));
         da2_station_12.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_12.setText(bundle.getString("CrInstrument.da2_station_12.text")); 
+        da2_station_12.setText("Station 12");
         da2_station_12.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_12MouseClicked(evt);
@@ -615,7 +618,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_13.setFont(da2_station_13.getFont().deriveFont(da2_station_13.getFont().getStyle() | java.awt.Font.BOLD, da2_station_13.getFont().getSize()+6));
         da2_station_13.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_13.setText(bundle.getString("CrInstrument.da2_station_13.text")); 
+        da2_station_13.setText("Station 13");
         da2_station_13.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_13MouseClicked(evt);
@@ -626,7 +629,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_14.setFont(da2_station_14.getFont().deriveFont(da2_station_14.getFont().getStyle() | java.awt.Font.BOLD, da2_station_14.getFont().getSize()+6));
         da2_station_14.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_14.setText(bundle.getString("CrInstrument.da2_station_14.text")); 
+        da2_station_14.setText("Station 14");
         da2_station_14.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_14MouseClicked(evt);
@@ -637,7 +640,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_15.setFont(da2_station_15.getFont().deriveFont(da2_station_15.getFont().getStyle() | java.awt.Font.BOLD, da2_station_15.getFont().getSize()+6));
         da2_station_15.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_15.setText(bundle.getString("CrInstrument.da2_station_15.text")); 
+        da2_station_15.setText("Station 15");
         da2_station_15.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_15MouseClicked(evt);
@@ -648,7 +651,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_station_16.setFont(da2_station_16.getFont().deriveFont(da2_station_16.getFont().getStyle() | java.awt.Font.BOLD, da2_station_16.getFont().getSize()+6));
         da2_station_16.setForeground(new java.awt.Color(153, 255, 255));
-        da2_station_16.setText(bundle.getString("CrInstrument.da2_station_16.text")); 
+        da2_station_16.setText("Station 16");
         da2_station_16.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_station_16MouseClicked(evt);
@@ -659,7 +662,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_02.setFont(da2_device_02.getFont().deriveFont(da2_device_02.getFont().getStyle() | java.awt.Font.BOLD, da2_device_02.getFont().getSize()+6));
         da2_device_02.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_02.setText(bundle.getString("CrInstrument.da2_device_02.text")); 
+        da2_device_02.setText("device 02");
         da2_device_02.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_02MouseClicked(evt);
@@ -670,7 +673,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_03.setFont(da2_device_03.getFont().deriveFont(da2_device_03.getFont().getStyle() | java.awt.Font.BOLD, da2_device_03.getFont().getSize()+6));
         da2_device_03.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_03.setText(bundle.getString("CrInstrument.da2_device_03.text")); 
+        da2_device_03.setText("device 03");
         da2_device_03.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_03MouseClicked(evt);
@@ -681,7 +684,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_04.setFont(da2_device_04.getFont().deriveFont(da2_device_04.getFont().getStyle() | java.awt.Font.BOLD, da2_device_04.getFont().getSize()+6));
         da2_device_04.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_04.setText(bundle.getString("CrInstrument.da2_device_04.text")); 
+        da2_device_04.setText("device 04");
         da2_device_04.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_04MouseClicked(evt);
@@ -692,7 +695,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_05.setFont(da2_device_05.getFont().deriveFont(da2_device_05.getFont().getStyle() | java.awt.Font.BOLD, da2_device_05.getFont().getSize()+6));
         da2_device_05.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_05.setText(bundle.getString("CrInstrument.da2_device_05.text")); 
+        da2_device_05.setText("device 05");
         da2_device_05.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_05MouseClicked(evt);
@@ -703,7 +706,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_06.setFont(da2_device_06.getFont().deriveFont(da2_device_06.getFont().getStyle() | java.awt.Font.BOLD, da2_device_06.getFont().getSize()+6));
         da2_device_06.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_06.setText(bundle.getString("CrInstrument.da2_device_06.text")); 
+        da2_device_06.setText("device 06");
         da2_device_06.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_06MouseClicked(evt);
@@ -714,7 +717,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_07.setFont(da2_device_07.getFont().deriveFont(da2_device_07.getFont().getStyle() | java.awt.Font.BOLD, da2_device_07.getFont().getSize()+6));
         da2_device_07.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_07.setText(bundle.getString("CrInstrument.da2_device_07.text")); 
+        da2_device_07.setText("device 07");
         da2_device_07.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_07MouseClicked(evt);
@@ -725,7 +728,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_08.setFont(da2_device_08.getFont().deriveFont(da2_device_08.getFont().getStyle() | java.awt.Font.BOLD, da2_device_08.getFont().getSize()+6));
         da2_device_08.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_08.setText(bundle.getString("CrInstrument.da2_device_08.text")); 
+        da2_device_08.setText("device 08");
         da2_device_08.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_08MouseClicked(evt);
@@ -736,7 +739,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_09.setFont(da2_device_09.getFont().deriveFont(da2_device_09.getFont().getStyle() | java.awt.Font.BOLD, da2_device_09.getFont().getSize()+6));
         da2_device_09.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_09.setText(bundle.getString("CrInstrument.da2_device_09.text")); 
+        da2_device_09.setText("device 09");
         da2_device_09.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_09MouseClicked(evt);
@@ -747,7 +750,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_10.setFont(da2_device_10.getFont().deriveFont(da2_device_10.getFont().getStyle() | java.awt.Font.BOLD, da2_device_10.getFont().getSize()+6));
         da2_device_10.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_10.setText(bundle.getString("CrInstrument.da2_device_10.text")); 
+        da2_device_10.setText("device 10");
         da2_device_10.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_10MouseClicked(evt);
@@ -758,7 +761,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_11.setFont(da2_device_11.getFont().deriveFont(da2_device_11.getFont().getStyle() | java.awt.Font.BOLD, da2_device_11.getFont().getSize()+6));
         da2_device_11.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_11.setText(bundle.getString("CrInstrument.da2_device_11.text")); 
+        da2_device_11.setText("device 11");
         da2_device_11.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_11MouseClicked(evt);
@@ -769,7 +772,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_12.setFont(da2_device_12.getFont().deriveFont(da2_device_12.getFont().getStyle() | java.awt.Font.BOLD, da2_device_12.getFont().getSize()+6));
         da2_device_12.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_12.setText(bundle.getString("CrInstrument.da2_device_12.text")); 
+        da2_device_12.setText("device 12");
         da2_device_12.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_12MouseClicked(evt);
@@ -780,7 +783,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_13.setFont(da2_device_13.getFont().deriveFont(da2_device_13.getFont().getStyle() | java.awt.Font.BOLD, da2_device_13.getFont().getSize()+6));
         da2_device_13.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_13.setText(bundle.getString("CrInstrument.da2_device_13.text")); 
+        da2_device_13.setText("device 13");
         da2_device_13.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_13MouseClicked(evt);
@@ -791,7 +794,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_14.setFont(da2_device_14.getFont().deriveFont(da2_device_14.getFont().getStyle() | java.awt.Font.BOLD, da2_device_14.getFont().getSize()+6));
         da2_device_14.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_14.setText(bundle.getString("CrInstrument.da2_device_14.text")); 
+        da2_device_14.setText("device 14");
         da2_device_14.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_14MouseClicked(evt);
@@ -802,7 +805,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_15.setFont(da2_device_15.getFont().deriveFont(da2_device_15.getFont().getStyle() | java.awt.Font.BOLD, da2_device_15.getFont().getSize()+6));
         da2_device_15.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_15.setText(bundle.getString("CrInstrument.da2_device_15.text")); 
+        da2_device_15.setText("device 15");
         da2_device_15.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_15MouseClicked(evt);
@@ -813,7 +816,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_16.setFont(da2_device_16.getFont().deriveFont(da2_device_16.getFont().getStyle() | java.awt.Font.BOLD, da2_device_16.getFont().getSize()+6));
         da2_device_16.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_16.setText(bundle.getString("CrInstrument.da2_device_16.text")); 
+        da2_device_16.setText("device 16");
         da2_device_16.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_16MouseClicked(evt);
@@ -824,7 +827,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_17.setFont(da2_device_17.getFont().deriveFont(da2_device_17.getFont().getStyle() | java.awt.Font.BOLD, da2_device_17.getFont().getSize()+6));
         da2_device_17.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_17.setText(bundle.getString("CrInstrument.da2_device_17.text")); 
+        da2_device_17.setText("device 17");
         da2_device_17.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_17MouseClicked(evt);
@@ -835,7 +838,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_18.setFont(da2_device_18.getFont().deriveFont(da2_device_18.getFont().getStyle() | java.awt.Font.BOLD, da2_device_18.getFont().getSize()+6));
         da2_device_18.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_18.setText(bundle.getString("CrInstrument.da2_device_18.text")); 
+        da2_device_18.setText("device 18");
         da2_device_18.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_18MouseClicked(evt);
@@ -846,7 +849,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_19.setFont(da2_device_19.getFont().deriveFont(da2_device_19.getFont().getStyle() | java.awt.Font.BOLD, da2_device_19.getFont().getSize()+6));
         da2_device_19.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_19.setText(bundle.getString("CrInstrument.da2_device_19.text")); 
+        da2_device_19.setText("device 19");
         da2_device_19.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_19MouseClicked(evt);
@@ -857,7 +860,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_20.setFont(da2_device_20.getFont().deriveFont(da2_device_20.getFont().getStyle() | java.awt.Font.BOLD, da2_device_20.getFont().getSize()+6));
         da2_device_20.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_20.setText(bundle.getString("CrInstrument.da2_device_20.text")); 
+        da2_device_20.setText("device 20");
         da2_device_20.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_20MouseClicked(evt);
@@ -868,7 +871,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_21.setFont(da2_device_21.getFont().deriveFont(da2_device_21.getFont().getStyle() | java.awt.Font.BOLD, da2_device_21.getFont().getSize()+6));
         da2_device_21.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_21.setText(bundle.getString("CrInstrument.da2_device_21.text")); 
+        da2_device_21.setText("device 21");
         da2_device_21.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_21MouseClicked(evt);
@@ -879,7 +882,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_22.setFont(da2_device_22.getFont().deriveFont(da2_device_22.getFont().getStyle() | java.awt.Font.BOLD, da2_device_22.getFont().getSize()+6));
         da2_device_22.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_22.setText(bundle.getString("CrInstrument.da2_device_22.text")); 
+        da2_device_22.setText("device 22");
         da2_device_22.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_22MouseClicked(evt);
@@ -890,7 +893,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_23.setFont(da2_device_23.getFont().deriveFont(da2_device_23.getFont().getStyle() | java.awt.Font.BOLD, da2_device_23.getFont().getSize()+6));
         da2_device_23.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_23.setText(bundle.getString("CrInstrument.da2_device_23.text")); 
+        da2_device_23.setText("device 23");
         da2_device_23.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_23MouseClicked(evt);
@@ -901,7 +904,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_24.setFont(da2_device_24.getFont().deriveFont(da2_device_24.getFont().getStyle() | java.awt.Font.BOLD, da2_device_24.getFont().getSize()+6));
         da2_device_24.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_24.setText(bundle.getString("CrInstrument.da2_device_24.text")); 
+        da2_device_24.setText("device 24");
         da2_device_24.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_24MouseClicked(evt);
@@ -912,7 +915,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_25.setFont(da2_device_25.getFont().deriveFont(da2_device_25.getFont().getStyle() | java.awt.Font.BOLD, da2_device_25.getFont().getSize()+6));
         da2_device_25.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_25.setText(bundle.getString("CrInstrument.da2_device_25.text")); 
+        da2_device_25.setText("device 25");
         da2_device_25.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_25MouseClicked(evt);
@@ -923,7 +926,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_26.setFont(da2_device_26.getFont().deriveFont(da2_device_26.getFont().getStyle() | java.awt.Font.BOLD, da2_device_26.getFont().getSize()+6));
         da2_device_26.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_26.setText(bundle.getString("CrInstrument.da2_device_26.text")); 
+        da2_device_26.setText("device 26");
         da2_device_26.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_26MouseClicked(evt);
@@ -934,7 +937,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_27.setFont(da2_device_27.getFont().deriveFont(da2_device_27.getFont().getStyle() | java.awt.Font.BOLD, da2_device_27.getFont().getSize()+6));
         da2_device_27.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_27.setText(bundle.getString("CrInstrument.da2_device_27.text")); 
+        da2_device_27.setText("device 27");
         da2_device_27.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_27MouseClicked(evt);
@@ -945,7 +948,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_28.setFont(da2_device_28.getFont().deriveFont(da2_device_28.getFont().getStyle() | java.awt.Font.BOLD, da2_device_28.getFont().getSize()+6));
         da2_device_28.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_28.setText(bundle.getString("CrInstrument.da2_device_28.text")); 
+        da2_device_28.setText("device 28");
         da2_device_28.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_28MouseClicked(evt);
@@ -956,7 +959,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_29.setFont(da2_device_29.getFont().deriveFont(da2_device_29.getFont().getStyle() | java.awt.Font.BOLD, da2_device_29.getFont().getSize()+6));
         da2_device_29.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_29.setText(bundle.getString("CrInstrument.da2_device_29.text")); 
+        da2_device_29.setText("device 29");
         da2_device_29.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_29MouseClicked(evt);
@@ -967,7 +970,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_30.setFont(da2_device_30.getFont().deriveFont(da2_device_30.getFont().getStyle() | java.awt.Font.BOLD, da2_device_30.getFont().getSize()+6));
         da2_device_30.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_30.setText(bundle.getString("CrInstrument.da2_device_30.text")); 
+        da2_device_30.setText("device 30");
         da2_device_30.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_30MouseClicked(evt);
@@ -978,7 +981,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_31.setFont(da2_device_31.getFont().deriveFont(da2_device_31.getFont().getStyle() | java.awt.Font.BOLD, da2_device_31.getFont().getSize()+6));
         da2_device_31.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_31.setText(bundle.getString("CrInstrument.da2_device_31.text")); 
+        da2_device_31.setText("device 31");
         da2_device_31.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_31MouseClicked(evt);
@@ -989,7 +992,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_device_32.setFont(da2_device_32.getFont().deriveFont(da2_device_32.getFont().getStyle() | java.awt.Font.BOLD, da2_device_32.getFont().getSize()+6));
         da2_device_32.setForeground(new java.awt.Color(0, 255, 102));
-        da2_device_32.setText(bundle.getString("CrInstrument.da2_device_32.text")); 
+        da2_device_32.setText("device 32");
         da2_device_32.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_device_32MouseClicked(evt);
@@ -1000,7 +1003,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_02.setFont(da2_dataname_02.getFont().deriveFont(da2_dataname_02.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_02.getFont().getSize()+6));
         da2_dataname_02.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_02.setText(bundle.getString("CrInstrument.da2_dataname_02.text")); 
+        da2_dataname_02.setText("dataname02");
         da2_dataname_02.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_02MouseClicked(evt);
@@ -1011,7 +1014,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_03.setFont(da2_dataname_03.getFont().deriveFont(da2_dataname_03.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_03.getFont().getSize()+6));
         da2_dataname_03.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_03.setText(bundle.getString("CrInstrument.da2_dataname_03.text")); 
+        da2_dataname_03.setText("dataname03");
         da2_dataname_03.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_03MouseClicked(evt);
@@ -1022,7 +1025,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_04.setFont(da2_dataname_04.getFont().deriveFont(da2_dataname_04.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_04.getFont().getSize()+6));
         da2_dataname_04.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_04.setText(bundle.getString("CrInstrument.da2_dataname_04.text")); 
+        da2_dataname_04.setText("dataname04");
         da2_dataname_04.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_04MouseClicked(evt);
@@ -1033,7 +1036,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_05.setFont(da2_dataname_05.getFont().deriveFont(da2_dataname_05.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_05.getFont().getSize()+6));
         da2_dataname_05.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_05.setText(bundle.getString("CrInstrument.da2_dataname_05.text")); 
+        da2_dataname_05.setText("dataname05");
         da2_dataname_05.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_05MouseClicked(evt);
@@ -1044,7 +1047,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_06.setFont(da2_dataname_06.getFont().deriveFont(da2_dataname_06.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_06.getFont().getSize()+6));
         da2_dataname_06.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_06.setText(bundle.getString("CrInstrument.da2_dataname_06.text")); 
+        da2_dataname_06.setText("dataname06");
         da2_dataname_06.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_06MouseClicked(evt);
@@ -1055,7 +1058,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_07.setFont(da2_dataname_07.getFont().deriveFont(da2_dataname_07.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_07.getFont().getSize()+6));
         da2_dataname_07.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_07.setText(bundle.getString("CrInstrument.da2_dataname_07.text")); 
+        da2_dataname_07.setText("dataname07");
         da2_dataname_07.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_07MouseClicked(evt);
@@ -1066,7 +1069,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_08.setFont(da2_dataname_08.getFont().deriveFont(da2_dataname_08.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_08.getFont().getSize()+6));
         da2_dataname_08.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_08.setText(bundle.getString("CrInstrument.da2_dataname_08.text")); 
+        da2_dataname_08.setText("dataname08");
         da2_dataname_08.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_08MouseClicked(evt);
@@ -1077,7 +1080,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_09.setFont(da2_dataname_09.getFont().deriveFont(da2_dataname_09.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_09.getFont().getSize()+6));
         da2_dataname_09.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_09.setText(bundle.getString("CrInstrument.da2_dataname_09.text")); 
+        da2_dataname_09.setText("dataname09");
         da2_dataname_09.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_09MouseClicked(evt);
@@ -1088,7 +1091,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_10.setFont(da2_dataname_10.getFont().deriveFont(da2_dataname_10.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_10.getFont().getSize()+6));
         da2_dataname_10.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_10.setText(bundle.getString("CrInstrument.da2_dataname_10.text")); 
+        da2_dataname_10.setText("dataname10");
         da2_dataname_10.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_10MouseClicked(evt);
@@ -1099,7 +1102,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_11.setFont(da2_dataname_11.getFont().deriveFont(da2_dataname_11.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_11.getFont().getSize()+6));
         da2_dataname_11.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_11.setText(bundle.getString("CrInstrument.da2_dataname_11.text")); 
+        da2_dataname_11.setText("dataname11");
         da2_dataname_11.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_11MouseClicked(evt);
@@ -1110,7 +1113,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_12.setFont(da2_dataname_12.getFont().deriveFont(da2_dataname_12.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_12.getFont().getSize()+6));
         da2_dataname_12.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_12.setText(bundle.getString("CrInstrument.da2_dataname_12.text")); 
+        da2_dataname_12.setText("dataname12");
         da2_dataname_12.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_12MouseClicked(evt);
@@ -1121,7 +1124,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_13.setFont(da2_dataname_13.getFont().deriveFont(da2_dataname_13.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_13.getFont().getSize()+6));
         da2_dataname_13.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_13.setText(bundle.getString("CrInstrument.da2_dataname_13.text")); 
+        da2_dataname_13.setText("dataname13");
         da2_dataname_13.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_13MouseClicked(evt);
@@ -1132,7 +1135,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_14.setFont(da2_dataname_14.getFont().deriveFont(da2_dataname_14.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_14.getFont().getSize()+6));
         da2_dataname_14.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_14.setText(bundle.getString("CrInstrument.da2_dataname_14.text")); 
+        da2_dataname_14.setText("dataname14");
         da2_dataname_14.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_14MouseClicked(evt);
@@ -1143,7 +1146,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_15.setFont(da2_dataname_15.getFont().deriveFont(da2_dataname_15.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_15.getFont().getSize()+6));
         da2_dataname_15.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_15.setText(bundle.getString("CrInstrument.da2_dataname_15.text")); 
+        da2_dataname_15.setText("dataname15");
         da2_dataname_15.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_15MouseClicked(evt);
@@ -1154,7 +1157,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_16.setFont(da2_dataname_16.getFont().deriveFont(da2_dataname_16.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_16.getFont().getSize()+6));
         da2_dataname_16.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_16.setText(bundle.getString("CrInstrument.da2_dataname_16.text")); 
+        da2_dataname_16.setText("dataname16");
         da2_dataname_16.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_16MouseClicked(evt);
@@ -1165,7 +1168,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_17.setFont(da2_dataname_17.getFont().deriveFont(da2_dataname_17.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_17.getFont().getSize()+6));
         da2_dataname_17.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_17.setText(bundle.getString("CrInstrument.da2_dataname_17.text")); 
+        da2_dataname_17.setText("dataname17");
         da2_dataname_17.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_17MouseClicked(evt);
@@ -1176,7 +1179,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_18.setFont(da2_dataname_18.getFont().deriveFont(da2_dataname_18.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_18.getFont().getSize()+6));
         da2_dataname_18.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_18.setText(bundle.getString("CrInstrument.da2_dataname_18.text")); 
+        da2_dataname_18.setText("dataname18");
         da2_dataname_18.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_18MouseClicked(evt);
@@ -1187,7 +1190,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_19.setFont(da2_dataname_19.getFont().deriveFont(da2_dataname_19.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_19.getFont().getSize()+6));
         da2_dataname_19.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_19.setText(bundle.getString("CrInstrument.da2_dataname_19.text")); 
+        da2_dataname_19.setText("dataname19");
         da2_dataname_19.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_19MouseClicked(evt);
@@ -1198,7 +1201,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_20.setFont(da2_dataname_20.getFont().deriveFont(da2_dataname_20.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_20.getFont().getSize()+6));
         da2_dataname_20.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_20.setText(bundle.getString("CrInstrument.da2_dataname_20.text")); 
+        da2_dataname_20.setText("dataname20");
         da2_dataname_20.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_20MouseClicked(evt);
@@ -1209,7 +1212,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_21.setFont(da2_dataname_21.getFont().deriveFont(da2_dataname_21.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_21.getFont().getSize()+6));
         da2_dataname_21.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_21.setText(bundle.getString("CrInstrument.da2_dataname_21.text")); 
+        da2_dataname_21.setText("dataname21");
         da2_dataname_21.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_21MouseClicked(evt);
@@ -1220,7 +1223,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_22.setFont(da2_dataname_22.getFont().deriveFont(da2_dataname_22.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_22.getFont().getSize()+6));
         da2_dataname_22.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_22.setText(bundle.getString("CrInstrument.da2_dataname_22.text")); 
+        da2_dataname_22.setText("dataname22");
         da2_dataname_22.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_22MouseClicked(evt);
@@ -1231,7 +1234,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_23.setFont(da2_dataname_23.getFont().deriveFont(da2_dataname_23.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_23.getFont().getSize()+6));
         da2_dataname_23.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_23.setText(bundle.getString("CrInstrument.da2_dataname_23.text")); 
+        da2_dataname_23.setText("dataname23");
         da2_dataname_23.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_23MouseClicked(evt);
@@ -1242,7 +1245,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_24.setFont(da2_dataname_24.getFont().deriveFont(da2_dataname_24.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_24.getFont().getSize()+6));
         da2_dataname_24.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_24.setText(bundle.getString("CrInstrument.da2_dataname_24.text")); 
+        da2_dataname_24.setText("dataname24");
         da2_dataname_24.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_24MouseClicked(evt);
@@ -1253,7 +1256,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_25.setFont(da2_dataname_25.getFont().deriveFont(da2_dataname_25.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_25.getFont().getSize()+6));
         da2_dataname_25.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_25.setText(bundle.getString("CrInstrument.da2_dataname_25.text")); 
+        da2_dataname_25.setText("dataname25");
         da2_dataname_25.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_25MouseClicked(evt);
@@ -1264,7 +1267,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_26.setFont(da2_dataname_26.getFont().deriveFont(da2_dataname_26.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_26.getFont().getSize()+6));
         da2_dataname_26.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_26.setText(bundle.getString("CrInstrument.da2_dataname_26.text")); 
+        da2_dataname_26.setText("dataname26");
         da2_dataname_26.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_26MouseClicked(evt);
@@ -1275,7 +1278,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_27.setFont(da2_dataname_27.getFont().deriveFont(da2_dataname_27.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_27.getFont().getSize()+6));
         da2_dataname_27.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_27.setText(bundle.getString("CrInstrument.da2_dataname_27.text")); 
+        da2_dataname_27.setText("dataname27");
         da2_dataname_27.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_27MouseClicked(evt);
@@ -1286,7 +1289,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_28.setFont(da2_dataname_28.getFont().deriveFont(da2_dataname_28.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_28.getFont().getSize()+6));
         da2_dataname_28.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_28.setText(bundle.getString("CrInstrument.da2_dataname_28.text")); 
+        da2_dataname_28.setText("dataname28");
         da2_dataname_28.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_28MouseClicked(evt);
@@ -1297,7 +1300,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_29.setFont(da2_dataname_29.getFont().deriveFont(da2_dataname_29.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_29.getFont().getSize()+6));
         da2_dataname_29.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_29.setText(bundle.getString("CrInstrument.da2_dataname_29.text")); 
+        da2_dataname_29.setText("dataname29");
         da2_dataname_29.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_29MouseClicked(evt);
@@ -1308,7 +1311,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_30.setFont(da2_dataname_30.getFont().deriveFont(da2_dataname_30.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_30.getFont().getSize()+6));
         da2_dataname_30.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_30.setText(bundle.getString("CrInstrument.da2_dataname_30.text")); 
+        da2_dataname_30.setText("dataname30");
         da2_dataname_30.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_30MouseClicked(evt);
@@ -1319,7 +1322,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_31.setFont(da2_dataname_31.getFont().deriveFont(da2_dataname_31.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_31.getFont().getSize()+6));
         da2_dataname_31.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_31.setText(bundle.getString("CrInstrument.da2_dataname_31.text")); 
+        da2_dataname_31.setText("dataname31");
         da2_dataname_31.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_31MouseClicked(evt);
@@ -1330,7 +1333,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_32.setFont(da2_dataname_32.getFont().deriveFont(da2_dataname_32.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_32.getFont().getSize()+6));
         da2_dataname_32.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_32.setText(bundle.getString("CrInstrument.da2_dataname_32.text")); 
+        da2_dataname_32.setText("dataname32");
         da2_dataname_32.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_32MouseClicked(evt);
@@ -1341,7 +1344,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_33.setFont(da2_dataname_33.getFont().deriveFont(da2_dataname_33.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_33.getFont().getSize()+6));
         da2_dataname_33.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_33.setText(bundle.getString("CrInstrument.da2_dataname_33.text")); 
+        da2_dataname_33.setText("dataname33");
         da2_dataname_33.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_33MouseClicked(evt);
@@ -1352,7 +1355,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_34.setFont(da2_dataname_34.getFont().deriveFont(da2_dataname_34.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_34.getFont().getSize()+6));
         da2_dataname_34.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_34.setText(bundle.getString("CrInstrument.da2_dataname_34.text")); 
+        da2_dataname_34.setText("dataname34");
         da2_dataname_34.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_34MouseClicked(evt);
@@ -1363,7 +1366,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_35.setFont(da2_dataname_35.getFont().deriveFont(da2_dataname_35.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_35.getFont().getSize()+6));
         da2_dataname_35.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_35.setText(bundle.getString("CrInstrument.da2_dataname_35.text")); 
+        da2_dataname_35.setText("dataname35");
         da2_dataname_35.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_35MouseClicked(evt);
@@ -1374,7 +1377,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_36.setFont(da2_dataname_36.getFont().deriveFont(da2_dataname_36.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_36.getFont().getSize()+6));
         da2_dataname_36.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_36.setText(bundle.getString("CrInstrument.da2_dataname_36.text")); 
+        da2_dataname_36.setText("dataname36");
         da2_dataname_36.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_36MouseClicked(evt);
@@ -1385,7 +1388,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_37.setFont(da2_dataname_37.getFont().deriveFont(da2_dataname_37.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_37.getFont().getSize()+6));
         da2_dataname_37.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_37.setText(bundle.getString("CrInstrument.da2_dataname_37.text")); 
+        da2_dataname_37.setText("dataname37");
         da2_dataname_37.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_37MouseClicked(evt);
@@ -1396,7 +1399,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_38.setFont(da2_dataname_38.getFont().deriveFont(da2_dataname_38.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_38.getFont().getSize()+6));
         da2_dataname_38.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_38.setText(bundle.getString("CrInstrument.da2_dataname_38.text")); 
+        da2_dataname_38.setText("dataname38");
         da2_dataname_38.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_38MouseClicked(evt);
@@ -1407,7 +1410,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_39.setFont(da2_dataname_39.getFont().deriveFont(da2_dataname_39.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_39.getFont().getSize()+6));
         da2_dataname_39.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_39.setText(bundle.getString("CrInstrument.da2_dataname_39.text")); 
+        da2_dataname_39.setText("dataname39");
         da2_dataname_39.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_39MouseClicked(evt);
@@ -1418,7 +1421,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_40.setFont(da2_dataname_40.getFont().deriveFont(da2_dataname_40.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_40.getFont().getSize()+6));
         da2_dataname_40.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_40.setText(bundle.getString("CrInstrument.da2_dataname_40.text")); 
+        da2_dataname_40.setText("dataname40");
         da2_dataname_40.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_40MouseClicked(evt);
@@ -1429,7 +1432,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_41.setFont(da2_dataname_41.getFont().deriveFont(da2_dataname_41.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_41.getFont().getSize()+6));
         da2_dataname_41.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_41.setText(bundle.getString("CrInstrument.da2_dataname_41.text")); 
+        da2_dataname_41.setText("dataname41");
         da2_dataname_41.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_41MouseClicked(evt);
@@ -1440,7 +1443,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_42.setFont(da2_dataname_42.getFont().deriveFont(da2_dataname_42.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_42.getFont().getSize()+6));
         da2_dataname_42.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_42.setText(bundle.getString("CrInstrument.da2_dataname_42.text")); 
+        da2_dataname_42.setText("dataname42");
         da2_dataname_42.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_42MouseClicked(evt);
@@ -1451,7 +1454,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_43.setFont(da2_dataname_43.getFont().deriveFont(da2_dataname_43.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_43.getFont().getSize()+6));
         da2_dataname_43.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_43.setText(bundle.getString("CrInstrument.da2_dataname_43.text")); 
+        da2_dataname_43.setText("dataname43");
         da2_dataname_43.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_43MouseClicked(evt);
@@ -1462,7 +1465,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_44.setFont(da2_dataname_44.getFont().deriveFont(da2_dataname_44.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_44.getFont().getSize()+6));
         da2_dataname_44.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_44.setText(bundle.getString("CrInstrument.da2_dataname_44.text")); 
+        da2_dataname_44.setText("dataname44");
         da2_dataname_44.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_44MouseClicked(evt);
@@ -1473,7 +1476,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_45.setFont(da2_dataname_45.getFont().deriveFont(da2_dataname_45.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_45.getFont().getSize()+6));
         da2_dataname_45.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_45.setText(bundle.getString("CrInstrument.da2_dataname_45.text")); 
+        da2_dataname_45.setText("dataname45");
         da2_dataname_45.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_45MouseClicked(evt);
@@ -1484,7 +1487,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_46.setFont(da2_dataname_46.getFont().deriveFont(da2_dataname_46.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_46.getFont().getSize()+6));
         da2_dataname_46.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_46.setText(bundle.getString("CrInstrument.da2_dataname_46.text")); 
+        da2_dataname_46.setText("dataname46");
         da2_dataname_46.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_46MouseClicked(evt);
@@ -1495,7 +1498,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_47.setFont(da2_dataname_47.getFont().deriveFont(da2_dataname_47.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_47.getFont().getSize()+6));
         da2_dataname_47.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_47.setText(bundle.getString("CrInstrument.da2_dataname_47.text")); 
+        da2_dataname_47.setText("dataname47");
         da2_dataname_47.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_47MouseClicked(evt);
@@ -1506,7 +1509,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_dataname_48.setFont(da2_dataname_48.getFont().deriveFont(da2_dataname_48.getFont().getStyle() | java.awt.Font.BOLD, da2_dataname_48.getFont().getSize()+6));
         da2_dataname_48.setForeground(new java.awt.Color(255, 255, 51));
-        da2_dataname_48.setText(bundle.getString("CrInstrument.da2_dataname_48.text")); 
+        da2_dataname_48.setText("dataname48");
         da2_dataname_48.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_dataname_48MouseClicked(evt);
@@ -1517,7 +1520,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_02.setFont(da2_datavalue_02.getFont().deriveFont(da2_datavalue_02.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_02.getFont().getSize()+36));
         da2_datavalue_02.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_02.setText(bundle.getString("CrInstrument.da2_datavalue_02.text")); 
+        da2_datavalue_02.setText("10000.8");
         da2_datavalue_02.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_02MouseClicked(evt);
@@ -1528,7 +1531,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_03.setFont(da2_datavalue_03.getFont().deriveFont(da2_datavalue_03.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_03.getFont().getSize()+36));
         da2_datavalue_03.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_03.setText(bundle.getString("CrInstrument.da2_datavalue_03.text")); 
+        da2_datavalue_03.setText("10000.8");
         da2_datavalue_03.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_03MouseClicked(evt);
@@ -1539,7 +1542,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_04.setFont(da2_datavalue_04.getFont().deriveFont(da2_datavalue_04.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_04.getFont().getSize()+36));
         da2_datavalue_04.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_04.setText(bundle.getString("CrInstrument.da2_datavalue_04.text")); 
+        da2_datavalue_04.setText("A:+00.0000 ¢X");
         da2_datavalue_04.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_04MouseClicked(evt);
@@ -1550,7 +1553,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_05.setFont(da2_datavalue_05.getFont().deriveFont(da2_datavalue_05.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_05.getFont().getSize()+36));
         da2_datavalue_05.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_05.setText(bundle.getString("CrInstrument.da2_datavalue_05.text")); 
+        da2_datavalue_05.setText("A:+00.0000 ¢X");
         da2_datavalue_05.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_05MouseClicked(evt);
@@ -1561,7 +1564,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_06.setFont(da2_datavalue_06.getFont().deriveFont(da2_datavalue_06.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_06.getFont().getSize()+36));
         da2_datavalue_06.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_06.setText(bundle.getString("CrInstrument.da2_datavalue_06.text")); 
+        da2_datavalue_06.setText("A:+00.0000 ¢X");
         da2_datavalue_06.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_06MouseClicked(evt);
@@ -1572,7 +1575,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_07.setFont(da2_datavalue_07.getFont().deriveFont(da2_datavalue_07.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_07.getFont().getSize()+36));
         da2_datavalue_07.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_07.setText(bundle.getString("CrInstrument.da2_datavalue_07.text")); 
+        da2_datavalue_07.setText("A:+00.0000 ¢X");
         da2_datavalue_07.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_07MouseClicked(evt);
@@ -1583,7 +1586,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_08.setFont(da2_datavalue_08.getFont().deriveFont(da2_datavalue_08.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_08.getFont().getSize()+36));
         da2_datavalue_08.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_08.setText(bundle.getString("CrInstrument.da2_datavalue_08.text")); 
+        da2_datavalue_08.setText("A:+00.0000 ¢X");
         da2_datavalue_08.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_08MouseClicked(evt);
@@ -1594,7 +1597,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_09.setFont(da2_datavalue_09.getFont().deriveFont(da2_datavalue_09.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_09.getFont().getSize()+36));
         da2_datavalue_09.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_09.setText(bundle.getString("CrInstrument.da2_datavalue_09.text")); 
+        da2_datavalue_09.setText("A:+00.0000 ¢X");
         da2_datavalue_09.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_09MouseClicked(evt);
@@ -1605,7 +1608,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_10.setFont(da2_datavalue_10.getFont().deriveFont(da2_datavalue_10.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_10.getFont().getSize()+36));
         da2_datavalue_10.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_10.setText(bundle.getString("CrInstrument.da2_datavalue_10.text")); 
+        da2_datavalue_10.setText("A:+00.0000 ¢X");
         da2_datavalue_10.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_10MouseClicked(evt);
@@ -1616,7 +1619,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_11.setFont(da2_datavalue_11.getFont().deriveFont(da2_datavalue_11.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_11.getFont().getSize()+36));
         da2_datavalue_11.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_11.setText(bundle.getString("CrInstrument.da2_datavalue_11.text")); 
+        da2_datavalue_11.setText("A:+00.0000 ¢X");
         da2_datavalue_11.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_11MouseClicked(evt);
@@ -1627,7 +1630,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_12.setFont(da2_datavalue_12.getFont().deriveFont(da2_datavalue_12.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_12.getFont().getSize()+36));
         da2_datavalue_12.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_12.setText(bundle.getString("CrInstrument.da2_datavalue_12.text")); 
+        da2_datavalue_12.setText("A:+00.0000 ¢X");
         da2_datavalue_12.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_12MouseClicked(evt);
@@ -1638,7 +1641,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_13.setFont(da2_datavalue_13.getFont().deriveFont(da2_datavalue_13.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_13.getFont().getSize()+36));
         da2_datavalue_13.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_13.setText(bundle.getString("CrInstrument.da2_datavalue_13.text")); 
+        da2_datavalue_13.setText("A:+00.0000 ¢X");
         da2_datavalue_13.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_13MouseClicked(evt);
@@ -1649,7 +1652,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_14.setFont(da2_datavalue_14.getFont().deriveFont(da2_datavalue_14.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_14.getFont().getSize()+36));
         da2_datavalue_14.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_14.setText(bundle.getString("CrInstrument.da2_datavalue_14.text")); 
+        da2_datavalue_14.setText("A:+00.0000 ¢X");
         da2_datavalue_14.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_14MouseClicked(evt);
@@ -1660,7 +1663,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_15.setFont(da2_datavalue_15.getFont().deriveFont(da2_datavalue_15.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_15.getFont().getSize()+36));
         da2_datavalue_15.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_15.setText(bundle.getString("CrInstrument.da2_datavalue_15.text")); 
+        da2_datavalue_15.setText("A:+00.0000 ¢X");
         da2_datavalue_15.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_15MouseClicked(evt);
@@ -1671,7 +1674,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_16.setFont(da2_datavalue_16.getFont().deriveFont(da2_datavalue_16.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_16.getFont().getSize()+36));
         da2_datavalue_16.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_16.setText(bundle.getString("CrInstrument.da2_datavalue_16.text")); 
+        da2_datavalue_16.setText("A:+00.0000 ¢X");
         da2_datavalue_16.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_16MouseClicked(evt);
@@ -1682,7 +1685,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_17.setFont(da2_datavalue_17.getFont().deriveFont(da2_datavalue_17.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_17.getFont().getSize()+36));
         da2_datavalue_17.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_17.setText(bundle.getString("CrInstrument.da2_datavalue_17.text")); 
+        da2_datavalue_17.setText("A:+00.0000 ¢X");
         da2_datavalue_17.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_17MouseClicked(evt);
@@ -1693,7 +1696,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_18.setFont(da2_datavalue_18.getFont().deriveFont(da2_datavalue_18.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_18.getFont().getSize()+36));
         da2_datavalue_18.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_18.setText(bundle.getString("CrInstrument.da2_datavalue_18.text")); 
+        da2_datavalue_18.setText("A:+00.0000 ¢X");
         da2_datavalue_18.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_18MouseClicked(evt);
@@ -1704,7 +1707,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_19.setFont(da2_datavalue_19.getFont().deriveFont(da2_datavalue_19.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_19.getFont().getSize()+36));
         da2_datavalue_19.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_19.setText(bundle.getString("CrInstrument.da2_datavalue_19.text")); 
+        da2_datavalue_19.setText("A:+00.0000 ¢X");
         da2_datavalue_19.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_19MouseClicked(evt);
@@ -1715,7 +1718,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_20.setFont(da2_datavalue_20.getFont().deriveFont(da2_datavalue_20.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_20.getFont().getSize()+36));
         da2_datavalue_20.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_20.setText(bundle.getString("CrInstrument.da2_datavalue_20.text")); 
+        da2_datavalue_20.setText("A:+00.0000 ¢X");
         da2_datavalue_20.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_20MouseClicked(evt);
@@ -1726,7 +1729,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_21.setFont(da2_datavalue_21.getFont().deriveFont(da2_datavalue_21.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_21.getFont().getSize()+36));
         da2_datavalue_21.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_21.setText(bundle.getString("CrInstrument.da2_datavalue_21.text")); 
+        da2_datavalue_21.setText("A:+00.0000 ¢X");
         da2_datavalue_21.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_21MouseClicked(evt);
@@ -1737,7 +1740,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_22.setFont(da2_datavalue_22.getFont().deriveFont(da2_datavalue_22.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_22.getFont().getSize()+36));
         da2_datavalue_22.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_22.setText(bundle.getString("CrInstrument.da2_datavalue_22.text")); 
+        da2_datavalue_22.setText("A:+00.0000 ¢X");
         da2_datavalue_22.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_22MouseClicked(evt);
@@ -1748,7 +1751,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_23.setFont(da2_datavalue_23.getFont().deriveFont(da2_datavalue_23.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_23.getFont().getSize()+36));
         da2_datavalue_23.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_23.setText(bundle.getString("CrInstrument.da2_datavalue_23.text")); 
+        da2_datavalue_23.setText("A:+00.0000 ¢X");
         da2_datavalue_23.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_23MouseClicked(evt);
@@ -1759,7 +1762,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_24.setFont(da2_datavalue_24.getFont().deriveFont(da2_datavalue_24.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_24.getFont().getSize()+36));
         da2_datavalue_24.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_24.setText(bundle.getString("CrInstrument.da2_datavalue_24.text")); 
+        da2_datavalue_24.setText("A:+00.0000 ¢X");
         da2_datavalue_24.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_24MouseClicked(evt);
@@ -1770,7 +1773,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_25.setFont(da2_datavalue_25.getFont().deriveFont(da2_datavalue_25.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_25.getFont().getSize()+36));
         da2_datavalue_25.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_25.setText(bundle.getString("CrInstrument.da2_datavalue_25.text")); 
+        da2_datavalue_25.setText("A:+00.0000 ¢X");
         da2_datavalue_25.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_25MouseClicked(evt);
@@ -1781,7 +1784,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_26.setFont(da2_datavalue_26.getFont().deriveFont(da2_datavalue_26.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_26.getFont().getSize()+36));
         da2_datavalue_26.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_26.setText(bundle.getString("CrInstrument.da2_datavalue_26.text")); 
+        da2_datavalue_26.setText("A:+00.0000 ¢X");
         da2_datavalue_26.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_26MouseClicked(evt);
@@ -1792,7 +1795,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_27.setFont(da2_datavalue_27.getFont().deriveFont(da2_datavalue_27.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_27.getFont().getSize()+36));
         da2_datavalue_27.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_27.setText(bundle.getString("CrInstrument.da2_datavalue_27.text")); 
+        da2_datavalue_27.setText("A:+00.0000 ¢X");
         da2_datavalue_27.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_27MouseClicked(evt);
@@ -1803,7 +1806,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_28.setFont(da2_datavalue_28.getFont().deriveFont(da2_datavalue_28.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_28.getFont().getSize()+36));
         da2_datavalue_28.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_28.setText(bundle.getString("CrInstrument.da2_datavalue_28.text")); 
+        da2_datavalue_28.setText("A:+00.0000 ¢X");
         da2_datavalue_28.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_28MouseClicked(evt);
@@ -1814,7 +1817,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_29.setFont(da2_datavalue_29.getFont().deriveFont(da2_datavalue_29.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_29.getFont().getSize()+36));
         da2_datavalue_29.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_29.setText(bundle.getString("CrInstrument.da2_datavalue_29.text")); 
+        da2_datavalue_29.setText("A:+00.0000 ¢X");
         da2_datavalue_29.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_29MouseClicked(evt);
@@ -1825,7 +1828,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_30.setFont(da2_datavalue_30.getFont().deriveFont(da2_datavalue_30.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_30.getFont().getSize()+36));
         da2_datavalue_30.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_30.setText(bundle.getString("CrInstrument.da2_datavalue_30.text")); 
+        da2_datavalue_30.setText("A:+00.0000 ¢X");
         da2_datavalue_30.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_30MouseClicked(evt);
@@ -1836,7 +1839,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_31.setFont(da2_datavalue_31.getFont().deriveFont(da2_datavalue_31.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_31.getFont().getSize()+36));
         da2_datavalue_31.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_31.setText(bundle.getString("CrInstrument.da2_datavalue_31.text")); 
+        da2_datavalue_31.setText("A:+00.0000 ¢X");
         da2_datavalue_31.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_31MouseClicked(evt);
@@ -1847,7 +1850,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_32.setFont(da2_datavalue_32.getFont().deriveFont(da2_datavalue_32.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_32.getFont().getSize()+36));
         da2_datavalue_32.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_32.setText(bundle.getString("CrInstrument.da2_datavalue_32.text")); 
+        da2_datavalue_32.setText("A:+00.0000 ¢X");
         da2_datavalue_32.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_32MouseClicked(evt);
@@ -1858,7 +1861,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_33.setFont(da2_datavalue_33.getFont().deriveFont(da2_datavalue_33.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_33.getFont().getSize()+36));
         da2_datavalue_33.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_33.setText(bundle.getString("CrInstrument.da2_datavalue_33.text")); 
+        da2_datavalue_33.setText("A:+00.0000 ¢X");
         da2_datavalue_33.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_33MouseClicked(evt);
@@ -1869,7 +1872,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_34.setFont(da2_datavalue_34.getFont().deriveFont(da2_datavalue_34.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_34.getFont().getSize()+36));
         da2_datavalue_34.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_34.setText(bundle.getString("CrInstrument.da2_datavalue_34.text")); 
+        da2_datavalue_34.setText("A:+00.0000 ¢X");
         da2_datavalue_34.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_34MouseClicked(evt);
@@ -1880,7 +1883,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_35.setFont(da2_datavalue_35.getFont().deriveFont(da2_datavalue_35.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_35.getFont().getSize()+36));
         da2_datavalue_35.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_35.setText(bundle.getString("CrInstrument.da2_datavalue_35.text")); 
+        da2_datavalue_35.setText("A:+00.0000 ¢X");
         da2_datavalue_35.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_35MouseClicked(evt);
@@ -1891,7 +1894,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_36.setFont(da2_datavalue_36.getFont().deriveFont(da2_datavalue_36.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_36.getFont().getSize()+36));
         da2_datavalue_36.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_36.setText(bundle.getString("CrInstrument.da2_datavalue_36.text")); 
+        da2_datavalue_36.setText("A:+00.0000 ¢X");
         da2_datavalue_36.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_36MouseClicked(evt);
@@ -1902,7 +1905,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_37.setFont(da2_datavalue_37.getFont().deriveFont(da2_datavalue_37.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_37.getFont().getSize()+36));
         da2_datavalue_37.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_37.setText(bundle.getString("CrInstrument.da2_datavalue_37.text")); 
+        da2_datavalue_37.setText("A:+00.0000 ¢X");
         da2_datavalue_37.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_37MouseClicked(evt);
@@ -1913,7 +1916,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_38.setFont(da2_datavalue_38.getFont().deriveFont(da2_datavalue_38.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_38.getFont().getSize()+36));
         da2_datavalue_38.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_38.setText(bundle.getString("CrInstrument.da2_datavalue_38.text")); 
+        da2_datavalue_38.setText("A:+00.0000 ¢X");
         da2_datavalue_38.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_38MouseClicked(evt);
@@ -1924,7 +1927,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_39.setFont(da2_datavalue_39.getFont().deriveFont(da2_datavalue_39.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_39.getFont().getSize()+36));
         da2_datavalue_39.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_39.setText(bundle.getString("CrInstrument.da2_datavalue_39.text")); 
+        da2_datavalue_39.setText("A:+00.0000 ¢X");
         da2_datavalue_39.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_39MouseClicked(evt);
@@ -1935,7 +1938,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_40.setFont(da2_datavalue_40.getFont().deriveFont(da2_datavalue_40.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_40.getFont().getSize()+36));
         da2_datavalue_40.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_40.setText(bundle.getString("CrInstrument.da2_datavalue_40.text")); 
+        da2_datavalue_40.setText("A:+00.0000 ¢X");
         da2_datavalue_40.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_40MouseClicked(evt);
@@ -1946,7 +1949,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_41.setFont(da2_datavalue_41.getFont().deriveFont(da2_datavalue_41.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_41.getFont().getSize()+36));
         da2_datavalue_41.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_41.setText(bundle.getString("CrInstrument.da2_datavalue_41.text")); 
+        da2_datavalue_41.setText("A:+00.0000 ¢X");
         da2_datavalue_41.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_41MouseClicked(evt);
@@ -1957,7 +1960,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_42.setFont(da2_datavalue_42.getFont().deriveFont(da2_datavalue_42.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_42.getFont().getSize()+36));
         da2_datavalue_42.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_42.setText(bundle.getString("CrInstrument.da2_datavalue_42.text")); 
+        da2_datavalue_42.setText("A:+00.0000 ¢X");
         da2_datavalue_42.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_42MouseClicked(evt);
@@ -1968,7 +1971,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_43.setFont(da2_datavalue_43.getFont().deriveFont(da2_datavalue_43.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_43.getFont().getSize()+36));
         da2_datavalue_43.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_43.setText(bundle.getString("CrInstrument.da2_datavalue_43.text")); 
+        da2_datavalue_43.setText("A:+00.0000 ¢X");
         da2_datavalue_43.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_43MouseClicked(evt);
@@ -1979,7 +1982,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_44.setFont(da2_datavalue_44.getFont().deriveFont(da2_datavalue_44.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_44.getFont().getSize()+36));
         da2_datavalue_44.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_44.setText(bundle.getString("CrInstrument.da2_datavalue_44.text")); 
+        da2_datavalue_44.setText("A:+00.0000 ¢X");
         da2_datavalue_44.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_44MouseClicked(evt);
@@ -1990,7 +1993,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_45.setFont(da2_datavalue_45.getFont().deriveFont(da2_datavalue_45.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_45.getFont().getSize()+36));
         da2_datavalue_45.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_45.setText(bundle.getString("CrInstrument.da2_datavalue_45.text")); 
+        da2_datavalue_45.setText("A:+00.0000 ¢X");
         da2_datavalue_45.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_45MouseClicked(evt);
@@ -2001,7 +2004,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_46.setFont(da2_datavalue_46.getFont().deriveFont(da2_datavalue_46.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_46.getFont().getSize()+36));
         da2_datavalue_46.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_46.setText(bundle.getString("CrInstrument.da2_datavalue_46.text")); 
+        da2_datavalue_46.setText("A:+00.0000 ¢X");
         da2_datavalue_46.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_46MouseClicked(evt);
@@ -2012,7 +2015,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_47.setFont(da2_datavalue_47.getFont().deriveFont(da2_datavalue_47.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_47.getFont().getSize()+36));
         da2_datavalue_47.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_47.setText(bundle.getString("CrInstrument.da2_datavalue_47.text")); 
+        da2_datavalue_47.setText("A:+00.0000 ¢X");
         da2_datavalue_47.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_47MouseClicked(evt);
@@ -2023,7 +2026,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
 
         da2_datavalue_48.setFont(da2_datavalue_48.getFont().deriveFont(da2_datavalue_48.getFont().getStyle() | java.awt.Font.BOLD, da2_datavalue_48.getFont().getSize()+36));
         da2_datavalue_48.setForeground(new java.awt.Color(255, 0, 51));
-        da2_datavalue_48.setText(bundle.getString("CrInstrument.da2_datavalue_48.text")); 
+        da2_datavalue_48.setText("A:+00.0000 ¢X");
         da2_datavalue_48.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_datavalue_48MouseClicked(evt);
@@ -2033,7 +2036,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
         da2_datavalue_48.setBounds(60, 150, 300, 60);
 
         da2_xlabel_01.setFont(da2_xlabel_01.getFont());
-        da2_xlabel_01.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_01.text")); 
+        da2_xlabel_01.setText("textlabel01");
         da2_xlabel_01.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_xlabel_01MouseClicked(evt);
@@ -2043,7 +2046,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
         da2_xlabel_01.setBounds(80, 240, 170, 20);
 
         da2_xlabel_02.setFont(da2_xlabel_02.getFont());
-        da2_xlabel_02.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_02.text")); 
+        da2_xlabel_02.setText("textlabel02");
         da2_xlabel_02.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_xlabel_02MouseClicked(evt);
@@ -2053,7 +2056,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
         da2_xlabel_02.setBounds(80, 240, 170, 20);
 
         da2_xlabel_03.setFont(da2_xlabel_03.getFont());
-        da2_xlabel_03.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_03.text")); 
+        da2_xlabel_03.setText("jLabel1");
         da2_xlabel_03.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_xlabel_03MouseClicked(evt);
@@ -2063,7 +2066,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
         da2_xlabel_03.setBounds(80, 240, 170, 20);
 
         da2_xlabel_04.setFont(da2_xlabel_04.getFont());
-        da2_xlabel_04.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_04.text")); 
+        da2_xlabel_04.setText("jLabel1");
         da2_xlabel_04.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_xlabel_04MouseClicked(evt);
@@ -2073,7 +2076,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
         da2_xlabel_04.setBounds(80, 240, 170, 20);
 
         da2_xlabel_05.setFont(da2_xlabel_05.getFont());
-        da2_xlabel_05.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_05.text")); 
+        da2_xlabel_05.setText("jLabel1");
         da2_xlabel_05.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_xlabel_05MouseClicked(evt);
@@ -2083,7 +2086,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
         da2_xlabel_05.setBounds(80, 240, 170, 20);
 
         da2_xlabel_06.setFont(da2_xlabel_06.getFont());
-        da2_xlabel_06.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_06.text")); 
+        da2_xlabel_06.setText("jLabel1");
         da2_xlabel_06.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_xlabel_06MouseClicked(evt);
@@ -2093,7 +2096,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
         da2_xlabel_06.setBounds(80, 240, 170, 20);
 
         da2_xlabel_07.setFont(da2_xlabel_07.getFont());
-        da2_xlabel_07.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_07.text")); 
+        da2_xlabel_07.setText("jLabel1");
         da2_xlabel_07.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_xlabel_07MouseClicked(evt);
@@ -2103,7 +2106,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
         da2_xlabel_07.setBounds(80, 240, 170, 20);
 
         da2_xlabel_08.setFont(da2_xlabel_08.getFont());
-        da2_xlabel_08.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_08.text")); 
+        da2_xlabel_08.setText("jLabel1");
         da2_xlabel_08.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_xlabel_08MouseClicked(evt);
@@ -2113,7 +2116,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
         da2_xlabel_08.setBounds(80, 240, 170, 20);
 
         da2_xlabel_09.setFont(da2_xlabel_09.getFont());
-        da2_xlabel_09.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_09.text")); 
+        da2_xlabel_09.setText("jLabel1");
         da2_xlabel_09.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_xlabel_09MouseClicked(evt);
@@ -2123,7 +2126,7 @@ public class CIDataAreaPanel extends javax.swing.JPanel {
         da2_xlabel_09.setBounds(80, 240, 170, 20);
 
         da2_xlabel_10.setFont(da2_xlabel_10.getFont());
-        da2_xlabel_10.setText(bundle.getString("CIDataAreaPanel.da2_xlabel_10.text")); 
+        da2_xlabel_10.setText("jLabel1");
         da2_xlabel_10.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 da2_xlabel_10MouseClicked(evt);

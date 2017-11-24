@@ -42,10 +42,10 @@ CrInstrument instrument;
                      sendCmd(act,1);
                    }
                    else if(miscCode==6){
-                     if (instrument.btnStart.getText().trim().equals(bundle2.getString("CrInstrument.xy.msg3")))  instrument.pressStartBtn(2);
+                     if (instrument.framePanel2.btnStart.getText().trim().equals(bundle2.getString("CrInstrument.xy.msg3")))  instrument.pressStartBtn(2);
                    }
                    else if(miscCode==7){
-                     if (instrument.btnStart.getText().trim().equals(bundle2.getString("CrInstrument.xy.msg4")))instrument.pressStartBtn(2);
+                     if (instrument.framePanel2.btnStart.getText().trim().equals(bundle2.getString("CrInstrument.xy.msg4")))instrument.pressStartBtn(2);
                    }
                    else if(miscCode==8){
                      String act[]=ylib.csvlinetoarray((String)instrument.actionTM.get(dataClass.dataSrc));
@@ -109,6 +109,7 @@ CrInstrument instrument;
      actInfo[1]=nextInfo[0];
      actInfo[27]= (String)instrument.portToCoors.get(instrument.wn.getPort(nextInfo[1]));
   }
+  cmd=instrument.actionThread.getTextValue(cmd, ""+instrument.dataValue,instrument.textValue);
   cmd=ylib.replace(cmd, "[#masterid#]", actInfo[27]);
   cmd=ylib.replace(cmd, "[#deviceid#]", actInfo[28]);
   cmd=ylib.replace(cmd, "[#Masterid#]", actInfo[27]);
