@@ -67,7 +67,7 @@ CrInstrument instrument;
 
             } 
 
-           instrument.textPaneAppend(shownData,(dataType.equals("1")? instrument.wn.socketColor:instrument.wn.serialColor),0);
+           instrument.textPaneAppend(shownData,(dataType.equals("1")? instrument.wn.socketColor:(dataType.equals("2")? instrument.wn.serialColor:instrument.wn.tcpClientColor)),0);
 
            instrument.lastDataFid=stringx[1];
            instrument.lastDataType=stringx[2];

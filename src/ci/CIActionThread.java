@@ -89,7 +89,7 @@ CrInstrument instrument;
                               column=dataStr.split(" ");
                             } else if(act[44].trim().equalsIgnoreCase("Separated by ','")){
                               column=ylib.csvlinetoarray(dataStr);
-                            } else if(act[44].trim().equalsIgnoreCase("Fixed column length")){
+                            } else if(act[44].trim().equalsIgnoreCase("Fixed field length")){
                                int len=Integer.parseInt(act[55]);
                                int cnt=dataStr.length()/len + (dataStr.length()%len >0 ? 1:0);
                                column=new String[cnt];
@@ -380,6 +380,11 @@ CrInstrument instrument;
                            if(from>hexData.length) from=hexData.length;
                            if(to2<1) to2=1;
                            if(to2>hexData.length) to2=hexData.length;
+                           if(from>to2){
+                              int tmp=from;
+                              from=to2;
+                              to2=tmp;
+                           }
                            b2=new byte[to2 - from + 1];
                            for(int k=0,j=from-1;j<to2;k++,j++) b2[k]=hexData[j];
                          } else {
@@ -401,7 +406,7 @@ CrInstrument instrument;
                               str=dataStr.split(" ");
                             } else if(act[4].trim().equalsIgnoreCase("Separated by ','")){
                               str=ylib.csvlinetoarray(dataStr);
-                            } else if(act[4].trim().equalsIgnoreCase("Fixed column length")){
+                            } else if(act[4].trim().equalsIgnoreCase("Fixed field length")){
                                int len=Integer.parseInt(act[5]);
                                int cnt=dataStr.length()/len + (dataStr.length()%len >0 ? 1:0);
                                str=new String[cnt];
@@ -420,6 +425,11 @@ CrInstrument instrument;
                            if(from>dataX.length()) from=dataX.length();
                            if(to2<1) to2=1;
                            if(to2>dataX.length()) to2=dataX.length();
+                           if(from>to2){
+                              int tmp=from;
+                              from=to2;
+                              to2=tmp;
+                           }
                            dataX=dataX.substring(from-1, to2);
                            }
                            if(WSN.isNumeric(dataX)) dataValue=Double.parseDouble(dataX);
@@ -432,6 +442,11 @@ CrInstrument instrument;
                            if(from>dataX.length()) from=dataX.length();
                            if(to2<1) to2=1;
                            if(to2>dataX.length()) to2=dataX.length();
+                           if(from>to2){
+                              int tmp=from;
+                              from=to2;
+                              to2=tmp;
+                           }
                            dataX=dataX.substring(from-1, to2);
                            }
                            if(WSN.isNumeric(dataX)) dataValue=Double.parseDouble(dataX);
@@ -670,7 +685,7 @@ CrInstrument instrument;
                               column=dataStr.split(" ");
                             } else if(act[74].trim().equalsIgnoreCase("Separated by ','")){
                               column=ylib.csvlinetoarray(dataStr);
-                            } else if(act[74].trim().equalsIgnoreCase("Fixed column length")){
+                            } else if(act[74].trim().equalsIgnoreCase("Fixed field length")){
                                int len=Integer.parseInt(act[75]);
                                int cnt=dataStr.length()/len + (dataStr.length()%len >0 ? 1:0);
                                column=new String[cnt];

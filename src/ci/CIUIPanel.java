@@ -28,7 +28,7 @@ public class CIUIPanel extends javax.swing.JPanel {
         initComponents();
         this.instrument=instrument;
         init();
-                    kfm= KeyboardFocusManager.getCurrentKeyboardFocusManager();
+        kfm= KeyboardFocusManager.getCurrentKeyboardFocusManager();
         kfm.addKeyEventPostProcessor(new KeyEventPostProcessor() {
             public boolean postProcessKeyEvent(KeyEvent evt) {
                 if (evt.getID() == KeyEvent.KEY_PRESSED) {
@@ -275,6 +275,20 @@ private void keyPress(java.awt.event.KeyEvent evt){
   }
   else if(evt.getKeyCode()==27){
       instrument.soundThread.setStop(2);
+  } else if(evt.getKeyCode()==18){
+      boolean showMenu=true;
+      if(instrument.editUI.get("frame")!=null){
+        String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("frame"));
+        if(info.length>17 && info[17].toLowerCase().trim().equals("s")) showMenu=true;
+        else showMenu=false;
+
+      }
+      if(showMenu){
+          if(!instrument.jMenuBar1.isVisible()) instrument.jMenuBar1.setVisible(true);
+      } else {
+          if(!instrument.jMenuBar1.isVisible()) instrument.jMenuBar1.setVisible(true);
+          else instrument.jMenuBar1.setVisible(false);
+      }
   }
 }
 private void keyRelease(java.awt.event.KeyEvent evt){
@@ -360,7 +374,7 @@ void setFrameItem(){
         }
         if(instrument.isNumeric(info[7])) jLabel61.setBackground(new Color(Integer.parseInt(info[7])));
                  else jLabel61.setBackground(Color.white);
-        if(info[2].trim().equals("%")) jCheckBox38.setSelected(true); else jCheckBox38.setSelected(false);
+        if(info[2].trim().equals("%")) inPercent.setSelected(true); else inPercent.setSelected(false);
         if(info[8].toLowerCase().trim().equals("c")) jCheckBox43.setSelected(true); else jCheckBox43.setSelected(false);
         if(info[10].toLowerCase().trim().equals("c")) jCheckBox9.setSelected(true); else jCheckBox9.setSelected(false);
         if(info[11].toLowerCase().trim().equals("c")) jCheckBox8.setSelected(true); else jCheckBox8.setSelected(false);
@@ -368,6 +382,8 @@ void setFrameItem(){
         if(info[13].toLowerCase().trim().equals("f")) jCheckBox44.setSelected(true); else jCheckBox44.setSelected(false);
         if(info[14].toLowerCase().trim().equals("r")) jCheckBox45.setSelected(true); else jCheckBox45.setSelected(false);
         if(info[15].toLowerCase().trim().equals("s")) jCheckBox10.setSelected(true); else jCheckBox10.setSelected(false);
+        if(info.length>16 && info[16].toLowerCase().trim().equals("s")) jCheckBox11.setSelected(true); else jCheckBox11.setSelected(false);
+        if(info.length>17 && info[17].toLowerCase().trim().equals("s")) jCheckBox12.setSelected(true); else jCheckBox12.setSelected(false);
     }
 }
 void setDataAreaItem(){
@@ -417,7 +433,7 @@ void setDataAreaItem(){
         jLabel8 = new javax.swing.JLabel();
         jTextField11 = new javax.swing.JTextField();
         jPanel146 = new javax.swing.JPanel();
-        jCheckBox38 = new javax.swing.JCheckBox();
+        inPercent = new javax.swing.JCheckBox();
         jCheckBox44 = new javax.swing.JCheckBox();
         jCheckBox45 = new javax.swing.JCheckBox();
         jPanel147 = new javax.swing.JPanel();
@@ -442,6 +458,8 @@ void setDataAreaItem(){
         jLabel61 = new javax.swing.JLabel();
         jPanel8 = new javax.swing.JPanel();
         jCheckBox10 = new javax.swing.JCheckBox();
+        jCheckBox11 = new javax.swing.JCheckBox();
+        jCheckBox12 = new javax.swing.JCheckBox();
         jPanel144 = new javax.swing.JPanel();
         jPanel141 = new javax.swing.JPanel();
         jLabel46 = new javax.swing.JLabel();
@@ -663,14 +681,14 @@ void setDataAreaItem(){
 
         jPanel146.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
-        jCheckBox38.setFont(jCheckBox38.getFont());
-        jCheckBox38.setText(bundle.getString("CrInstrument.jCheckBox38.text")); 
-        jCheckBox38.addActionListener(new java.awt.event.ActionListener() {
+        inPercent.setFont(inPercent.getFont());
+        inPercent.setText(bundle.getString("CrInstrument.jCheckBox38.text")); 
+        inPercent.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jCheckBox38ActionPerformed(evt);
+                inPercentActionPerformed(evt);
             }
         });
-        jPanel146.add(jCheckBox38);
+        jPanel146.add(inPercent);
 
         jCheckBox44.setFont(jCheckBox44.getFont());
         jCheckBox44.setText(bundle.getString("CrInstrument.jCheckBox44.text")); 
@@ -844,6 +862,22 @@ void setDataAreaItem(){
             }
         });
         jPanel8.add(jCheckBox10);
+
+        jCheckBox11.setText(bundle.getString("CIUIPanel.jCheckBox11.text")); 
+        jCheckBox11.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox11ActionPerformed(evt);
+            }
+        });
+        jPanel8.add(jCheckBox11);
+
+        jCheckBox12.setText(bundle.getString("CIUIPanel.jCheckBox12.text")); 
+        jCheckBox12.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox12ActionPerformed(evt);
+            }
+        });
+        jPanel8.add(jCheckBox12);
 
         jPanel145.add(jPanel8);
         jPanel8.setBounds(20, 100, 850, 30);
@@ -2113,13 +2147,13 @@ int[] getFrameSizeFromEditUI(){
        updateFrameItem();
     }
 
-    private void jCheckBox38ActionPerformed(java.awt.event.ActionEvent evt) {
+    private void inPercentActionPerformed(java.awt.event.ActionEvent evt) {
     int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;
     int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
     int frameWidth = instrument.getWidth();
     int frameHeight = instrument.getHeight();
 
-        if(jCheckBox38.isSelected()){
+        if(inPercent.isSelected()){
             jLabel107.setText("%");
             jLabel139.setText("%");
             jLabel156.setText("%");
@@ -2398,6 +2432,7 @@ void updateButtonName(){
     private void jButton29ActionPerformed(java.awt.event.ActionEvent evt) {
 
      boolean needUpdateChartProfile=false;
+     instrument.updateLayoutAll=true;
      if(instrument.editUI.get("misc")!=null){
        String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("misc"));
        if(instrument.currentUI.get("misc")!=null){
@@ -2730,6 +2765,14 @@ void updateButtonName(){
     private void jCheckBox7ActionPerformed(java.awt.event.ActionEvent evt) {
         instrument.uiFramePanel.updateAreaItem();
     }
+
+    private void jCheckBox11ActionPerformed(java.awt.event.ActionEvent evt) {
+      updateFrameItem();
+    }
+
+    private void jCheckBox12ActionPerformed(java.awt.event.ActionEvent evt) {
+      updateFrameItem();
+    }
 void showMenuItem(String sel){
     if(instrument.editUI.get(sel)==null) return;
     String info[]=ylib.csvlinetoarray((String)instrument.editUI.get(sel));
@@ -2868,7 +2911,7 @@ void updateDataAreaType(){
     if(instrument.editUI.get("frame")==null) return;
     String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("frame"));
     info[1]=jTextField45.getText().trim();
-    if(jCheckBox38.isSelected()) {
+    if(inPercent.isSelected()) {
         info[2]="%";
     info[3]= (instrument.isNumeric(jTextField74.getText())? String.valueOf(Double.parseDouble(jTextField74.getText())/100.0):"0.0");
     info[4]= (instrument.isNumeric(jTextField75.getText())? String.valueOf(Double.parseDouble(jTextField75.getText())/100.0):"0.0");
@@ -2891,6 +2934,8 @@ void updateDataAreaType(){
     if(jCheckBox44.isSelected()) info[13]="f"; else info[13]="e";
     if(jCheckBox45.isSelected()) info[14]="r"; else info[14]="e";
     if(jCheckBox10.isSelected()) info[15]="s"; else info[15]="e";
+    if(jCheckBox11.isSelected()) info[16]="s"; else info[16]="e";
+    if(jCheckBox12.isSelected()) info[17]="s"; else info[17]="e";
 
     instrument.editUI.put("frame",ylib.arrayToCsvLine(info));
 
@@ -2918,6 +2963,7 @@ void updateDataAreaType(){
     javax.swing.JCheckBox cbShowFrameItem;
     javax.swing.JComboBox chartGroupCB;
     javax.swing.JPanel dataPanel;
+    javax.swing.JCheckBox inPercent;
     private javax.swing.JButton jButton17;
     private javax.swing.JButton jButton18;
     private javax.swing.JButton jButton23;
@@ -2928,9 +2974,10 @@ void updateDataAreaType(){
     private javax.swing.JButton jButton57;
     javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox10;
+    private javax.swing.JCheckBox jCheckBox11;
+    private javax.swing.JCheckBox jCheckBox12;
     javax.swing.JCheckBox jCheckBox2;
     javax.swing.JCheckBox jCheckBox3;
-    javax.swing.JCheckBox jCheckBox38;
     javax.swing.JCheckBox jCheckBox4;
     javax.swing.JCheckBox jCheckBox43;
     javax.swing.JCheckBox jCheckBox44;

@@ -128,7 +128,7 @@ public class CICurveSetupPanel extends javax.swing.JPanel {
         jScrollPane10.setViewportView(curveList);
 
         add(jScrollPane10);
-        jScrollPane10.setBounds(14, 50, 60, 190);
+        jScrollPane10.setBounds(14, 50, 70, 190);
 
         jLabel109.setFont(jLabel109.getFont());
         jLabel109.setText(bundle.getString("CrInstrument.jLabel109.text")); 

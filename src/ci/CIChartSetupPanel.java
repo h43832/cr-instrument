@@ -121,7 +121,7 @@ public class CIChartSetupPanel extends javax.swing.JPanel {
         jScrollPane9.setViewportView(chartList);
 
         add(jScrollPane9);
-        jScrollPane9.setBounds(20, 50, 70, 220);
+        jScrollPane9.setBounds(20, 50, 80, 220);
 
         jLabel82.setFont(jLabel82.getFont());
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("ci/Bundle"); 

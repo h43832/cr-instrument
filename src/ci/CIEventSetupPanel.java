@@ -8,6 +8,7 @@ import java.util.TreeMap;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
+import y.ylib.OneVar;
 import y.ylib.ylib;
 
 /**
@@ -48,6 +49,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
 
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jPanel71 = new javax.swing.JPanel();
         jScrollPane6 = new javax.swing.JScrollPane();
         eventList = new javax.swing.JList(eventListModel);
@@ -63,6 +65,10 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         actionList2 = new javax.swing.JList(actionListModel2);
         btnRemoveCondition2 = new javax.swing.JButton();
         btnRemoveAction2 = new javax.swing.JButton();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
         jPanel70 = new javax.swing.JPanel();
         jScrollPane8 = new javax.swing.JScrollPane();
         actionList = new javax.swing.JList(actionListModel);
@@ -114,6 +120,16 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jPanel129 = new javax.swing.JPanel();
         jCheckBox29 = new javax.swing.JCheckBox();
         jTextField64 = new javax.swing.JTextField();
+        jPanel2 = new javax.swing.JPanel();
+        jCheckBox1 = new javax.swing.JCheckBox();
+        jTextField2 = new javax.swing.JTextField();
+        jLabel4 = new javax.swing.JLabel();
+        jTextField5 = new javax.swing.JTextField();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        jTextField3 = new javax.swing.JTextField();
+        jLabel5 = new javax.swing.JLabel();
+        jComboBox1 = new javax.swing.JComboBox();
         jPanel79 = new javax.swing.JPanel();
         jPanel83 = new javax.swing.JPanel();
         jLabel95 = new javax.swing.JLabel();
@@ -189,6 +205,12 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jTextField71 = new javax.swing.JTextField();
         jLabel167 = new javax.swing.JLabel();
         jTextField72 = new javax.swing.JTextField();
+        jPanel5 = new javax.swing.JPanel();
+        jLabel7 = new javax.swing.JLabel();
+        jTextField7 = new javax.swing.JTextField();
+        jPanel6 = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        jTextField8 = new javax.swing.JTextField();
         jPanel84 = new javax.swing.JPanel();
         jPanel95 = new javax.swing.JPanel();
         jLabel114 = new javax.swing.JLabel();
@@ -253,6 +275,8 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jCheckBox30 = new javax.swing.JCheckBox();
         jComboBox27 = new javax.swing.JComboBox();
         jTextField14 = new javax.swing.JTextField();
+        jLabel6 = new javax.swing.JLabel();
+        jTextField6 = new javax.swing.JTextField();
         jPanel130 = new javax.swing.JPanel();
         jCheckBox31 = new javax.swing.JCheckBox();
         jComboBox39 = new javax.swing.JComboBox();
@@ -266,6 +290,71 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jLabel157 = new javax.swing.JLabel();
         jTextField55 = new javax.swing.JTextField();
         emptyPanel1 = new javax.swing.JPanel();
+        jPanel7 = new javax.swing.JPanel();
+        jTabbedPane1 = new javax.swing.JTabbedPane();
+        jPanel13 = new javax.swing.JPanel();
+        jPanel9 = new javax.swing.JPanel();
+        jRadioButton1 = new javax.swing.JRadioButton();
+        jTextField9 = new javax.swing.JTextField();
+        jLabel10 = new javax.swing.JLabel();
+        jComboBox5 = new javax.swing.JComboBox();
+        jLabel11 = new javax.swing.JLabel();
+        jComboBox6 = new javax.swing.JComboBox();
+        jLabel12 = new javax.swing.JLabel();
+        jComboBox7 = new javax.swing.JComboBox();
+        jPanel10 = new javax.swing.JPanel();
+        jRadioButton2 = new javax.swing.JRadioButton();
+        jTextField10 = new javax.swing.JTextField();
+        jLabel13 = new javax.swing.JLabel();
+        jComboBox3 = new javax.swing.JComboBox();
+        jLabel14 = new javax.swing.JLabel();
+        jComboBox4 = new javax.swing.JComboBox();
+        jLabel24 = new javax.swing.JLabel();
+        jComboBox10 = new javax.swing.JComboBox();
+        jLabel15 = new javax.swing.JLabel();
+        jComboBox8 = new javax.swing.JComboBox();
+        jLabel16 = new javax.swing.JLabel();
+        jComboBox9 = new javax.swing.JComboBox();
+        jPanel8 = new javax.swing.JPanel();
+        jCheckBox2 = new javax.swing.JCheckBox();
+        jCheckBox3 = new javax.swing.JCheckBox();
+        jCheckBox9 = new javax.swing.JCheckBox();
+        jCheckBox10 = new javax.swing.JCheckBox();
+        jCheckBox12 = new javax.swing.JCheckBox();
+        jCheckBox13 = new javax.swing.JCheckBox();
+        jCheckBox14 = new javax.swing.JCheckBox();
+        jCheckBox15 = new javax.swing.JCheckBox();
+        jPanel14 = new javax.swing.JPanel();
+        jPanel15 = new javax.swing.JPanel();
+        jCheckBox18 = new javax.swing.JCheckBox();
+        jCheckBox19 = new javax.swing.JCheckBox();
+        jPanel12 = new javax.swing.JPanel();
+        jCheckBox17 = new javax.swing.JCheckBox();
+        jTextField17 = new javax.swing.JTextField();
+        jLabel27 = new javax.swing.JLabel();
+        jComboBox23 = new javax.swing.JComboBox();
+        jLabel28 = new javax.swing.JLabel();
+        jComboBox24 = new javax.swing.JComboBox();
+        jLabel26 = new javax.swing.JLabel();
+        jComboBox25 = new javax.swing.JComboBox();
+        jLabel20 = new javax.swing.JLabel();
+        jComboBox34 = new javax.swing.JComboBox();
+        jLabel21 = new javax.swing.JLabel();
+        jComboBox35 = new javax.swing.JComboBox();
+        jPanel11 = new javax.swing.JPanel();
+        jCheckBox16 = new javax.swing.JCheckBox();
+        jTextField11 = new javax.swing.JTextField();
+        jLabel17 = new javax.swing.JLabel();
+        jComboBox12 = new javax.swing.JComboBox();
+        jLabel23 = new javax.swing.JLabel();
+        jComboBox13 = new javax.swing.JComboBox();
+        jLabel25 = new javax.swing.JLabel();
+        jComboBox15 = new javax.swing.JComboBox();
+        jLabel18 = new javax.swing.JLabel();
+        jComboBox17 = new javax.swing.JComboBox();
+        jLabel19 = new javax.swing.JLabel();
+        jComboBox21 = new javax.swing.JComboBox();
+        jLabel29 = new javax.swing.JLabel();
 
         setLayout(null);
 
@@ -332,12 +421,12 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jLabel87.setFont(jLabel87.getFont());
         jLabel87.setText(bundle.getString("CIEventSetupPanel.jLabel87.text")); 
         jPanel71.add(jLabel87);
-        jLabel87.setBounds(91, 40, 90, 20);
+        jLabel87.setBounds(90, 20, 90, 20);
 
         jLabel88.setFont(jLabel88.getFont());
         jLabel88.setText(bundle.getString("CIEventSetupPanel.jLabel88.text")); 
         jPanel71.add(jLabel88);
-        jLabel88.setBounds(100, 240, 80, 20);
+        jLabel88.setBounds(90, 240, 90, 20);
 
         conditionList2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -352,7 +441,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jScrollPane17.setViewportView(conditionList2);
 
         jPanel71.add(jScrollPane17);
-        jScrollPane17.setBounds(110, 60, 60, 110);
+        jScrollPane17.setBounds(90, 40, 90, 110);
 
         actionList2.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
@@ -367,7 +456,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jScrollPane18.setViewportView(actionList2);
 
         jPanel71.add(jScrollPane18);
-        jScrollPane18.setBounds(110, 260, 60, 90);
+        jScrollPane18.setBounds(90, 260, 90, 90);
 
         btnRemoveCondition2.setFont(btnRemoveCondition2.getFont());
         btnRemoveCondition2.setText(bundle.getString("CIEventSetupPanel.btnRemoveCondition2.text")); 
@@ -377,7 +466,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
             }
         });
         jPanel71.add(btnRemoveCondition2);
-        btnRemoveCondition2.setBounds(89, 180, 90, 23);
+        btnRemoveCondition2.setBounds(90, 160, 90, 23);
 
         btnRemoveAction2.setFont(btnRemoveAction2.getFont());
         btnRemoveAction2.setText(bundle.getString("CIEventSetupPanel.btnRemoveAction2.text")); 
@@ -387,7 +476,43 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
             }
         });
         jPanel71.add(btnRemoveAction2);
-        btnRemoveAction2.setBounds(89, 360, 90, 23);
+        btnRemoveAction2.setBounds(90, 360, 90, 23);
+
+        jButton1.setText(bundle.getString("CIEventSetupPanel.jButton1.text")); 
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jPanel71.add(jButton1);
+        jButton1.setBounds(90, 180, 90, 23);
+
+        jButton2.setText(bundle.getString("CIEventSetupPanel.jButton2.text")); 
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+        jPanel71.add(jButton2);
+        jButton2.setBounds(90, 200, 90, 23);
+
+        jButton3.setText(bundle.getString("CIEventSetupPanel.jButton3.text")); 
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+        jPanel71.add(jButton3);
+        jButton3.setBounds(90, 380, 90, 23);
+
+        jButton4.setText(bundle.getString("CIEventSetupPanel.jButton4.text")); 
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+        jPanel71.add(jButton4);
+        jButton4.setBounds(90, 400, 90, 23);
 
         add(jPanel71);
         jPanel71.setBounds(20, 30, 190, 550);
@@ -458,7 +583,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jPanel76.add(jComboBox19);
 
         jPanel70.add(jPanel76);
-        jPanel76.setBounds(90, 60, 260, 35);
+        jPanel76.setBounds(90, 60, 270, 35);
 
         jPanel77.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -633,7 +758,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jPanel89.add(jTextField31);
 
         jPanel85.add(jPanel89);
-        jPanel89.setBounds(10, 30, 380, 40);
+        jPanel89.setBounds(10, 20, 380, 35);
 
         jPanel90.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -644,7 +769,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jPanel90.add(jComboBox31);
 
         jPanel85.add(jPanel90);
-        jPanel90.setBounds(10, 110, 360, 33);
+        jPanel90.setBounds(10, 93, 360, 33);
 
         jPanel91.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -652,6 +777,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jCheckBox11.setActionCommand(bundle.getString("CIEventSetupPanel.jCheckBox11.actionCommand")); 
         jPanel91.add(jCheckBox11);
 
+        jTextField32.setFont(jTextField32.getFont());
         jTextField32.setText(bundle.getString("CIEventSetupPanel.jTextField32.text")); 
         jTextField32.setPreferredSize(new java.awt.Dimension(50, 25));
         jPanel91.add(jTextField32);
@@ -660,7 +786,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jPanel91.add(jLabel104);
 
         jPanel85.add(jPanel91);
-        jPanel91.setBounds(10, 150, 370, 40);
+        jPanel91.setBounds(10, 130, 400, 40);
 
         jPanel129.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -672,7 +798,47 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jPanel129.add(jTextField64);
 
         jPanel85.add(jPanel129);
-        jPanel129.setBounds(90, 70, 290, 40);
+        jPanel129.setBounds(10, 60, 370, 35);
+
+        jPanel2.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox1.setText(bundle.getString("CIEventSetupPanel.jCheckBox1.text")); 
+        jPanel2.add(jCheckBox1);
+
+        jTextField2.setFont(jTextField2.getFont());
+        jTextField2.setText(bundle.getString("CIEventSetupPanel.jTextField2.text")); 
+        jTextField2.setPreferredSize(new java.awt.Dimension(56, 25));
+        jPanel2.add(jTextField2);
+
+        jLabel4.setText(bundle.getString("CIEventSetupPanel.jLabel4.text")); 
+        jPanel2.add(jLabel4);
+
+        jTextField5.setText(bundle.getString("CIEventSetupPanel.jTextField5.text")); 
+        jTextField5.setPreferredSize(new java.awt.Dimension(36, 25));
+        jPanel2.add(jTextField5);
+
+        jPanel85.add(jPanel2);
+        jPanel2.setBounds(10, 165, 400, 40);
+
+        jPanel4.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel3.setText(bundle.getString("CIEventSetupPanel.jLabel3.text")); 
+        jPanel4.add(jLabel3);
+
+        jTextField3.setText(bundle.getString("CIEventSetupPanel.jTextField3.text")); 
+        jTextField3.setPreferredSize(new java.awt.Dimension(52, 25));
+        jPanel4.add(jTextField3);
+
+        jLabel5.setFont(jLabel5.getFont());
+        jLabel5.setText(bundle.getString("CIEventSetupPanel.jLabel5.text")); 
+        jPanel4.add(jLabel5);
+
+        jComboBox1.setEditable(true);
+        jComboBox1.setPreferredSize(new java.awt.Dimension(70, 25));
+        jPanel4.add(jComboBox1);
+
+        jPanel85.add(jPanel4);
+        jPanel4.setBounds(30, 205, 390, 40);
 
         jPanel43.add(jPanel85, "card5");
 
@@ -694,7 +860,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         });
         jPanel83.add(jComboBox28);
 
-        jComboBox29.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Whole line", "Separated by space", "Separated by ',' ", "Fixed column length" }));
+        jComboBox29.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Whole line", "Separated by space", "Separated by ',' ", "Fixed field length" }));
         jComboBox29.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBox29ItemStateChanged(evt);
@@ -880,7 +1046,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         });
         jPanel94.add(jComboBox32);
 
-        jComboBox41.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Whole line", "Separated by space", "Separated by ',' ", "Fixed column length" }));
+        jComboBox41.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Whole line", "Separated by space", "Separated by ',' ", "Fixed field length" }));
         jComboBox41.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBox41ItemStateChanged(evt);
@@ -897,7 +1063,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jPanel94.add(jTextField57);
 
         jPanel78.add(jPanel94);
-        jPanel94.setBounds(10, 20, 410, 70);
+        jPanel94.setBounds(10, 20, 410, 40);
 
         jPanel121.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -933,7 +1099,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jPanel121.add(jTextField60);
 
         jPanel78.add(jPanel121);
-        jPanel121.setBounds(10, 110, 410, 35);
+        jPanel121.setBounds(10, 60, 410, 35);
 
         jPanel137.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -969,7 +1135,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jPanel137.add(jTextField69);
 
         jPanel78.add(jPanel137);
-        jPanel137.setBounds(10, 190, 410, 35);
+        jPanel137.setBounds(10, 140, 410, 35);
 
         jPanel138.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
@@ -1005,7 +1171,31 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jPanel138.add(jTextField72);
 
         jPanel78.add(jPanel138);
-        jPanel138.setBounds(10, 150, 410, 40);
+        jPanel138.setBounds(10, 100, 410, 40);
+
+        jPanel5.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel7.setText(bundle.getString("CIEventSetupPanel.jLabel7.text")); 
+        jPanel5.add(jLabel7);
+
+        jTextField7.setText(bundle.getString("CIEventSetupPanel.jTextField7.text")); 
+        jTextField7.setPreferredSize(new java.awt.Dimension(86, 25));
+        jPanel5.add(jTextField7);
+
+        jPanel78.add(jPanel5);
+        jPanel5.setBounds(20, 180, 400, 40);
+
+        jPanel6.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jLabel8.setText(bundle.getString("CIEventSetupPanel.jLabel8.text")); 
+        jPanel6.add(jLabel8);
+
+        jTextField8.setText(bundle.getString("CIEventSetupPanel.jTextField8.text")); 
+        jTextField8.setPreferredSize(new java.awt.Dimension(86, 25));
+        jPanel6.add(jTextField8);
+
+        jPanel78.add(jPanel6);
+        jPanel6.setBounds(20, 220, 390, 40);
 
         jPanel43.add(jPanel78, "card6");
 
@@ -1026,7 +1216,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         });
         jPanel95.add(jComboBox33);
 
-        jComboBox42.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Whole line", "Separated by space", "Separated by ',' ", "Fixed column length" }));
+        jComboBox42.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Whole line", "Separated by space", "Separated by ',' ", "Fixed field length" }));
         jComboBox42.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 jComboBox42ItemStateChanged(evt);
@@ -1188,7 +1378,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jPanel74.add(jLabel78);
 
         jComboBox16.setFont(jComboBox16.getFont());
-        jComboBox16.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "After system startup", "Click connect button", "Click start button", "Click stop button", "After connected", "After disconnected", "Over upper take-action level", "Under lower take-action level", "Over upper alert level", "Under lower alert level", "Data condition", "Data checked by Java class", "Any data", "Click button 01", "Click button 02", "Click button 03", "Click button 04", "Click button 05", "Click button 06", "Click button 07", "Click button 08", "Click button 09", "Click button 10", "Click button 11", "Click button 12", "Click button 13", "Click button 14", "Click button 15", "Click button 16", "Click button 17", "Click button 18", "Click button 19", "Click button 20", "Click button 21", "Click button 22", "Click button 23", "Click button 24", "Click button 25", "Click button 26", "Click button 27", "Click button 28", "Click button 29", "Click button 30", "Click file menuitem 01", "Click file menuitem 02", "Click file menuitem 03", "Click file menuitem 04", "Click file menuitem 05", "Click help menuitem 01", "Click help menuitem 02", "Click help menuitem 03", "Click help menuitem 04", "Click help menuitem 05", "Click tool menuitem 01", "Click tool menuitem 02", "Click tool menuitem 03", "Click tool menuitem 04", "Click tool menuitem 05", "Message 01 confirmed YES", "Message 01 confirmed NO", "Message 02 confirmed YES", "Message 02 confirmed NO", "Message 03 confirmed YES", "Message 03 confirmed NO", "Message 04 confirmed YES", "Message 04 confirmed NO", "Message 05 confirmed YES", "Message 05 confirmed NO", "Message 06 confirmed YES", "Message 06 confirmed NO", "Message 07 confirmed YES", "Message 07 confirmed NO", "Message 08 confirmed YES", "Message 08 confirmed NO", "Message 09 confirmed YES", "Message 09 confirmed NO", "Message 10 confirmed YES", "Message 10 confirmed NO", "and checkbox 01 checked", "and checkbox 01 not checked", "and checkbox 02 checked", "and checkbox 02 not checked", "and checkbox 03 checked", "and checkbox 03 not checked", "and checkbox 04 checked", "and checkbox 04 not checked", "and checkbox 05 checked", "and checkbox 05 not checked", "and checkbox 06 checked", "and checkbox 06 not checked", "and checkbox 07 checked", "and checkbox 07 not checked", "and checkbox 08 checked", "and checkbox 08 not checked", "and checkbox 09 checked", "and checkbox 09 not checked", "and checkbox 10 checked", "and checkbox 10 not checked", "and checkbox 11 checked", "and checkbox 11 not checked", "and checkbox 12 checked", "and checkbox 12 not checked", "and checkbox 13 checked", "and checkbox 13 not checked", "and checkbox 14 checked", "and checkbox 14 not checked", "and checkbox 15 checked", "and checkbox 15 not checked", "and checkbox 16 checked", "and checkbox 17 not checked", "and checkbox 17 checked", "and checkbox 18 not checked", "and checkbox 18 checked", "and checkbox 19 not checked", "and checkbox 19 checked", "and checkbox 19 not checked", "and checkbox 20 checked", "and checkbox 20 not checked", "and radiobutton 01 selected", "and radiobutton 01 not selected", "and radiobutton 02 selected", "and radiobutton 02 not selected", "and radiobutton 03 selected", "and radiobutton 03 not selected", "and radiobutton 04 selected", "and radiobutton 04 not selected", "and radiobutton 05 selected", "and radiobutton 05 not selected", "and radiobutton 06 selected", "and radiobutton 06 not selected", "and radiobutton 07 selected", "and radiobutton 07 not selected", "and radiobutton 08 selected", "and radiobutton 08 not selected", "and radiobutton 09 selected", "and radiobutton 09 not selected", "and radiobutton 10 selected", "and radiobutton 10 not selected", "and radiobutton 11 selected", "and radiobutton 11 not selected", "and radiobutton 12 selected", "and radiobutton 12 not selected", "and radiobutton 13 selected", "and radiobutton 13 not selected", "and radiobutton 14 selected", "and radiobutton 14 not selected", "and radiobutton 15 selected", "and radiobutton 15 not selected", "and radiobutton 16 selected", "and radiobutton 16 not selected", "and radiobutton 17 selected", "and radiobutton 17 not selected", "and radiobutton 18 selected", "and radiobutton 18 not selected", "and radiobutton 19 selected", "and radiobutton 19 not selected", "and radiobutton 20 selected", "and radiobutton 20 not selected", "Before system terminated", " ", " ", " " }));
+        jComboBox16.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "After system startup", "Click connect button", "Click start button", "Click stop button", "After connected", "After disconnected", "Over upper take-action level", "Under lower take-action level", "Over upper alert level", "Under lower alert level", "Device data", "Data checked by Java class", "Any data", "Schedule time", "Click button 01", "Click button 02", "Click button 03", "Click button 04", "Click button 05", "Click button 06", "Click button 07", "Click button 08", "Click button 09", "Click button 10", "Click button 11", "Click button 12", "Click button 13", "Click button 14", "Click button 15", "Click button 16", "Click button 17", "Click button 18", "Click button 19", "Click button 20", "Click button 21", "Click button 22", "Click button 23", "Click button 24", "Click button 25", "Click button 26", "Click button 27", "Click button 28", "Click button 29", "Click button 30", "Click file menuitem 01", "Click file menuitem 02", "Click file menuitem 03", "Click file menuitem 04", "Click file menuitem 05", "Click help menuitem 01", "Click help menuitem 02", "Click help menuitem 03", "Click help menuitem 04", "Click help menuitem 05", "Click tool menuitem 01", "Click tool menuitem 02", "Click tool menuitem 03", "Click tool menuitem 04", "Click tool menuitem 05", "Message 01 confirmed YES", "Message 01 confirmed NO", "Message 02 confirmed YES", "Message 02 confirmed NO", "Message 03 confirmed YES", "Message 03 confirmed NO", "Message 04 confirmed YES", "Message 04 confirmed NO", "Message 05 confirmed YES", "Message 05 confirmed NO", "Message 06 confirmed YES", "Message 06 confirmed NO", "Message 07 confirmed YES", "Message 07 confirmed NO", "Message 08 confirmed YES", "Message 08 confirmed NO", "Message 09 confirmed YES", "Message 09 confirmed NO", "Message 10 confirmed YES", "Message 10 confirmed NO", "and in continuous monitoring mode", "and checkbox 01 checked", "and checkbox 01 not checked", "and checkbox 02 checked", "and checkbox 02 not checked", "and checkbox 03 checked", "and checkbox 03 not checked", "and checkbox 04 checked", "and checkbox 04 not checked", "and checkbox 05 checked", "and checkbox 05 not checked", "and checkbox 06 checked", "and checkbox 06 not checked", "and checkbox 07 checked", "and checkbox 07 not checked", "and checkbox 08 checked", "and checkbox 08 not checked", "and checkbox 09 checked", "and checkbox 09 not checked", "and checkbox 10 checked", "and checkbox 10 not checked", "and checkbox 11 checked", "and checkbox 11 not checked", "and checkbox 12 checked", "and checkbox 12 not checked", "and checkbox 13 checked", "and checkbox 13 not checked", "and checkbox 14 checked", "and checkbox 14 not checked", "and checkbox 15 checked", "and checkbox 15 not checked", "and checkbox 16 checked", "and checkbox 17 not checked", "and checkbox 17 checked", "and checkbox 18 not checked", "and checkbox 18 checked", "and checkbox 19 not checked", "and checkbox 19 checked", "and checkbox 19 not checked", "and checkbox 20 checked", "and checkbox 20 not checked", "and radiobutton 01 selected", "and radiobutton 01 not selected", "and radiobutton 02 selected", "and radiobutton 02 not selected", "and radiobutton 03 selected", "and radiobutton 03 not selected", "and radiobutton 04 selected", "and radiobutton 04 not selected", "and radiobutton 05 selected", "and radiobutton 05 not selected", "and radiobutton 06 selected", "and radiobutton 06 not selected", "and radiobutton 07 selected", "and radiobutton 07 not selected", "and radiobutton 08 selected", "and radiobutton 08 not selected", "and radiobutton 09 selected", "and radiobutton 09 not selected", "and radiobutton 10 selected", "and radiobutton 10 not selected", "and radiobutton 11 selected", "and radiobutton 11 not selected", "and radiobutton 12 selected", "and radiobutton 12 not selected", "and radiobutton 13 selected", "and radiobutton 13 not selected", "and radiobutton 14 selected", "and radiobutton 14 not selected", "and radiobutton 15 selected", "and radiobutton 15 not selected", "and radiobutton 16 selected", "and radiobutton 16 not selected", "and radiobutton 17 selected", "and radiobutton 17 not selected", "and radiobutton 18 selected", "and radiobutton 18 not selected", "and radiobutton 19 selected", "and radiobutton 19 not selected", "and radiobutton 20 selected", "and radiobutton 20 not selected", "Before system terminated", " ", " ", " " }));
         jComboBox16.setPreferredSize(new java.awt.Dimension(250, 21));
         jComboBox16.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -1370,13 +1560,25 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jTextField14.setPreferredSize(new java.awt.Dimension(100, 21));
         jPanel82.add(jTextField14);
 
+        jLabel6.setText(bundle.getString("CIEventSetupPanel.jLabel6.text")); 
+        jPanel82.add(jLabel6);
+
+        jTextField6.setText(bundle.getString("CIEventSetupPanel.jTextField6.text")); 
+        jTextField6.setPreferredSize(new java.awt.Dimension(36, 25));
+        jPanel82.add(jTextField6);
+
         jPanel72.add(jPanel82);
-        jPanel82.setBounds(10, 90, 380, 33);
+        jPanel82.setBounds(10, 90, 410, 35);
 
         jPanel130.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
 
         jCheckBox31.setFont(jCheckBox31.getFont());
         jCheckBox31.setText(bundle.getString("CIEventSetupPanel.jCheckBox31.text")); 
+        jCheckBox31.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBox31ActionPerformed(evt);
+            }
+        });
         jPanel130.add(jCheckBox31);
 
         jComboBox39.setModel(new javax.swing.DefaultComboBoxModel(new String[] { ">", "=", "<", ">=", "<=", "!=" }));
@@ -1422,10 +1624,228 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         jPanel125.add(jTextField55);
 
         jPanel124.add(jPanel125);
-        jPanel125.setBounds(12, 27, 350, 30);
+        jPanel125.setBounds(12, 27, 350, 35);
 
         jPanel37.add(jPanel124, "card3");
         jPanel37.add(emptyPanel1, "card4");
+
+        jPanel7.setBorder(javax.swing.BorderFactory.createTitledBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 51, 255)), bundle.getString("CIEventSetupPanel.jPanel7.border.title"))); 
+        jPanel7.setLayout(new java.awt.BorderLayout());
+
+        jPanel13.setLayout(null);
+
+        jPanel9.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        buttonGroup1.add(jRadioButton1);
+        jRadioButton1.setText(bundle.getString("CIEventSetupPanel.jRadioButton1.text")); 
+        jPanel9.add(jRadioButton1);
+
+        jTextField9.setText(bundle.getString("CIEventSetupPanel.jTextField9.text")); 
+        jTextField9.setToolTipText(bundle.getString("CIEventSetupPanel.jTextField9.toolTipText")); 
+        jTextField9.setPreferredSize(new java.awt.Dimension(36, 25));
+        jPanel9.add(jTextField9);
+
+        jLabel10.setText(bundle.getString("CIEventSetupPanel.jLabel10.text")); 
+        jPanel9.add(jLabel10);
+
+        jComboBox5.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" }));
+        jPanel9.add(jComboBox5);
+
+        jLabel11.setText(bundle.getString("CIEventSetupPanel.jLabel11.text")); 
+        jPanel9.add(jLabel11);
+
+        jComboBox6.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", " " }));
+        jPanel9.add(jComboBox6);
+
+        jLabel12.setText(bundle.getString("CIEventSetupPanel.jLabel12.text")); 
+        jPanel9.add(jLabel12);
+
+        jComboBox7.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", " " }));
+        jPanel9.add(jComboBox7);
+
+        jPanel13.add(jPanel9);
+        jPanel9.setBounds(0, 5, 410, 40);
+
+        jPanel10.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        buttonGroup1.add(jRadioButton2);
+        jRadioButton2.setText(bundle.getString("CIEventSetupPanel.jRadioButton2.text")); 
+        jPanel10.add(jRadioButton2);
+
+        jTextField10.setText(bundle.getString("CIEventSetupPanel.jTextField10.text")); 
+        jTextField10.setPreferredSize(new java.awt.Dimension(46, 25));
+        jPanel10.add(jTextField10);
+
+        jLabel13.setText(bundle.getString("CIEventSetupPanel.jLabel13.text")); 
+        jPanel10.add(jLabel13);
+
+        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12" }));
+        jPanel10.add(jComboBox3);
+
+        jLabel14.setText(bundle.getString("CIEventSetupPanel.jLabel14.text")); 
+        jPanel10.add(jLabel14);
+
+        jComboBox4.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", " ", " " }));
+        jPanel10.add(jComboBox4);
+
+        jLabel24.setText(bundle.getString("CIEventSetupPanel.jLabel24.text")); 
+        jPanel10.add(jLabel24);
+
+        jComboBox10.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" }));
+        jPanel10.add(jComboBox10);
+
+        jLabel15.setText(bundle.getString("CIEventSetupPanel.jLabel15.text")); 
+        jPanel10.add(jLabel15);
+
+        jComboBox8.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", " " }));
+        jPanel10.add(jComboBox8);
+
+        jLabel16.setText(bundle.getString("CIEventSetupPanel.jLabel16.text")); 
+        jPanel10.add(jLabel16);
+
+        jComboBox9.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", " " }));
+        jPanel10.add(jComboBox9);
+
+        jPanel13.add(jPanel10);
+        jPanel10.setBounds(0, 40, 410, 40);
+
+        jPanel8.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox2.setText(bundle.getString("CIEventSetupPanel.jCheckBox2.text")); 
+        jPanel8.add(jCheckBox2);
+
+        jCheckBox3.setText(bundle.getString("CIEventSetupPanel.jCheckBox3.text")); 
+        jPanel8.add(jCheckBox3);
+
+        jCheckBox9.setText(bundle.getString("CIEventSetupPanel.jCheckBox9.text")); 
+        jPanel8.add(jCheckBox9);
+
+        jCheckBox10.setText(bundle.getString("CIEventSetupPanel.jCheckBox10.text")); 
+        jPanel8.add(jCheckBox10);
+
+        jCheckBox12.setText(bundle.getString("CIEventSetupPanel.jCheckBox12.text")); 
+        jPanel8.add(jCheckBox12);
+
+        jCheckBox13.setText(bundle.getString("CIEventSetupPanel.jCheckBox13.text")); 
+        jPanel8.add(jCheckBox13);
+
+        jCheckBox14.setText(bundle.getString("CIEventSetupPanel.jCheckBox14.text")); 
+        jPanel8.add(jCheckBox14);
+
+        jCheckBox15.setText(bundle.getString("CIEventSetupPanel.jCheckBox15.text")); 
+        jPanel8.add(jCheckBox15);
+
+        jPanel13.add(jPanel8);
+        jPanel8.setBounds(0, 90, 410, 100);
+
+        jTabbedPane1.addTab(bundle.getString("CIEventSetupPanel.jPanel13.TabConstraints.tabTitle"), jPanel13); 
+
+        jPanel14.setLayout(null);
+
+        jPanel15.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox18.setText(bundle.getString("CIEventSetupPanel.jCheckBox18.text")); 
+        jPanel15.add(jCheckBox18);
+
+        jCheckBox19.setText(bundle.getString("CIEventSetupPanel.jCheckBox19.text")); 
+        jPanel15.add(jCheckBox19);
+
+        jPanel14.add(jPanel15);
+        jPanel15.setBounds(0, 10, 400, 40);
+
+        jPanel12.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox17.setText(bundle.getString("CIEventSetupPanel.jCheckBox17.text")); 
+        jPanel12.add(jCheckBox17);
+
+        jTextField17.setText(bundle.getString("CIEventSetupPanel.jTextField17.text")); 
+        jTextField17.setPreferredSize(new java.awt.Dimension(46, 25));
+        jPanel12.add(jTextField17);
+
+        jLabel27.setText(bundle.getString("CIEventSetupPanel.jLabel27.text")); 
+        jPanel12.add(jLabel27);
+
+        jComboBox23.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12" }));
+        jPanel12.add(jComboBox23);
+
+        jLabel28.setText(bundle.getString("CIEventSetupPanel.jLabel28.text")); 
+        jPanel12.add(jLabel28);
+
+        jComboBox24.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", " " }));
+        jPanel12.add(jComboBox24);
+
+        jLabel26.setText(bundle.getString("CIEventSetupPanel.jLabel26.text")); 
+        jPanel12.add(jLabel26);
+
+        jComboBox25.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" }));
+        jPanel12.add(jComboBox25);
+
+        jLabel20.setText(bundle.getString("CIEventSetupPanel.jLabel20.text")); 
+        jPanel12.add(jLabel20);
+
+        jComboBox34.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", " " }));
+        jPanel12.add(jComboBox34);
+
+        jLabel21.setText(bundle.getString("CIEventSetupPanel.jLabel21.text")); 
+        jPanel12.add(jLabel21);
+
+        jComboBox35.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", " " }));
+        jPanel12.add(jComboBox35);
+
+        jPanel14.add(jPanel12);
+        jPanel12.setBounds(0, 110, 410, 100);
+
+        jPanel11.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox16.setText(bundle.getString("CIEventSetupPanel.jCheckBox16.text")); 
+        jPanel11.add(jCheckBox16);
+
+        jTextField11.setText(bundle.getString("CIEventSetupPanel.jTextField11.text")); 
+        jTextField11.setPreferredSize(new java.awt.Dimension(46, 25));
+        jPanel11.add(jTextField11);
+
+        jLabel17.setText(bundle.getString("CIEventSetupPanel.jLabel17.text")); 
+        jPanel11.add(jLabel17);
+
+        jComboBox12.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12" }));
+        jPanel11.add(jComboBox12);
+
+        jLabel23.setText(bundle.getString("CIEventSetupPanel.jLabel23.text")); 
+        jPanel11.add(jLabel23);
+
+        jComboBox13.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", " " }));
+        jPanel11.add(jComboBox13);
+
+        jLabel25.setText(bundle.getString("CIEventSetupPanel.jLabel25.text")); 
+        jPanel11.add(jLabel25);
+
+        jComboBox15.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23" }));
+        jPanel11.add(jComboBox15);
+
+        jLabel18.setText(bundle.getString("CIEventSetupPanel.jLabel18.text")); 
+        jPanel11.add(jLabel18);
+
+        jComboBox17.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", " " }));
+        jPanel11.add(jComboBox17);
+
+        jLabel19.setText(bundle.getString("CIEventSetupPanel.jLabel19.text")); 
+        jPanel11.add(jLabel19);
+
+        jComboBox21.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46", "47", "48", "49", "50", "51", "52", "53", "54", "55", "56", "57", "58", "59", " " }));
+        jPanel11.add(jComboBox21);
+
+        jPanel14.add(jPanel11);
+        jPanel11.setBounds(0, 75, 410, 100);
+
+        jLabel29.setText(bundle.getString("CIEventSetupPanel.jLabel29.text")); 
+        jPanel14.add(jLabel29);
+        jLabel29.setBounds(10, 50, 110, 20);
+
+        jTabbedPane1.addTab(bundle.getString("CIEventSetupPanel.jPanel14.TabConstraints.tabTitle"), jPanel14); 
+
+        jPanel7.add(jTabbedPane1, java.awt.BorderLayout.CENTER);
+
+        jPanel37.add(jPanel7, "card5");
 
         jPanel69.add(jPanel37);
         jPanel37.setBounds(360, 30, 430, 200);
@@ -1488,6 +1908,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
                 eventList.setSelectedIndex(inx);
             }
             instrument.showEvent();
+            if(instrument.scheduler.scheduleTM.get(sel)!=null) instrument.scheduler.scheduleTM.remove(sel);
         }
     }
 
@@ -1510,11 +1931,15 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     private void btnRemoveCondition2ActionPerformed(java.awt.event.ActionEvent evt) {
         if(conditionList2.getSelectedIndex()>-1){
             String cond=(String)conditionList2.getSelectedValue();
+            String condName=(String)jComboBox16.getSelectedItem();
             conditionListModel2.removeElement(cond);
             if(eventList.getSelectedIndex()>-1){
                 String sel=(String)eventList.getSelectedValue();
                 instrument.eventRemoveCondition(sel, cond);
+
+                if(condName.equalsIgnoreCase("Schedule time")) instrument.scheduler.scheduleTM.remove(sel);
             }
+
         }
     }
 
@@ -1558,20 +1983,24 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
             if(instrument.updateActionItem()){
                 String ev=(String)eventList.getSelectedValue();
                 String act=(String)actionList.getSelectedValue();
-                int cnt=actionList2.getModel().getSize();
+                int cnt=actionList2.getModel().getSize(),inx=0,inxLen=1;
                 TreeMap tm=new TreeMap();
 
                 for(int i=0;i<cnt;i++){
+                    inx++;
+                    inxLen=String.valueOf(inx).length();
                     String item=(String)actionList2.getModel().getElementAt(i);
 
-                    if(item.length()>0) tm.put(item, item);
+                    if(item.length()>0) tm.put(instrument.zero(3-inxLen)+inx, item);
                 }
-                if(!tm.containsKey(act)){
-                    tm.put(act, act);
+
+                 inx++;
+                 inxLen=String.valueOf(inx).length();
+                 tm.put(instrument.zero(3-inxLen)+inx, act);
                     
 
                     instrument.eventSetAction(ev,tm);
-                }
+
             }
         } else  { JOptionPane.showMessageDialog(this, "Please select which action to be added."); return;}
     }
@@ -1583,11 +2012,40 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     private void jComboBox19ItemStateChanged(java.awt.event.ItemEvent evt) {
         if(evt.getStateChange()==evt.SELECTED){
             if(jComboBox19.getSelectedIndex()>0){
-                String sel=(String)jComboBox19.getSelectedItem();
-                Iterator it=instrument.sensors.values().iterator();
+                String sel=((String)jComboBox19.getSelectedItem()).trim();
                 jComboBox49.removeAllItems();
                 jComboBox49.addItem("");
+                if(sel.equalsIgnoreCase(instrument.currentReceivingDataDevice) || sel.equalsIgnoreCase(instrument.allDeviceTag) ||
+                      sel.equalsIgnoreCase(instrument.firstDeviceTag) || 
+                    sel.equalsIgnoreCase(instrument.currentReceivingDataStation) || sel.equalsIgnoreCase(instrument.allStationTag) ||
+                      sel.equalsIgnoreCase(instrument.firstStationTag) ||
+                    sel.equalsIgnoreCase(instrument.nextStationTag) || sel.equalsIgnoreCase(instrument.nextDeviceTag) ||
+                    sel.equalsIgnoreCase(instrument.nextStationExceptLastOne) || sel.equalsIgnoreCase(instrument.nextDeviceExceptLastOne) ){
+                  jComboBox44.removeAllItems();
+                  jComboBox44.addItem("");
+                  jComboBox45.removeAllItems();
+                  jComboBox45.addItem("");
+            if(jComboBox18.getSelectedIndex()>0 && ((String)jComboBox18.getSelectedItem()).trim().equalsIgnoreCase("Set data value") && sel.equalsIgnoreCase(instrument.currentReceivingDataDevice)){
+
+                Iterator it=instrument.sensors.values().iterator();
                 for(;it.hasNext();){
+                    String info[]=ylib.csvlinetoarray((String)it.next());
+                        boolean exists=false;
+                        for (int index = 0; index < jComboBox45.getItemCount() && !exists; index++) {
+                            if (info[4].equals((String)jComboBox45.getItemAt(index))) {
+                                exists = true; break;
+                            }
+                        }
+                        if(!exists) {
+                            jComboBox45.addItem(info[4]);
+                        }
+                }
+                jComboBox45.setSelectedIndex(0);
+
+                }
+            } else {
+                    Iterator it=instrument.sensors.values().iterator();
+                    for(;it.hasNext();){
                     String info[]=ylib.csvlinetoarray((String)it.next());
                     if(info[0].equalsIgnoreCase(sel)){
                         boolean exists=false;
@@ -1601,6 +2059,8 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
                         }
                     }
                 }
+                }
+
                 jComboBox49.setSelectedIndex(0);
             }
         }
@@ -1741,14 +2201,28 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
                 jCheckBox40.setText("Byte from");
             } else if(((String)jComboBox32.getSelectedItem()).trim().equalsIgnoreCase("String data")){
                 jComboBox41.setVisible(true);
-                if(((String)jComboBox41.getSelectedItem()).trim().equalsIgnoreCase("Fixed column length")){
+                String sel=((String)jComboBox41.getSelectedItem()).trim();
+                if(sel.equalsIgnoreCase("Fixed field length")){
                     jLabel111.setVisible(true);
                     jTextField57.setVisible(true);
-                } else {
+                    jLabel112.setVisible(true);
+                    jTextField58.setVisible(true);
+                    jLabel166.setVisible(true);
+                    jTextField70.setVisible(true);
+                    jLabel164.setVisible(true);
+                    jTextField67.setVisible(true);
+                } else if(sel.equalsIgnoreCase("Separated by space") || sel.equalsIgnoreCase("Separated by ','")) {
                     jLabel111.setVisible(false);
                     jTextField57.setVisible(false);
-                }
-                if(((String)jComboBox41.getSelectedItem()).trim().equalsIgnoreCase("Whole line")){
+                    jLabel112.setVisible(true);
+                    jTextField58.setVisible(true);
+                    jLabel166.setVisible(true);
+                    jTextField70.setVisible(true);
+                    jLabel164.setVisible(true);
+                    jTextField67.setVisible(true);
+                } else if(sel.equalsIgnoreCase("Whole line")){
+                    jLabel111.setVisible(false);
+                    jTextField57.setVisible(false);
                     jLabel112.setVisible(false);
                     jTextField58.setVisible(false);
                     jLabel166.setVisible(false);
@@ -1802,7 +2276,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
                 jLabel164.setVisible(false);
                 jTextField67.setVisible(false);
 
-            } else if(sel.equalsIgnoreCase("Fixed column length")){
+            } else if(sel.equalsIgnoreCase("Fixed field length")){
                 jLabel111.setVisible(true);
                 jTextField57.setVisible(true);
                 jLabel112.setVisible(true);
@@ -1871,7 +2345,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
                 jTextField56.setVisible(false);
                 jLabel96.setVisible(false);
                 jTextField15.setVisible(false);
-            } else if(sel.equalsIgnoreCase("Fixed column length")){
+            } else if(sel.equalsIgnoreCase("Fixed field length")){
                 jLabel79.setVisible(true);
                 jTextField56.setVisible(true);
                 jLabel96.setVisible(true);
@@ -1886,11 +2360,11 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     }
 
     private void conditionListMouseClicked(java.awt.event.MouseEvent evt) {
-        instrument.showCondition1();
+        showCondition1();
     }
 
     private void conditionListKeyReleased(java.awt.event.KeyEvent evt) {
-        if(evt.getKeyCode()==38 || evt.getKeyCode()==40 ) instrument.showCondition1();
+        if(evt.getKeyCode()==38 || evt.getKeyCode()==40 ) showCondition1();
     }
 
     private void btnCondition1AddToEventActionPerformed(java.awt.event.ActionEvent evt) {
@@ -1903,17 +2377,25 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
             int cnt=conditionList2.getModel().getSize();
             TreeMap tm=new TreeMap();
 
+            int inx=0,inxLen=1;
             for(int i=0;i<cnt;i++){
+                inx++;
                 String item=(String)conditionList2.getModel().getElementAt(i);
 
-                if(item.length()>0) tm.put(item, item);
+                inxLen=String.valueOf(inx).length();
+                if(item.length()>0) tm.put(instrument.zero(3-inxLen)+inx, item);
             }
-            if(!tm.containsKey(cond)){
-                tm.put(cond,cond);
+
+            inx++;
+            inxLen=String.valueOf(inx).length();
+            tm.put(instrument.zero(3-inxLen)+inx,cond);
                 
 
-                instrument.eventSetCondition(ev,tm);
+            instrument.eventSetCondition(ev,tm);
+            if(((String)jComboBox16.getSelectedItem()).equalsIgnoreCase("Schedule time")){
+              instrument.scheduler.updateFromConditionItem(cond);
             }
+
         } else  { JOptionPane.showMessageDialog(this, "Please select which condition to be added."); return;}
     }
 
@@ -1921,6 +2403,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
         if(conditionList.getSelectedIndex()>-1){
             String sel=(String)conditionList.getSelectedValue();
             int selInt=conditionList.getSelectedIndex();
+
             conditionListModel.removeElement(sel);
             instrument.conditionTM.remove(sel);
             if(selInt>0) conditionList.setSelectedIndex(selInt-1);
@@ -1928,6 +2411,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
             conditionListModel2.removeElement(sel);
             instrument.eventRemoveCondition(sel);
             instrument.showEvent();
+
         }
     }
 
@@ -1938,10 +2422,19 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     private void jComboBox14ItemStateChanged(java.awt.event.ItemEvent evt) {
         if(evt.getStateChange()==evt.SELECTED){
             if(jComboBox14.getSelectedIndex()>0){
-                String sel=(String)jComboBox14.getSelectedItem();
-                Iterator it=instrument.sensors.values().iterator();
+                String sel=((String)jComboBox14.getSelectedItem()).trim();
                 jComboBox48.removeAllItems();
                 jComboBox48.addItem("");
+                if(sel.equalsIgnoreCase(instrument.anyDeviceTag) || sel.equalsIgnoreCase(instrument.lastDeviceTag) ||
+                   sel.equalsIgnoreCase(instrument.currentSendingCmdDevice) || sel.equalsIgnoreCase(instrument.anyDeviceExceptLastOne) ||
+                   sel.equalsIgnoreCase(instrument.anyStationTag) || sel.equalsIgnoreCase(instrument.lastStationTag) ||
+                   sel.equalsIgnoreCase(instrument.currentSendingCmdStation) || sel.equalsIgnoreCase(instrument.anyStationExceptLastOne)){
+                  jComboBox46.removeAllItems();
+                  jComboBox46.addItem("");
+                  jComboBox47.removeAllItems();
+                  jComboBox47.addItem("");
+                } else {
+                Iterator it=instrument.sensors.values().iterator();
                 for(;it.hasNext();){
                     String info[]=ylib.csvlinetoarray((String)it.next());
                     if(info[0].equalsIgnoreCase(sel)){
@@ -1956,6 +2449,8 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
                         }
                     }
                 }
+                }
+
                 jComboBox48.setSelectedIndex(0);
             }
         }
@@ -1964,7 +2459,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     private void jComboBox16ItemStateChanged(java.awt.event.ItemEvent evt) {
         if(evt.getStateChange()==evt.SELECTED && !instrument.initStage){
             String sel=((String)jComboBox16.getSelectedItem()).trim();
-            instrument.showConditionItem(sel);
+            showConditionPanel(sel);
         }
     }
 
@@ -2079,6 +2574,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
             if(((String)jComboBox20.getSelectedItem()).trim().equalsIgnoreCase("Byte data")){
                 jComboBox26.setVisible(false);
                 instrument.framePanel2.dataPanel.da_datavalue_01.setVisible(false);
+                jLabel130.setVisible(false);
                 jTextField46.setVisible(false);
                 jLabel93.setVisible(false);
                 jTextField13.setVisible(false);
@@ -2089,16 +2585,34 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
             } else if(((String)jComboBox20.getSelectedItem()).trim().equalsIgnoreCase("String data")) {
                 jComboBox26.setVisible(true);
                 instrument.framePanel2.dataPanel.da_datavalue_01.setVisible(true);
-                jTextField46.setVisible(true);
-                jLabel93.setVisible(true);
-                jTextField13.setVisible(true);
                 jCheckBox35.setText("Char from");
                 String sel=(String)jComboBox26.getSelectedItem();
-                if(sel.equalsIgnoreCase("whole line")){
+                if(sel.trim().equalsIgnoreCase("whole line")){
 
+                    jLabel130.setVisible(false);
                     jTextField46.setVisible(false);
                     jLabel93.setVisible(false);
                     jTextField13.setVisible(false);
+
+                    jCheckBox31.setVisible(true);
+                    jComboBox39.setVisible(true);
+                    jTextField65.setVisible(true);
+                } else if(sel.trim().equalsIgnoreCase("Fixed field length")){
+
+                    jLabel130.setVisible(true);
+                    jTextField46.setVisible(true);
+                    jLabel93.setVisible(true);
+                    jTextField13.setVisible(true);
+
+                    jCheckBox31.setVisible(true);
+                    jComboBox39.setVisible(true);
+                    jTextField65.setVisible(true);
+                } else if(sel.trim().equalsIgnoreCase("Separated by space") || sel.trim().equalsIgnoreCase("Separated by ','") ){
+
+                    jLabel130.setVisible(false);
+                    jTextField46.setVisible(false);
+                    jLabel93.setVisible(true);
+                    jTextField13.setVisible(true);
 
                     jCheckBox31.setVisible(true);
                     jComboBox39.setVisible(true);
@@ -2109,6 +2623,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
                 jCheckBox35.setText("Char from");
                 jComboBox26.setVisible(false);
 
+                jLabel130.setVisible(false);
                 jTextField46.setVisible(false);
                 jLabel93.setVisible(false);
                 jTextField13.setVisible(false);
@@ -2122,17 +2637,17 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     private void jComboBox26ItemStateChanged(java.awt.event.ItemEvent evt) {
         if(evt.getStateChange()==evt.SELECTED && !instrument.initStage){
             String sel=(String)jComboBox26.getSelectedItem();
-            if(sel.equalsIgnoreCase("Whole line")){
+            if(sel.trim().equalsIgnoreCase("Whole line")){
                 jLabel130.setVisible(false);
                 jTextField46.setVisible(false);
                 jLabel93.setVisible(false);
                 jTextField13.setVisible(false);
-            } else if(sel.equalsIgnoreCase("Fixed column length")){
+            } else if(sel.trim().equalsIgnoreCase("Fixed field length")){
                 jLabel130.setVisible(true);
                 jTextField46.setVisible(true);
                 jLabel93.setVisible(true);
                 jTextField13.setVisible(true);
-            } else  if(sel.equalsIgnoreCase("Separated by space") || sel.equalsIgnoreCase("Separated by ','") ){
+            } else  if(sel.trim().equalsIgnoreCase("Separated by space") || sel.trim().equalsIgnoreCase("Separated by ','") ){
                 jLabel130.setVisible(false);
                 jTextField46.setVisible(false);
                 jLabel93.setVisible(true);
@@ -2152,7 +2667,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
                 jTextField61.setVisible(false);
                 jLabel116.setVisible(false);
                 jTextField73.setVisible(false);
-            } else if(sel.equalsIgnoreCase("Fixed column length")){
+            } else if(sel.equalsIgnoreCase("Fixed field length")){
                 jLabel115.setVisible(true);
                 jTextField61.setVisible(true);
                 jLabel116.setVisible(true);
@@ -2164,6 +2679,84 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
                 jTextField73.setVisible(true);
             }
         }
+    }
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
+        if(conditionList2.getSelectedIndex()>0){
+            int inx=conditionList2.getSelectedIndex();
+            String selCond=(String)conditionList2.getSelectedValue();
+            if(eventList.getSelectedIndex()>-1){
+                String selEvent=(String)eventList.getSelectedValue();
+                String data[]=ylib.csvlinetoarray((String)instrument.eventTM.get(selEvent));
+                String tmp=data[3+inx];
+                data[3+inx]=data[3+inx-1];
+                data[3+inx-1]=tmp;
+                instrument.eventTM.put(selEvent, ylib.arrayToCsvLine(data));
+            }
+            conditionListModel2.removeElement(selCond);
+            conditionListModel2.add(inx-1,selCond);
+            conditionList2.setSelectedIndex(inx-1);
+        }
+    }
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
+        if(conditionList2.getSelectedIndex()>-1 && conditionList2.getSelectedIndex()<conditionListModel2.getSize()-1){
+            int inx=conditionList2.getSelectedIndex();
+            String selCond=(String)conditionList2.getSelectedValue();
+            if(eventList.getSelectedIndex()>-1){
+                String selEvent=(String)eventList.getSelectedValue();
+                String data[]=ylib.csvlinetoarray((String)instrument.eventTM.get(selEvent));
+                String tmp=data[3+inx];
+                data[3+inx]=data[3+inx+1];
+                data[3+inx+1]=tmp;
+                instrument.eventTM.put(selEvent, ylib.arrayToCsvLine(data));
+            }
+            conditionListModel2.removeElement(selCond);
+            conditionListModel2.add(inx+1,selCond);
+            conditionList2.setSelectedIndex(inx+1);
+        }
+    }
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {
+        if(actionList2.getSelectedIndex()>0){
+            int inx=actionList2.getSelectedIndex();
+            String selAct=(String)actionList2.getSelectedValue();
+            if(eventList.getSelectedIndex()>-1){
+                String selEvent=(String)eventList.getSelectedValue();
+                String data[]=ylib.csvlinetoarray((String)instrument.eventTM.get(selEvent));
+                int condCnt=(data[1].length()>0? Integer.parseInt(data[1]):0);
+                String tmp=data[3+condCnt+inx];
+                data[3+condCnt+inx]=data[3+condCnt+inx-1];
+                data[3+condCnt+inx-1]=tmp;
+                instrument.eventTM.put(selEvent, ylib.arrayToCsvLine(data));
+            }
+            actionListModel2.removeElement(selAct);
+            actionListModel2.add(inx-1,selAct);
+            actionList2.setSelectedIndex(inx-1);
+        }
+    }
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {
+        if(actionList2.getSelectedIndex()>-1 && actionList2.getSelectedIndex()<actionListModel2.getSize()-1){
+            int inx=actionList2.getSelectedIndex();
+            String selAct=(String)actionList2.getSelectedValue();
+            if(eventList.getSelectedIndex()>-1){
+                String selEvent=(String)eventList.getSelectedValue();
+                String data[]=ylib.csvlinetoarray((String)instrument.eventTM.get(selEvent));
+                int condCnt=(data[1].length()>0? Integer.parseInt(data[1]):0);
+                String tmp=data[3+condCnt+inx];
+                data[3+condCnt+inx]=data[3+condCnt+inx+1];
+                data[3+condCnt+inx+1]=tmp;
+                instrument.eventTM.put(selEvent, ylib.arrayToCsvLine(data));
+            }
+            actionListModel2.removeElement(selAct);
+            actionListModel2.add(inx+1,selAct);
+            actionList2.setSelectedIndex(inx+1);
+        }
+    }
+
+    private void jCheckBox31ActionPerformed(java.awt.event.ActionEvent evt) {
+
     }
 
     public javax.swing.JList actionList;
@@ -2186,15 +2779,32 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     private javax.swing.JButton btnRemoveEvent;
     private javax.swing.JButton btnUpdateAction1;
     private javax.swing.JButton btnUpdateCondition1;
+    private javax.swing.ButtonGroup buttonGroup1;
     public javax.swing.JList conditionList;
     public javax.swing.JList conditionList2;
     public javax.swing.JPanel emptyPanel1;
     public javax.swing.JPanel emptyPanel2;
     public javax.swing.JList eventList;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    public javax.swing.JCheckBox jCheckBox1;
+    public javax.swing.JCheckBox jCheckBox10;
     public javax.swing.JCheckBox jCheckBox11;
+    public javax.swing.JCheckBox jCheckBox12;
+    public javax.swing.JCheckBox jCheckBox13;
+    public javax.swing.JCheckBox jCheckBox14;
+    public javax.swing.JCheckBox jCheckBox15;
+    public javax.swing.JCheckBox jCheckBox16;
+    public javax.swing.JCheckBox jCheckBox17;
+    public javax.swing.JCheckBox jCheckBox18;
+    public javax.swing.JCheckBox jCheckBox19;
+    public javax.swing.JCheckBox jCheckBox2;
     public javax.swing.JCheckBox jCheckBox27;
     public javax.swing.JCheckBox jCheckBox28;
     public javax.swing.JCheckBox jCheckBox29;
+    public javax.swing.JCheckBox jCheckBox3;
     public javax.swing.JCheckBox jCheckBox30;
     public javax.swing.JCheckBox jCheckBox31;
     public javax.swing.JCheckBox jCheckBox32;
@@ -2213,20 +2823,35 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     public javax.swing.JCheckBox jCheckBox6;
     public javax.swing.JCheckBox jCheckBox7;
     public javax.swing.JCheckBox jCheckBox8;
+    public javax.swing.JCheckBox jCheckBox9;
+    public javax.swing.JComboBox jComboBox1;
+    public javax.swing.JComboBox jComboBox10;
+    public javax.swing.JComboBox jComboBox12;
+    public javax.swing.JComboBox jComboBox13;
     public javax.swing.JComboBox jComboBox14;
+    public javax.swing.JComboBox jComboBox15;
     public javax.swing.JComboBox jComboBox16;
+    public javax.swing.JComboBox jComboBox17;
     public javax.swing.JComboBox jComboBox18;
     public javax.swing.JComboBox jComboBox19;
     public javax.swing.JComboBox jComboBox20;
+    public javax.swing.JComboBox jComboBox21;
+    public javax.swing.JComboBox jComboBox23;
+    public javax.swing.JComboBox jComboBox24;
+    public javax.swing.JComboBox jComboBox25;
     public javax.swing.JComboBox jComboBox26;
     public javax.swing.JComboBox jComboBox27;
     public javax.swing.JComboBox jComboBox28;
     public javax.swing.JComboBox jComboBox29;
+    public javax.swing.JComboBox jComboBox3;
     public javax.swing.JComboBox jComboBox30;
     public javax.swing.JComboBox jComboBox31;
     public javax.swing.JComboBox jComboBox32;
     public javax.swing.JComboBox jComboBox33;
+    public javax.swing.JComboBox jComboBox34;
+    public javax.swing.JComboBox jComboBox35;
     public javax.swing.JComboBox jComboBox39;
+    public javax.swing.JComboBox jComboBox4;
     public javax.swing.JComboBox jComboBox41;
     public javax.swing.JComboBox jComboBox42;
     public javax.swing.JComboBox jComboBox43;
@@ -2236,11 +2861,18 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     public javax.swing.JComboBox jComboBox47;
     public javax.swing.JComboBox jComboBox48;
     public javax.swing.JComboBox jComboBox49;
+    public javax.swing.JComboBox jComboBox5;
+    public javax.swing.JComboBox jComboBox6;
+    public javax.swing.JComboBox jComboBox7;
+    public javax.swing.JComboBox jComboBox8;
+    public javax.swing.JComboBox jComboBox9;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel100;
     private javax.swing.JLabel jLabel101;
     private javax.swing.JLabel jLabel102;
     private javax.swing.JLabel jLabel104;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel110;
     public javax.swing.JLabel jLabel111;
     public javax.swing.JLabel jLabel112;
@@ -2249,13 +2881,18 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     public javax.swing.JLabel jLabel115;
     public javax.swing.JLabel jLabel116;
     public javax.swing.JLabel jLabel117;
+    private javax.swing.JLabel jLabel12;
+    private javax.swing.JLabel jLabel13;
     public javax.swing.JLabel jLabel130;
+    private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel142;
     private javax.swing.JLabel jLabel148;
     public javax.swing.JLabel jLabel149;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel157;
     private javax.swing.JLabel jLabel158;
     private javax.swing.JLabel jLabel159;
+    private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel160;
     private javax.swing.JLabel jLabel161;
     private javax.swing.JLabel jLabel162;
@@ -2264,14 +2901,32 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel165;
     public javax.swing.JLabel jLabel166;
     private javax.swing.JLabel jLabel167;
+    private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel171;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
+    private javax.swing.JLabel jLabel26;
+    private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
+    private javax.swing.JLabel jLabel29;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel35;
     public javax.swing.JLabel jLabel39;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel45;
+    public javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel78;
     public javax.swing.JLabel jLabel79;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel80;
     private javax.swing.JLabel jLabel81;
     private javax.swing.JLabel jLabel83;
@@ -2288,7 +2943,10 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel98;
     private javax.swing.JLabel jLabel99;
     public javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel104;
+    private javax.swing.JPanel jPanel11;
+    private javax.swing.JPanel jPanel12;
     private javax.swing.JPanel jPanel121;
     public javax.swing.JPanel jPanel122;
     private javax.swing.JPanel jPanel123;
@@ -2298,6 +2956,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel127;
     private javax.swing.JPanel jPanel128;
     private javax.swing.JPanel jPanel129;
+    private javax.swing.JPanel jPanel13;
     private javax.swing.JPanel jPanel130;
     private javax.swing.JPanel jPanel131;
     public javax.swing.JPanel jPanel132;
@@ -2308,13 +2967,20 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel137;
     private javax.swing.JPanel jPanel138;
     private javax.swing.JPanel jPanel139;
+    private javax.swing.JPanel jPanel14;
     private javax.swing.JPanel jPanel141;
+    private javax.swing.JPanel jPanel15;
+    private javax.swing.JPanel jPanel2;
     public javax.swing.JPanel jPanel26;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel37;
+    private javax.swing.JPanel jPanel4;
     public javax.swing.JPanel jPanel41;
     private javax.swing.JPanel jPanel43;
+    private javax.swing.JPanel jPanel5;
+    private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel69;
+    private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel70;
     private javax.swing.JPanel jPanel71;
     public javax.swing.JPanel jPanel72;
@@ -2325,6 +2991,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel77;
     public javax.swing.JPanel jPanel78;
     public javax.swing.JPanel jPanel79;
+    private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel80;
     private javax.swing.JPanel jPanel81;
     private javax.swing.JPanel jPanel82;
@@ -2335,37 +3002,48 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     private javax.swing.JPanel jPanel87;
     private javax.swing.JPanel jPanel88;
     private javax.swing.JPanel jPanel89;
+    private javax.swing.JPanel jPanel9;
     private javax.swing.JPanel jPanel90;
     private javax.swing.JPanel jPanel91;
     private javax.swing.JPanel jPanel94;
     private javax.swing.JPanel jPanel95;
+    public javax.swing.JRadioButton jRadioButton1;
+    public javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JScrollPane jScrollPane17;
     private javax.swing.JScrollPane jScrollPane18;
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JScrollPane jScrollPane8;
+    private javax.swing.JTabbedPane jTabbedPane1;
     public javax.swing.JTextField jTextField1;
+    public javax.swing.JTextField jTextField10;
+    public javax.swing.JTextField jTextField11;
     public javax.swing.JTextField jTextField12;
     public javax.swing.JTextField jTextField13;
     public javax.swing.JTextField jTextField14;
     public javax.swing.JTextField jTextField15;
     public javax.swing.JTextField jTextField16;
+    public javax.swing.JTextField jTextField17;
+    public javax.swing.JTextField jTextField2;
     public javax.swing.JTextField jTextField21;
     public javax.swing.JTextField jTextField23;
     public javax.swing.JTextField jTextField27;
     public javax.swing.JTextField jTextField28;
     public javax.swing.JTextField jTextField29;
+    public javax.swing.JTextField jTextField3;
     public javax.swing.JTextField jTextField30;
     public javax.swing.JTextField jTextField31;
     public javax.swing.JTextField jTextField32;
     public javax.swing.JTextField jTextField4;
     public javax.swing.JTextField jTextField46;
+    public javax.swing.JTextField jTextField5;
     public javax.swing.JTextField jTextField54;
     public javax.swing.JTextField jTextField55;
     public javax.swing.JTextField jTextField56;
     public javax.swing.JTextField jTextField57;
     public javax.swing.JTextField jTextField58;
     public javax.swing.JTextField jTextField59;
+    public javax.swing.JTextField jTextField6;
     public javax.swing.JTextField jTextField60;
     public javax.swing.JTextField jTextField61;
     public javax.swing.JTextField jTextField62;
@@ -2376,6 +3054,7 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     public javax.swing.JTextField jTextField67;
     public javax.swing.JTextField jTextField68;
     public javax.swing.JTextField jTextField69;
+    public javax.swing.JTextField jTextField7;
     public javax.swing.JTextField jTextField70;
     public javax.swing.JTextField jTextField71;
     public javax.swing.JTextField jTextField72;
@@ -2383,7 +3062,9 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
     public javax.swing.JTextField jTextField74;
     public javax.swing.JTextField jTextField75;
     public javax.swing.JTextField jTextField79;
+    public javax.swing.JTextField jTextField8;
     public javax.swing.JTextField jTextField81;
+    public javax.swing.JTextField jTextField9;
 
     void showActionItem(String sel) {
         jPanel126.setVisible(false);
@@ -2492,6 +3173,194 @@ public class CIEventSetupPanel extends javax.swing.JPanel {
             jPanel122.setVisible(true);
         } else if (sel.equalsIgnoreCase("Next station send command")) {
             jPanel76.setVisible(true);
+        }
+    }
+
+    void showConditionPanel(String sel) {
+        jPanel72.setVisible(false);
+        jPanel124.setVisible(false);
+        emptyPanel1.setVisible(false);
+        jPanel7.setVisible(false);
+
+        if (sel.equalsIgnoreCase("Schedule time")) {
+            jPanel7.setVisible(true);
+        } else if (sel.equalsIgnoreCase("Device data")) {
+            jPanel72.setVisible(true);
+        } else if (sel.equalsIgnoreCase("Data checked by Java class")) {
+            jPanel124.setVisible(true);
+        } else {
+            emptyPanel1.setVisible(true);
+        }
+        jPanel73.setVisible(false);
+        jPanel133.setVisible(false);
+        jPanel134.setVisible(false);
+        jPanel135.setVisible(false);
+        if (sel.equalsIgnoreCase("Device data") || sel.equalsIgnoreCase("Any data") || sel.equalsIgnoreCase("Data checked by Java class") || sel.equalsIgnoreCase("After connected") || sel.equalsIgnoreCase("After disconnected")) {
+            jPanel73.setVisible(true); 
+
+        } else if (sel.equalsIgnoreCase("Over upper take-action level") || sel.equalsIgnoreCase("Under lower take-action level") || sel.equalsIgnoreCase("Over upper alert level") || sel.equalsIgnoreCase("Under lower alert level")) {
+            jPanel73.setVisible(true);
+            jPanel133.setVisible(true);
+            jPanel134.setVisible(true); 
+            jPanel135.setVisible(true);
+        }
+    }
+  int getStringInt(String key) {
+    return (key != null && instrument.isNumeric(key) ? ((int) Double.parseDouble(key.trim())) : 0);
+  }
+  void showCondition1() {
+    if (conditionList.getSelectedIndex() > -1) {
+      String sel = (String) conditionList.getSelectedValue();
+      if (!sel.equals(instrument.currentCondition1)) {
+        if (instrument.conditionTM.get(sel) != null) {
+          String[] data = ylib.csvlinetoarray((String) instrument.conditionTM.get(sel)); 
+          if (data.length > 1) {
+                        jComboBox14.setSelectedItem(data[1]);
+           }
+          if (data.length > 22) {
+                        jComboBox48.setSelectedItem(data[22]); 
+           }
+          if (data.length > 18) {
+                        jComboBox46.setSelectedItem(data[18]);
+           }
+           if (data.length > 19) {
+                        jComboBox47.setSelectedItem(data[19]); 
+           }
+           if (data.length > 2) {
+              jComboBox16.setSelectedItem(data[2]);
+              if(data[2].equalsIgnoreCase("Schedule time")){
+
+         data[18]=data[38];
+         data[19]=data[39];
+         data[22]=data[42];
+        if(getStringInt(data[7])>0 || getStringInt(data[8])>0 || getStringInt(data[10])>0 || getStringInt(data[11])>0 || getStringInt(data[12])>0 || getStringInt(data[13])>0) jCheckBox16.setSelected(true);
+        jTextField17.setText(data[7]);
+        jComboBox12.setSelectedItem(data[8]);
+        jComboBox13.setSelectedItem(data[10]);
+        jComboBox15.setSelectedItem(data[11]);
+        jComboBox17.setSelectedItem(data[12]);
+        jComboBox12.setSelectedItem(data[13]);
+
+        if(getStringInt(data[7])>0 || getStringInt(data[8])>0 || getStringInt(data[10])>0 || getStringInt(data[11])>0 || getStringInt(data[12])>0 || getStringInt(data[13])>0) jCheckBox17.setSelected(true);
+        jTextField17.setText(data[14]);
+        jComboBox23.setSelectedItem(data[15]);
+        jComboBox24.setSelectedItem(data[17]);
+        jComboBox25.setSelectedItem(data[18]);
+        jComboBox34.setSelectedItem(data[19]);
+        jComboBox35.setSelectedItem(data[20]);
+        if(getStringInt(data[21])==0) jRadioButton1.setSelected(true);
+        else jRadioButton2.setSelected(true);
+        jCheckBox2.setSelected(getStringInt(data[23])>1);
+        jCheckBox3.setSelected(OneVar.check(data[23],1));
+        jCheckBox9.setSelected(OneVar.check(data[23],2));
+        jCheckBox10.setSelected(OneVar.check(data[23],3));
+        jCheckBox12.setSelected(OneVar.check(data[23],4));
+        jCheckBox13.setSelected(OneVar.check(data[23],5));
+        jCheckBox14.setSelected(OneVar.check(data[23],6));
+        jCheckBox15.setSelected(OneVar.check(data[23],7));
+        jTextField9.setText(data[24]);
+        jComboBox4.setSelectedItem(data[24]);
+        jComboBox5.setSelectedItem(data[25]);
+        jComboBox10.setSelectedItem(data[25]);
+        jComboBox6.setSelectedItem(data[26]);
+        jComboBox8.setSelectedItem(data[26]);
+        jComboBox7.setSelectedItem(data[27]);
+        jComboBox9.setSelectedItem(data[27]);
+        jCheckBox19.setSelected(OneVar.check(data[28],2));
+        jCheckBox18.setSelected(OneVar.check(data[28],3));
+        if(jRadioButton1.isSelected()) {}
+          else jTextField17.setText(data[37]); 
+              }
+              else if (data[2].equalsIgnoreCase("Device data")) {
+                            if (data.length > 3) {
+                                jComboBox20.setSelectedItem(data[3]);
+                            }
+                            if (data.length > 4) {
+                                jComboBox26.setSelectedItem(data[4]);
+                                if (data.length > 5 && data[4].equalsIgnoreCase("Fixed field length")) {
+                                    jTextField46.setText(data[5]);
+                                    jLabel130.setVisible(true);
+                                    jTextField46.setVisible(true);
+                                } else {
+                                    jLabel130.setVisible(true);
+                                    jTextField46.setVisible(true);
+                                }
+                            }
+                            if (data.length > 4 && !data[4].equalsIgnoreCase("Whole line")) {
+                                jLabel93.setVisible(true);
+                                jTextField13.setVisible(true);
+                                if (data.length > 6) {
+                                   jTextField13.setText(data[6]);
+                                }
+                            } else {
+                                jLabel93.setVisible(false);
+                                jTextField13.setVisible(false);
+                            }
+                            if (data.length > 7 && instrument.wn.w.chkValue(data[7])) {
+                                jCheckBox35.setSelected(true);
+                            } else {
+                                jCheckBox35.setSelected(false);
+                            }
+                            if (data.length > 8) {
+                                jTextField4.setText(data[8]);
+                            }
+                            if (data.length > 9) {
+                                jTextField12.setText(data[9]);
+                            }
+                            if (data.length > 10) {
+                                jComboBox27.setSelectedItem(data[10]);
+                            }
+                            if (data.length > 11) {
+                                jTextField14.setText(data[11]);
+                            }
+                            if (data.length > 12 && instrument.wn.w.chkValue(data[12])) {
+                                jCheckBox30.setSelected(true);
+                            } else {
+                                jCheckBox30.setSelected(false);
+                            }
+                            if (data.length > 13) {
+                                jTextField55.setText(data[13]);
+                            }
+                            if (data.length > 14 && instrument.wn.w.chkValue(data[14])) {
+                                jCheckBox31.setSelected(true);
+                            } else {
+                                jCheckBox31.setSelected(false);
+                            }
+                            if (data.length > 15 && instrument.wn.w.chkValue(data[15])) {
+                                jCheckBox32.setSelected(true);
+                            } else {
+                                jCheckBox32.setSelected(false);
+                            }
+                            if (data.length > 16) {
+                                jTextField65.setText(data[16]);
+                            }
+                            if (data.length > 17) {
+                                jTextField66.setText(data[17]);
+                            }
+                            if (data.length > 20) {
+                                jComboBox39.setSelectedItem(data[20]);
+                            }
+                            if (data.length > 21) {
+                                jComboBox43.setSelectedItem(data[21]);
+                            }
+                            if (data.length > 23) {
+                                jTextField6.setText(data[23]);
+                            }
+
+                        }
+                        else if (data[2].equalsIgnoreCase("Data checked by Java class")) {
+                            if (data.length > 13) {
+                                jTextField55.setText(data[13]);
+                            }
+                        }
+                    }
+                    instrument.currentCondition1 = sel;
+                } else {
+                    instrument.sysLog("Condition id '" + sel + "' not found in conditionTM.");
+                }
+            }
+        } else {
+            instrument.currentCondition1 = "";
         }
     }
 }

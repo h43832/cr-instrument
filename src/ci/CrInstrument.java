@@ -37,9 +37,9 @@ import javax.swing.text.StyleConstants;
  * @author Administrator
  */
 public class CrInstrument extends WSNApplication implements Runnable {
-  public static String version = "2.17.0046";
+  public static String version = "2.18.0005";
   public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-  String versionTime = "20171125-110000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
+  String versionTime = "20180429-110000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
           stationFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_stations.txt",
           sensorFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_sensors.txt",currentViewDSrc="",
           statusFile = System.getProperty("user.home") + File.separator + "ci_status.txt", 
@@ -49,17 +49,24 @@ public class CrInstrument extends WSNApplication implements Runnable {
           chartFile ="apps" + File.separator + "cr-wsn" + File.separator + "ci_chart.txt", 
           curveFile ="apps" + File.separator + "cr-wsn" + File.separator + "ci_curve.txt", logFileHead = "sys_log",allItemsName="全部",
           allNodesName="全部",myNodeName="自己",
-          uiFile ="apps" + File.separator + "cr-wsn" + File.separator + "ci_ui.txt", 
+          uiFile ="apps" + File.separator + "cr-wsn" + File.separator + "ci_ui.txt",
+          allStationTag="All Stations",allDeviceTag="All Devices",anyStationTag="Any Station",anyDeviceTag="Any Device",
+          firstStationTag="First Station",firstDeviceTag="First Device",
+          lastStationTag="Last Station",lastDeviceTag="Last Device", 
+          anyStationExceptLastOne="Any Station Except Last One",anyDeviceExceptLastOne="Any Device Except Last One",
+          currentSendingCmdDevice="Current Sending-Command Device",currentReceivingDataDevice="Current Receiving-Data Device",
+          currentSendingCmdStation="Current Sending-Command Station",currentReceivingDataStation="Current Receiving-Data Station",
+          nextStationTag="Next Station",nextDeviceTag="Next Device",nextStationExceptLastOne="Next Station Except Last One",nextDeviceExceptLastOne="Next Device Except Last One",
           conditionFile="",actionFile="",currentChartPara="",dataDir="ci-data",usedDataDir="",logDir="ci-log",
           smsSpFile="",emailSpFile="",currentEvent="",currentCondition2="",currentAction2="",currentCondition1="",currentAction1="";
   String restartStr="",selectedUIAreaItem="",selectedDataItem="",selectedChart="",selectedMenuItem="",textValue="";
 
   JLabel button01;
-
+  CIScheduler scheduler;
   CIEditFrame editFrame;
   StringBuffer emailMsg = new StringBuffer(), smsMsg = new StringBuffer();
 
-                 boolean firstEmailMsg = true, firstSmsMsg = true;
+  boolean firstEmailMsg = true, firstSmsMsg = true,allDevice_mode=false;
   public y.ylib.OpenURL openURL=new y.ylib.OpenURL();
   CIAbout about;
   NumberFormat numberFormat = new DecimalFormat("############0.0################################################");
@@ -79,12 +86,13 @@ public class CrInstrument extends WSNApplication implements Runnable {
   ShowStationTableThread showTableThread;
   ShowStationChartThread showChartThread;
   Thread myThread;
+  DataViewFrame dFrame;
   DefaultStyledDocument styleDoc=new DefaultStyledDocument();
   Vector displayV=new Vector();
   JComboBox cbbSerial=new JComboBox(),cbbSocket=new JComboBox(),cbbTCPClient=new JComboBox();
   double roomValues[] = {0.01, 0.02, 0.03, 0.05, 0.1, 0.15, 0.2, 0.25, 0.5, 1.0, 1.5, 3.0, 10.0, 30.0, 90.0};
   public double dataAreaRatio=1.0,dataValue=0.;
-  int roomIndex = 7,eventMaxArrCnt=20,condMaxArrCnt=40,actMaxArrCnt=100,chartMaxArrCnt=60,curveMaxArrCnt=60,
+  int roomIndex = 7,eventMaxArrCnt=20,condMaxArrCnt=50,actMaxArrCnt=120,chartMaxArrCnt=60,curveMaxArrCnt=60,
           currentChartType=1,n120=1;
   public int showIndex=7,showType=2,maxMainLogLength=100000,maxDSrcLogLength=10000;
   boolean beginTextPane=true,lastIsData=false,beginToReceive=false,needChk=false,resetFrameSize=true;
@@ -160,6 +168,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     readEmailSp();
     readDefaultUI();
     readUI();
+    resetFrameSize=true;
     allItemsName=bundle2.getString("CrInstrument.xy.msg100");
     allNodesName=bundle2.getString("CrInstrument.xy.msg155");
     myNodeName=bundle2.getString("CrInstrument.xy.msg156");
@@ -181,10 +190,12 @@ public class CrInstrument extends WSNApplication implements Runnable {
             }
     });
     initComponents();
+    dFrame=new DataViewFrame(this);
     eventSetupPanel=new CIEventSetupPanel(this);
     chartSetupPanel=new CIChartSetupPanel(this);
     jPanel49.add(eventSetupPanel,BorderLayout.CENTER);
     jPanel1.add(framePanel2,BorderLayout.CENTER);
+    historyDataPanel.add(dFrame,BorderLayout.CENTER);
     chartSetupPanel.jPanel142.add(chartPanel3,BorderLayout.CENTER);
     jPanel50.add(chartSetupPanel,BorderLayout.CENTER);
     uiPanel.add(uiPanel2,BorderLayout.CENTER);
@@ -200,11 +211,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     int w2 = 1024;
     int h2 = 712;
 
-    setSize(w2, h2);
-
     setTitle("cr-Instrument " + version);
-
-    setLocation((width - w2) / 2, (h - h2) / 2 - 10);
 
     iconImage = new ImageIcon(getClass().getClassLoader().getResource("cr_instrument_t.gif")).getImage();
     setIconImage(iconImage);
@@ -222,6 +229,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
 
   public void init(WSN wsn) {
     this.wn = wsn;
+    scheduler=new CIScheduler(this);
     init();
     makeDataDir();
     nameIdMap.put(allItemsName,"0");
@@ -258,6 +266,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
     updateHistoryFile(0);
     eventThread.setStatus(wn.w.getGNS(1),"",50);
     initStage=false;
+    scheduler.updateFromEvent();
     sysLog("System start at " + format4.format(new Date(startTime)) + " (version=" + version + ", version time=" + versionTime +", jversion="+System.getProperty("java.version")+", wsn version="+wsn.getVersion()+", glib version="+multiPanel.getVersion()+ ",ci-demo="+props.getProperty("ci-demo")+", run_my_ap_only="+wn.getPropsString("run_my_ap_only")+")(This need "+(System.currentTimeMillis()-startTime)+" ms to start.)");
   }
 
@@ -432,6 +441,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
     framePanel2.btnZoomIn.setVisible(false);
     framePanel2.btnZoomOut.setVisible(false);
     framePanel2.cbRemark.setVisible(false);
+    dFrame.invalidate();
+    dFrame.setDataDir(this.getPropsString("record-directory"));
 
   }
 
@@ -1821,6 +1832,26 @@ public Status getStatus(String curveId){
         curvePanel2.jComboBox40.addItem(key);
 
       }
+        eventSetupPanel.jComboBox14.addItem(currentSendingCmdDevice);
+        eventSetupPanel.jComboBox14.addItem(anyDeviceTag);
+        eventSetupPanel.jComboBox14.addItem(lastDeviceTag);
+        eventSetupPanel.jComboBox14.addItem(anyDeviceExceptLastOne);
+        eventSetupPanel.jComboBox14.addItem(currentSendingCmdStation);
+        eventSetupPanel.jComboBox14.addItem(anyStationTag);
+        eventSetupPanel.jComboBox14.addItem(lastStationTag);
+        eventSetupPanel.jComboBox14.addItem(anyStationExceptLastOne);
+
+        eventSetupPanel.jComboBox19.addItem(currentReceivingDataDevice);
+        eventSetupPanel.jComboBox19.addItem(allDeviceTag);
+        eventSetupPanel.jComboBox19.addItem(firstDeviceTag);
+        eventSetupPanel.jComboBox19.addItem(nextDeviceTag);
+        eventSetupPanel.jComboBox19.addItem(nextDeviceExceptLastOne);
+        eventSetupPanel.jComboBox19.addItem(currentReceivingDataStation);
+        eventSetupPanel.jComboBox19.addItem(allStationTag);
+        eventSetupPanel.jComboBox19.addItem(firstStationTag);
+        eventSetupPanel.jComboBox19.addItem(nextStationTag);
+        eventSetupPanel.jComboBox19.addItem(nextStationExceptLastOne);
+
       eventSetupPanel.jComboBox14.setSelectedIndex(0);
       eventSetupPanel.jComboBox19.setSelectedIndex(0);
       curvePanel2.jComboBox40.setSelectedIndex(0);
@@ -2295,6 +2326,7 @@ public Status getStatus(String curveId){
       props.put("record-directory", "data");
       jTextField1.setText("data");
     }
+    dFrame.setDataDir(this.getPropsString("record-directory"));
     if (getPropsString("record-directory").charAt(getPropsString("record-directory").length() - 1) == File.separatorChar) {
       props.setProperty("record-directory", getPropsString("record-directory").substring(0, getPropsString("record-directory").length() - 1));
       jTextField1.setText(getPropsString("record-directory"));
@@ -4797,6 +4829,7 @@ public void doLayout(){
             if(y>screenHeight-20) y=screenHeight-20;
             setLocation(x, y);
            }
+
         if(info[2].equals("%") && x==100 && y==100){
             this.setExtendedState(JFrame.MAXIMIZED_BOTH);
             frameWidth=screenWidth;
@@ -4813,11 +4846,23 @@ public void doLayout(){
     if(info.length>12 && info[11].equalsIgnoreCase("c") && info[12].length()>0){
         jTabbedPane1.setTitleAt(0, info[12]);
     } else jTabbedPane1.setTitleAt(0, bundle2.getString("CrInstrument.jPanel1.TabConstraints.tabTitle"));
-    if(info.length>15 && info[15].equalsIgnoreCase("s")) {
-        if(!jTabbedPane1.getComponentAt(1).equals(jPanel2)) jTabbedPane1.insertTab(bundle2.getString("CrInstrument.jPanel2.TabConstraints.tabTitle"), null, jPanel2, null, 1);
+    if(info.length>16 && info[16].equalsIgnoreCase("s")) {
+        if(!jTabbedPane1.getComponentAt(1).equals(historyDataPanel)) jTabbedPane1.insertTab(bundle2.getString("CrInstrument.historyDataPanel.TabConstraints.tabTitle"), null, historyDataPanel, null, 1);
     } else {
 
-        if(jTabbedPane1.getComponentAt(1).equals(jPanel2)) jTabbedPane1.remove(jPanel2);
+        if(jTabbedPane1.getComponentAt(1).equals(historyDataPanel)) jTabbedPane1.remove(historyDataPanel);
+    }
+    int setupPanelInx=(info.length>16 && info[16].equalsIgnoreCase("s")? 2:1);
+    if(info.length>15 && info[15].equalsIgnoreCase("s")) {
+        if(!jTabbedPane1.getComponentAt(setupPanelInx).equals(jPanel2)) jTabbedPane1.insertTab(bundle2.getString("CrInstrument.jPanel2.TabConstraints.tabTitle"), null, jPanel2, null, setupPanelInx);
+    } else {
+
+        if(jTabbedPane1.getComponentAt(setupPanelInx).equals(jPanel2)) jTabbedPane1.remove(jPanel2);
+    }
+   if(info.length>17 && info[17].equalsIgnoreCase("s")) {
+       if(!jMenuBar1.isVisible()) jMenuBar1.setVisible(true);
+    } else {
+       if(jMenuBar1.isVisible()) jMenuBar1.setVisible(false);
     }
 
   } else {
@@ -5566,6 +5611,7 @@ public void doLayout(){
         buttonGroup6 = new javax.swing.ButtonGroup();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
+        historyDataPanel = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jTabbedPane2 = new javax.swing.JTabbedPane();
         jPanel4 = new javax.swing.JPanel();
@@ -5896,6 +5942,9 @@ public void doLayout(){
         jPanel1.setFont(jPanel1.getFont());
         jPanel1.setLayout(new java.awt.BorderLayout());
         jTabbedPane1.addTab(bundle.getString("CrInstrument.jPanel1.TabConstraints.tabTitle"), jPanel1); 
+
+        historyDataPanel.setLayout(new java.awt.BorderLayout());
+        jTabbedPane1.addTab(bundle.getString("CrInstrument.historyDataPanel.TabConstraints.tabTitle"), historyDataPanel); 
 
         jPanel2.setLayout(new java.awt.BorderLayout());
 
@@ -8929,25 +8978,25 @@ void showEvent(String setCond2,String setCond1,String setAct2,String setAct1){
   if(eventSetupPanel.eventList.getSelectedIndex()>-1){
      selEvent=(String)eventSetupPanel.eventList.getSelectedValue();
      if(!selEvent.equals(currentEvent) || eventTM.size()!=eventSetupPanel.eventListModel.size() || !selAct2.equalsIgnoreCase(selAct1) || !selCond2.equalsIgnoreCase(selCond1)){
-     eventSetupPanel.conditionListModel2.removeAllElements();
-     eventSetupPanel.actionListModel2.removeAllElements();
-     if(eventTM.get(selEvent)!=null){
-       String data[]=ylib.csvlinetoarray((String)eventTM.get(selEvent));
-       int cntCond=0,cntAct=0;
-       if(data.length>1 && data[1].length()>0) cntCond=Integer.parseInt(data[1]);
-       if(data.length>2 && data[2].length()>0) cntAct=Integer.parseInt(data[2]);
-       if(cntCond>0 && data.length>2+cntCond) {
-         for(int i=0;i<cntCond;i++) eventSetupPanel.conditionListModel2.addElement(data[3+i]);
-         if(setCond2.length()==0) eventSetupPanel.conditionList2.setSelectedIndex(0);
-         else eventSetupPanel.conditionList2.setSelectedValue(setCond2, true);
-         showCondition2(setCond1);
-       }
-       if(cntAct>0 && data.length>2+cntCond+cntAct) {
-         for(int i=0;i<cntAct;i++) eventSetupPanel.actionListModel2.addElement(data[3+cntCond+i]);
-         if(setAct2.length()==0) eventSetupPanel.actionList2.setSelectedIndex(0);
-         else eventSetupPanel.actionList2.setSelectedValue(setAct2, true);
-         showAction2(setAct1);
-       }
+       eventSetupPanel.conditionListModel2.removeAllElements();
+       eventSetupPanel.actionListModel2.removeAllElements();
+       if(eventTM.get(selEvent)!=null){
+         String data[]=ylib.csvlinetoarray((String)eventTM.get(selEvent));
+         int cntCond=0,cntAct=0;
+         if(data.length>1 && data[1].length()>0) cntCond=Integer.parseInt(data[1]);
+         if(data.length>2 && data[2].length()>0) cntAct=Integer.parseInt(data[2]);
+         if(cntCond>0 && data.length>2+cntCond) {
+           for(int i=0;i<cntCond;i++) eventSetupPanel.conditionListModel2.addElement(data[3+i]);
+           if(setCond2.length()==0) eventSetupPanel.conditionList2.setSelectedIndex(0);
+           else eventSetupPanel.conditionList2.setSelectedValue(setCond2, true);
+           showCondition2(setCond1);
+         }
+         if(cntAct>0 && data.length>2+cntCond+cntAct) {
+           for(int i=0;i<cntAct;i++) eventSetupPanel.actionListModel2.addElement(data[3+cntCond+i]);
+           if(setAct2.length()==0) eventSetupPanel.actionList2.setSelectedIndex(0);
+           else eventSetupPanel.actionList2.setSelectedValue(setAct2, true);
+           showAction2(setAct1);
+         }
      }
      currentEvent=selEvent;
     }
@@ -8966,7 +9015,7 @@ void showCondition(){
         eventSetupPanel.conditionList.setSelectedIndex(0);
       }
   }
-   showCondition1();
+        eventSetupPanel.showCondition1();
 }
 void showAction(){
   if(eventSetupPanel.actionList.getSelectedIndex()==-1){
@@ -9014,34 +9063,16 @@ String getNewAction(String key,String action){
     actionTM.put(newItem,ylib.arrayToCsvLine(newInfo));
     return newItem;
 }
-void showConditionItem(String sel){
-        eventSetupPanel.jPanel72.setVisible(false);
-        eventSetupPanel.jPanel124.setVisible(false);
-        eventSetupPanel.emptyPanel1.setVisible(false);
-
-      if(sel.equalsIgnoreCase("Data condition"))  eventSetupPanel.jPanel72.setVisible(true);
-      else if(sel.equalsIgnoreCase("Data checked by Java class")) eventSetupPanel.jPanel124.setVisible(true);
-      else eventSetupPanel.emptyPanel1.setVisible(true);
-
-      eventSetupPanel.jPanel73.setVisible(false);
-      eventSetupPanel.jPanel133.setVisible(false);
-      eventSetupPanel.jPanel134.setVisible(false);
-      eventSetupPanel.jPanel135.setVisible(false);
-      if(sel.equalsIgnoreCase("Data condition") || sel.equalsIgnoreCase("Any data") || sel.equalsIgnoreCase("Data checked by Java class")
-          || sel.equalsIgnoreCase("After connected") || sel.equalsIgnoreCase("After disconnected"))  {
-      eventSetupPanel.jPanel73.setVisible(true);
-
-      } else if(sel.equalsIgnoreCase("Over upper take-action level") || sel.equalsIgnoreCase("Under lower take-action level") 
-              || sel.equalsIgnoreCase("Over upper alert level") || sel.equalsIgnoreCase("Under lower alert level")){
-      eventSetupPanel.jPanel73.setVisible(true);
-      eventSetupPanel.jPanel133.setVisible(true);
-      eventSetupPanel.jPanel134.setVisible(true);
-      eventSetupPanel.jPanel135.setVisible(true);
-      }
-}
 void updateConditionItem(){
-        if(eventSetupPanel.conditionList.getSelectedIndex()>-1){
+    if(eventSetupPanel.conditionList.getSelectedIndex()>-1){
      String sel=(String)eventSetupPanel.conditionList.getSelectedValue();
+     if(conditionTM.get(sel)!=null){
+       String oldData[]=ylib.csvlinetoarray((String)conditionTM.get(sel));
+       if(oldData.length>2){
+          int an=JOptionPane.showConfirmDialog(this, "Confirm to replace '"+oldData[0]+"-"+oldData[2]+"' condition? ", "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+          if(an!=JOptionPane.YES_OPTION) return;
+        }
+     }
        String data[]=new String[condMaxArrCnt];
        for(int i=0;i<data.length;i++) data[i]="";
        data[0]=sel;
@@ -9050,6 +9081,98 @@ void updateConditionItem(){
        data[18]=(String)eventSetupPanel.jComboBox46.getSelectedItem();
        data[19]=(String)eventSetupPanel.jComboBox47.getSelectedItem();
        data[2]=(String)eventSetupPanel.jComboBox16.getSelectedItem();
+       if(data[2].equalsIgnoreCase("Schedule time")){
+               data[3]="1";
+               data[4]="1";
+               data[5]="";
+               data[6]="6";
+              if(eventSetupPanel.jCheckBox16.isSelected()){
+               data[7]=eventSetupPanel.jTextField17.getText();
+               data[8]=(String)eventSetupPanel.jComboBox12.getSelectedItem();
+               data[9]="";
+               data[10]=(String)eventSetupPanel.jComboBox13.getSelectedItem();
+               data[11]=(String)eventSetupPanel.jComboBox15.getSelectedItem();
+               data[12]=(String)eventSetupPanel.jComboBox17.getSelectedItem();
+               data[13]=(String)eventSetupPanel.jComboBox21.getSelectedItem();
+              } else {
+               data[7]="";
+               data[8]="";
+               data[9]="";
+               data[10]="";
+               data[11]="";
+               data[12]="";
+               data[13]="";
+              }
+              if(eventSetupPanel.jCheckBox17.isSelected()){
+               data[14]=eventSetupPanel.jTextField17.getText();
+               data[15]=(String)eventSetupPanel.jComboBox23.getSelectedItem();
+               data[16]="";
+               data[17]=(String)eventSetupPanel.jComboBox24.getSelectedItem();
+               data[18]=(String)eventSetupPanel.jComboBox25.getSelectedItem();
+               data[19]=(String)eventSetupPanel.jComboBox34.getSelectedItem();
+               data[20]=(String)eventSetupPanel.jComboBox35.getSelectedItem();
+              } else{
+               data[14]="";
+               data[15]="";
+               data[16]="";
+               data[17]="";
+               data[18]="";
+               data[19]="";
+               data[20]="";
+              }
+               data[21]=(eventSetupPanel.jRadioButton1.isSelected()? "0":(eventSetupPanel.jRadioButton2.isSelected()? "1":"0"));
+               if(eventSetupPanel.jRadioButton1.isSelected()){
+                 data[22]="0";
+                 data[23]="0";
+                 data[24]=(String)eventSetupPanel.jTextField9.getText();
+                 data[25]=(String)eventSetupPanel.jComboBox5.getSelectedItem();
+                 data[26]=(String)eventSetupPanel.jComboBox6.getSelectedItem();
+                 data[27]=(String)eventSetupPanel.jComboBox7.getSelectedItem();
+               } else if(eventSetupPanel.jRadioButton2.isSelected()){
+                 data[22]=(String)eventSetupPanel.jComboBox3.getSelectedItem();
+                 data[23]="0";
+                 data[24]=(String)eventSetupPanel.jComboBox4.getSelectedItem();
+                 data[25]=(String)eventSetupPanel.jComboBox10.getSelectedItem();
+                 data[26]=(String)eventSetupPanel.jComboBox8.getSelectedItem();
+                 data[27]=(String)eventSetupPanel.jComboBox9.getSelectedItem();
+               }
+           if(eventSetupPanel.jCheckBox2.isSelected()){
+               if(eventSetupPanel.jCheckBox3.isSelected()) data[23]=OneVar.add(data[23],1);
+               if(eventSetupPanel.jCheckBox9.isSelected()) data[23]=OneVar.add(data[23],2);
+               if(eventSetupPanel.jCheckBox10.isSelected()) data[23]=OneVar.add(data[23],3);
+               if(eventSetupPanel.jCheckBox12.isSelected()) data[23]=OneVar.add(data[23],4);
+               if(eventSetupPanel.jCheckBox13.isSelected()) data[23]=OneVar.add(data[23],5);
+               if(eventSetupPanel.jCheckBox14.isSelected()) data[23]=OneVar.add(data[23],6);
+               if(eventSetupPanel.jCheckBox15.isSelected()) data[23]=OneVar.add(data[23],7);
+           }
+                int onevar=0;
+     if(eventSetupPanel.jCheckBox19.isSelected()) onevar=OneVar.add(onevar,2);
+     if(eventSetupPanel.jCheckBox18.isSelected()) onevar=OneVar.add(onevar,3);
+               data[28]=""+onevar;
+               data[29]="";
+               data[30]="";
+               data[31]="";
+               data[32]="";
+               data[33]="";
+               data[34]="";
+               data[35]="";
+               data[36]="";
+               if(eventSetupPanel.jRadioButton1.isSelected()) data[37]="0";
+               else data[37]=eventSetupPanel.jTextField17.getText(); 
+               data[38]="";
+               data[39]="";
+               data[40]="";
+               data[41]="";
+               data[42]="";
+
+               data[38]=data[18];
+               data[39]=data[19];
+               data[42]=data[22];
+               data[18]=(String)eventSetupPanel.jComboBox46.getSelectedItem();
+               data[19]=(String)eventSetupPanel.jComboBox47.getSelectedItem();
+               data[22]=(String)eventSetupPanel.jComboBox48.getSelectedItem();
+
+       } else {
            data[3]=(String)eventSetupPanel.jComboBox20.getSelectedItem();
            data[4]=(String)eventSetupPanel.jComboBox26.getSelectedItem();
 
@@ -9072,7 +9195,10 @@ void updateConditionItem(){
            data[17]=eventSetupPanel.jTextField66.getText();
            data[20]=(String)eventSetupPanel.jComboBox39.getSelectedItem();
            data[21]=(String)eventSetupPanel.jComboBox43.getSelectedItem();
+           data[23]=eventSetupPanel.jTextField6.getText();
+       }
         conditionTM.put(sel, ylib.arrayToCsvLine(data));
+        if(data[2].equalsIgnoreCase("Schedule time")) scheduler.updateFromConditionItem(sel);
         updateExecEnv();
     }
 }
@@ -9100,7 +9226,14 @@ boolean updateActionItem(){
    }
     if(eventSetupPanel.actionList.getSelectedIndex()>-1){
      String sel=(String)eventSetupPanel.actionList.getSelectedValue();
-       String data[]=new String[actMaxArrCnt];
+     if(actionTM.get(sel)!=null){
+       String oldData[]=ylib.csvlinetoarray((String)actionTM.get(sel));
+       if(oldData.length>2){
+          int an=JOptionPane.showConfirmDialog(this, "Confirm to replace '"+oldData[0]+"-"+oldData[2]+"' action? ", "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
+          if(an!=JOptionPane.YES_OPTION) return false;
+        }
+     }      
+     String data[]=new String[actMaxArrCnt];
        for(int i=0;i<data.length;i++) data[i]="";
        data[0]=sel;
        data[1]=(String)eventSetupPanel.jComboBox19.getSelectedItem();
@@ -9192,6 +9325,14 @@ boolean updateActionItem(){
        data[80]=eventSetupPanel.jTextField75.getText();
        data[81]=eventSetupPanel.jTextField79.getText();
        data[82]=eventSetupPanel.jTextField81.getText();
+       if(eventSetupPanel.jCheckBox1.isSelected()) data[83]="Y" ;
+           else  data[83]="N";
+       data[84]=eventSetupPanel.jTextField2.getText();
+       data[85]=eventSetupPanel.jTextField3.getText();
+       data[86]=(String)eventSetupPanel.jComboBox1.getSelectedItem();
+       data[87]=eventSetupPanel.jTextField5.getText();
+       data[88]=eventSetupPanel.jTextField7.getText();
+       data[89]=eventSetupPanel.jTextField8.getText();
        actionTM.put(sel,ylib.arrayToCsvLine(data));
        chkAndAdjustEvents();
        rtn=true;
@@ -9844,6 +9985,10 @@ void eventRemoveCondition(String key,String cond){
             for(int j=0;j<i;j++) data2[3+j]=data[3+j];
             for(int j=4+i;j<data.length;j++) data2[j-1]=data[j];
             eventTM.put(key, ylib.arrayToCsvLine(data2));
+            if(conditionTM.get(cond)!=null){
+                String condData[]=ylib.csvlinetoarray((String)conditionTM.get(cond));
+                if(condData.length>2 && condData[2].equalsIgnoreCase("Schedule time")) scheduler.scheduleTM.remove(key);
+            }
             break;
           }
         }
@@ -9869,60 +10014,63 @@ void eventAddAction(String key,String act){
     eventSetAction(key,actionTM);
 }
 
-void eventSetCondition(String key,TreeMap tm){
+void eventSetCondition(String eventKey,TreeMap condTM){
     String data[]=new String[eventMaxArrCnt];
-    int cnt=0,cnt2=0;
+    int condiCnt=0,actCnt=0;
     TreeMap actionTM=new TreeMap();
     for(int i=0;i<data.length;i++) data[i]="";
-    data[0]=key;
-    data[2]="0";
-    if(eventTM.get(key)!=null){
-      String data2[]=ylib.csvlinetoarray((String)eventTM.get(key));
-      cnt=Integer.parseInt(data2[1]);
-      cnt2=Integer.parseInt(data2[2]);
-      for(int i=cnt+3,j=0;j<cnt2 && i<data.length && i<data2.length;i++) actionTM.put(data2[i], data2[i]);
-    } else {
-      cnt=0;
+    data[0]=eventKey;
+    int inxLen=0;
+    if(eventTM.get(eventKey)!=null){
+      String data2[]=ylib.csvlinetoarray((String)eventTM.get(eventKey));
+      condiCnt=Integer.parseInt(data2[1]);
+      actCnt=Integer.parseInt(data2[2]);
+      for(int i=condiCnt+3,j=0;j<actCnt && i<data.length && i<data2.length;i++) {
+          inxLen=String.valueOf(i).length();
+          if(inxLen>3) inxLen=3;
+          actionTM.put(zero(3-inxLen)+i, data2[i]);
+      }
     }
-    data[1]=""+tm.size();
+    data[1]=""+condTM.size();
     data[2]=""+actionTM.size();
-    cnt=tm.size();
-    Iterator it=tm.keySet().iterator();
+    condiCnt=condTM.size();
+    Iterator it=condTM.values().iterator();
     int inx=0;
     for(;it.hasNext();){
        data[3+inx]=(String)it.next();
        inx++;   
     }
-    it=actionTM.keySet().iterator();
+    it=actionTM.values().iterator();
     inx=0;
     for(;it.hasNext();){
-       data[3+cnt+inx]=(String)it.next();
+       data[3+condiCnt+inx]=(String)it.next();
        inx++;   
     }
-    eventTM.put(key, ylib.arrayToCsvLine(data));
+    eventTM.put(eventKey, ylib.arrayToCsvLine(data));
     showEvent();
 }
 
-void eventSetAction(String key,TreeMap tm){
+void eventSetAction(String key,TreeMap actionTM){
     String data[]=new String[eventMaxArrCnt];
-    int cnt=0,cnt2=0;
+    int condCnt=0,actCnt=0,inx=0,inxLen=1;
     for(int i=0;i<data.length;i++) data[i]="";
     data[0]=key;
     data[1]="0";
     if(eventTM.get(key)!=null){
       String data2[]=ylib.csvlinetoarray((String)eventTM.get(key));
-      cnt=Integer.parseInt(data2[1]);
-      for(int i=0;i<cnt+3 && i<data.length && i<data2.length;i++) data[i]=data2[i];
-      for(int i=cnt+3;i<cnt+3 && i<data.length && i<data2.length;i++) data[i]="";
+      data[1]=data2[1];
+      condCnt=Integer.parseInt(data2[1]);
+      for(int i=0;i<condCnt+3 && i<data.length && i<data2.length;i++) data[i]=data2[i];
+      for(int i=condCnt+3;i<data.length && i<data2.length;i++) data[i]="";
     } else {
-      cnt=0;
+      condCnt=0;
     }
-    data[2]=""+tm.size();
-    cnt2=tm.size();
-    Iterator it=tm.keySet().iterator();
-    int inx=0;
+    data[2]=""+actionTM.size();
+    actCnt=actionTM.size();
+    Iterator it=actionTM.values().iterator();
+    inx=0;
     for(;it.hasNext();){
-       data[3+cnt+inx]=(String)it.next();
+       data[3+condCnt+inx]=(String)it.next();
        inx++;   
     }
     eventTM.put(key, ylib.arrayToCsvLine(data));
@@ -9956,73 +10104,16 @@ void eventRemoveAction(String key,String act){
      String sel=(String)eventSetupPanel.conditionList2.getSelectedValue();
      if(setCond1.length()>0 && !setCond1.equals(currentCondition1)){
        eventSetupPanel.conditionList.setSelectedValue(setCond1, true);
-       showCondition1();
+                eventSetupPanel.showCondition1();
      } else if(!sel.equals(currentCondition2)){
        eventSetupPanel.conditionList.setSelectedValue(sel, true);
-       showCondition1();
+                eventSetupPanel.showCondition1();
+     }else if(!sel.equals((String)eventSetupPanel.conditionList.getSelectedValue())){
+       eventSetupPanel.conditionList.setSelectedValue(sel, true);
+                eventSetupPanel.showCondition1();
      }
      currentCondition2=sel;
   } else currentCondition2="";
-}
-void showCondition1(){
-    if(eventSetupPanel.conditionList.getSelectedIndex()>-1){
-     String sel=(String)eventSetupPanel.conditionList.getSelectedValue();
-     if(!sel.equals(currentCondition1)){
-     if(conditionTM.get(sel)!=null){
-       String data[]=ylib.csvlinetoarray((String)conditionTM.get(sel));
-       if(data.length>1) eventSetupPanel.jComboBox14.setSelectedItem(data[1]);
-       if(data.length>22) eventSetupPanel.jComboBox48.setSelectedItem(data[22]);
-       if(data.length>18) eventSetupPanel.jComboBox46.setSelectedItem(data[18]);
-       if(data.length>19) eventSetupPanel.jComboBox47.setSelectedItem(data[19]);
-       if(data.length>2) {
-         eventSetupPanel.jComboBox16.setSelectedItem(data[2]);
-         if(data[2].equalsIgnoreCase("Data condition")) {
-           eventSetupPanel.jPanel72.setVisible(true);
-           if(data.length>3) eventSetupPanel.jComboBox20.setSelectedItem(data[3]);
-           if(data.length>4) {
-             eventSetupPanel.jComboBox26.setSelectedItem(data[4]);
-             if(data.length>5 && data[4].equalsIgnoreCase("Fixed column length")) {
-               eventSetupPanel.jTextField46.setText(data[5]);
-               eventSetupPanel.jLabel130.setVisible(true);
-               eventSetupPanel.jTextField46.setVisible(true);
-             } else {
-               eventSetupPanel.jLabel130.setVisible(true);
-               eventSetupPanel.jTextField46.setVisible(true);
-             } 
-           }
-           if(data.length>4 && !data[4].equalsIgnoreCase("Whole line")){
-               eventSetupPanel.jLabel93.setVisible(true);
-               eventSetupPanel.jTextField13.setVisible(true);
-               if(data.length>6) eventSetupPanel.jTextField13.setText(data[6]);
-           } else {
-               eventSetupPanel.jLabel93.setVisible(false);
-               eventSetupPanel.jTextField13.setVisible(false);
-           }
-           if(data.length>7 && wn.w.chkValue(data[7])) eventSetupPanel.jCheckBox35.setSelected(true);
-           else  eventSetupPanel.jCheckBox35.setSelected(false);
-           if(data.length>8) eventSetupPanel.jTextField4.setText(data[8]);
-           if(data.length>9) eventSetupPanel.jTextField12.setText(data[9]);
-           if(data.length>10) eventSetupPanel.jComboBox27.setSelectedItem(data[10]);
-           if(data.length>11) eventSetupPanel.jTextField14.setText(data[11]);
-           if(data.length>12 && wn.w.chkValue(data[12])) eventSetupPanel.jCheckBox30.setSelected(true);
-           else  eventSetupPanel.jCheckBox30.setSelected(false);
-            if(data.length>13) eventSetupPanel.jTextField55.setText(data[13]);
-           if(data.length>14 && wn.w.chkValue(data[14])) eventSetupPanel.jCheckBox31.setSelected(true);
-           else  eventSetupPanel.jCheckBox31.setSelected(false);
-           if(data.length>15 && wn.w.chkValue(data[15])) eventSetupPanel.jCheckBox32.setSelected(true);
-           else  eventSetupPanel.jCheckBox32.setSelected(false);
-           if(data.length>16) eventSetupPanel.jTextField65.setText(data[16]);
-           if(data.length>17) eventSetupPanel.jTextField66.setText(data[17]);
-           if(data.length>20) eventSetupPanel.jComboBox39.setSelectedItem(data[20]);
-           if(data.length>21) eventSetupPanel.jComboBox43.setSelectedItem(data[21]);
-           showConditionItem(data[2]);
-         }
-         else eventSetupPanel.jPanel72.setVisible(false);
-       }
-     currentCondition1=sel;
-     } else sysLog("Condition id '"+sel+"' not found in conditionTM.");
-     }
-  } else currentCondition1="";
 }
 
 void showAction2(String setAct1){
@@ -10034,6 +10125,9 @@ void showAction2(String setAct1){
      } else if(!sel.equals(currentAction2)){
      eventSetupPanel.actionList.setSelectedValue(sel, true);
      showAction1();
+     } else if(!sel.equals((String)eventSetupPanel.actionList.getSelectedValue())){
+       eventSetupPanel.actionList.setSelectedValue(sel, true);
+       showAction1();
      }
      currentAction2=sel;
   } else currentAction2="";
@@ -10055,7 +10149,7 @@ void showAction1(){
            if(data.length>3) eventSetupPanel.jComboBox28.setSelectedItem(data[3]);
            if(data.length>4) {
              eventSetupPanel.jComboBox29.setSelectedItem(data[4]);
-             if(data.length>5 && data[4].equalsIgnoreCase("Fixed column length")) {
+             if(data.length>5 && data[4].equalsIgnoreCase("Fixed field length")) {
                eventSetupPanel.jTextField56.setText(data[5]);
                eventSetupPanel.jLabel79.setVisible(true);
                eventSetupPanel.jTextField56.setVisible(true);
@@ -10110,7 +10204,7 @@ void showAction1(){
            if(data.length>43) eventSetupPanel.jComboBox32.setSelectedItem(data[43]);
            if(data.length>44) {
              eventSetupPanel.jComboBox41.setSelectedItem(data[44]);
-             if(data.length>45 && data[44].equalsIgnoreCase("Fixed column length")) {
+             if(data.length>45 && data[44].equalsIgnoreCase("Fixed field length")) {
                eventSetupPanel.jTextField57.setText(data[45]);
                eventSetupPanel.jLabel111.setVisible(true);
                eventSetupPanel.jTextField57.setVisible(true);
@@ -10155,6 +10249,8 @@ void showAction1(){
            else  eventSetupPanel.jCheckBox40.setSelected(false);
            if(data.length>68) eventSetupPanel.jTextField68.setText(data[68]);
            if(data.length>69) eventSetupPanel.jTextField69.setText(data[69]);
+           if(data.length>88) eventSetupPanel.jTextField7.setText(data[88]);
+           if(data.length>89) eventSetupPanel.jTextField8.setText(data[89]);
 
          }
          if(data.length>63) eventSetupPanel.jTextField1.setText(data[63]);
@@ -10164,7 +10260,7 @@ void showAction1(){
            if(data.length>73) eventSetupPanel.jComboBox33.setSelectedItem(data[73]);
            if(data.length>74) {
              eventSetupPanel.jComboBox42.setSelectedItem(data[74]);
-             if(data.length>75 && data[74].equalsIgnoreCase("Fixed column length")) {
+             if(data.length>75 && data[74].equalsIgnoreCase("Fixed field length")) {
                eventSetupPanel.jTextField61.setText(data[75]);
                eventSetupPanel.jLabel115.setVisible(true);
                eventSetupPanel.jTextField61.setVisible(true);
@@ -10199,6 +10295,12 @@ void showAction1(){
            if(data.length>14 && wn.w.chkValue(data[14])) eventSetupPanel.jCheckBox11.setSelected(true);
            else  eventSetupPanel.jCheckBox11.setSelected(false);
            if(data.length>15) eventSetupPanel.jTextField32.setText(data[15]);
+           if(data.length>83 && wn.w.chkValue(data[83])) eventSetupPanel.jCheckBox1.setSelected(true);
+           else  eventSetupPanel.jCheckBox1.setSelected(false);
+           if(data.length>84) eventSetupPanel.jTextField2.setText(data[84]);
+           if(data.length>85) eventSetupPanel.jTextField3.setText(data[85]);
+           if(data.length>86) eventSetupPanel.jComboBox1.setSelectedItem(data[86]);
+           if(data.length>87) eventSetupPanel.jTextField5.setText(data[87]);
          }
 
          if(data[2].equalsIgnoreCase("Open URL") && data.length>70) eventSetupPanel.jTextField54.setText(data[70]);
@@ -10729,6 +10831,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JMenuItem helpMenuItem03;
     private javax.swing.JMenuItem helpMenuItem04;
     private javax.swing.JMenuItem helpMenuItem05;
+    private javax.swing.JPanel historyDataPanel;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton10;
     private javax.swing.JButton jButton11;
@@ -10847,7 +10950,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
-    private javax.swing.JMenuBar jMenuBar1;
+    public javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JMenuItem jMenuItem2;
     private javax.swing.JMenuItem jMenuItem20;

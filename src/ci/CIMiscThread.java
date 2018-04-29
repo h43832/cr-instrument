@@ -84,6 +84,10 @@ CrInstrument instrument;
   }
 
   void sendCmd(String actInfo[],int type){
+    if(instrument.getDataSrcFromStation(actInfo[1])==null) {
+        instrument.log("Warning: cannot send command, because cannot get data source from station \""+actInfo[1]+"\".", true);
+        return;
+    }
   String cmd="";
   if(actInfo.length>37 && actInfo[36]!=null && actInfo[36].equalsIgnoreCase("Y") && actInfo[37].length()>0){
     if(((CIDataGenerator)instrument.jClasses.get(actInfo[37]))==null){

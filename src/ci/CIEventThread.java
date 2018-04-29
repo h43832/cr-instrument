@@ -39,9 +39,9 @@ CrInstrument instrument;
 
                   if(cond[1].equalsIgnoreCase((String)instrument.ports.get(dataClass.dataSrc))){
 
-                     if(cond.length>11 && cond[2].trim().equalsIgnoreCase("Data Condition") && cond[11].length()>0){
+                     if(cond.length>17 && cond[2].trim().equalsIgnoreCase("Device data")){
 
-                       if(cond[3].trim().equalsIgnoreCase("Byte data")){
+                       if(cond[3].trim().equalsIgnoreCase("Byte data") && (cond[12].equalsIgnoreCase("Y") || (cond[15].equalsIgnoreCase("Y") && cond[17].length()>0))){
                          if(instrument.wn.w.chkValue(cond[7])){
                            int from=Integer.parseInt(cond[8]);
                            int to2=Integer.parseInt(cond[9]);
@@ -55,7 +55,7 @@ CrInstrument instrument;
                              dataX=instrument.wn.byteToStr(b2);
 
                          } else dataX=dataHex;
-                       } else if(cond[3].trim().equalsIgnoreCase("String data")){
+                       } else if(cond[3].trim().equalsIgnoreCase("String data") && (cond[12].equalsIgnoreCase("Y") || (cond[14].equalsIgnoreCase("Y") && cond[16].length()>0) || (cond[15].equalsIgnoreCase("Y") && cond[17].length()>0))){
                           if(cond[4].trim().equalsIgnoreCase("Whole line")){
                             dataX=dataStr;
                           } else {
@@ -64,7 +64,7 @@ CrInstrument instrument;
                               str=dataStr.split(" ");
                             } else if(cond[4].trim().equalsIgnoreCase("Separated by ','")){
                               str=ylib.csvlinetoarray(dataStr);
-                            } else if(cond[4].trim().equalsIgnoreCase("Fixed column length")){
+                            } else if(cond[4].trim().equalsIgnoreCase("Fixed field length")){
                                int len=Integer.parseInt(cond[5]);
                                int cnt=dataStr.length()/len + (dataStr.length()%len >0 ? 1:0);
                                str=new String[cnt];
@@ -96,7 +96,7 @@ CrInstrument instrument;
                            dataX=dataX.substring(from-1, to2);
                            }
 
-                       }  else if(cond[3].trim().equalsIgnoreCase("Byte string data")){
+                       }  else if(cond[3].trim().equalsIgnoreCase("Byte string data") && (cond[12].equalsIgnoreCase("Y") || (cond[15].equalsIgnoreCase("Y") && cond[17].length()>0))){
                             dataX=ylib.replace(dataHex," ","");
 
                            if(instrument.wn.w.chkValue(cond[7])){
@@ -254,6 +254,7 @@ CrInstrument instrument;
                    else if(status==89 && cond[2].trim().equalsIgnoreCase("Message 08 confirmed NO")){}
                    else if(status==90 && cond[2].trim().equalsIgnoreCase("Message 09 confirmed NO")){}
                    else if(status==91 && cond[2].trim().equalsIgnoreCase("Message 10 confirmed NO")){}
+                   else if(status==92 && evt[0].equals(dataClass.dataSrc) && cond[2].trim().equalsIgnoreCase("Schedule time")){}
                    else if(cond[2].trim().equalsIgnoreCase("and checkbox 01 checked") && instrument.framePanel2.checkBox01.isSelected()){}
                    else if(cond[2].trim().equalsIgnoreCase("and checkbox 02 checked") && instrument.framePanel2.checkBox02.isSelected()){}
                    else if(cond[2].trim().equalsIgnoreCase("and checkbox 03 checked") && instrument.framePanel2.checkBox03.isSelected()){}
@@ -363,6 +364,7 @@ CrInstrument instrument;
     waitData.add(dataClass);
     if(isSleep) this.interrupt();
 }
+
    public void setStatus(String nodeId,String dataSrc,int statusCode){
 
     CIDataClass dataClass=new CIDataClass((long)statusCode,dataSrc,nodeId);
