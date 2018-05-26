@@ -9,12 +9,10 @@ import java.util.TreeMap;
 import java.util.Vector;
 import javax.swing.JOptionPane;
 import wsn.WSN;
+import y.base64.YB642D;
+import y.ylib.windowscommand2;
 import y.ylib.ylib;
 
-/**
- *
- * @author peter
- */
 public class CIActionThread extends Thread {
 CrInstrument instrument;
   Vector waitV=new Vector();
@@ -502,11 +500,11 @@ CrInstrument instrument;
                  boolean sendMail=false,sendSMS=false;
                  if (dataValue > d7){
                    if(instrument.chkProps("up-action-email")) {
-                     newActionTM.put(getActionCode(key,"Send email message"),"");
+                     newActionTM.put(getActionCode(key,"Send A-email message"),"");
                      sendMail=true;
                    } 
                    if(instrument.chkProps("up-action-sms")) {
-                     newActionTM.put(getActionCode(key,"Send SMS message to cell phone"),"");
+                     newActionTM.put(getActionCode(key,"Send A-SMS message to mobile phone"),"");
                      sendSMS=true;
                    } 
                    if(instrument.chkProps("alert-sound-on")) {
@@ -523,8 +521,8 @@ CrInstrument instrument;
                            newActionTM.put(actions[i],"");
                          if(instrument.actionTM.get(actions[i])!=null){
                            String actInfo[]=ylib.csvlinetoarray((String)instrument.actionTM.get(actions[i]));
-                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send email message")) sendMail=true;
-                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send SMS message to cell phone")) sendSMS=true;
+                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send A-email message")) sendMail=true;
+                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send A-SMS message to mobile phone")) sendSMS=true;
 
                          }
                          }
@@ -540,11 +538,11 @@ CrInstrument instrument;
                  }
                  else if(dataValue < d8) {
                    if(instrument.chkProps("down-action-email")) {
-                     newActionTM.put(getActionCode(key,"Send email message"),"");
+                     newActionTM.put(getActionCode(key,"Send A-email message"),"");
                      sendMail=true;
                    }
                    if(instrument.chkProps("down-action-sms")) {
-                     newActionTM.put(getActionCode(key,"Send SMS message to cell phone"),"");
+                     newActionTM.put(getActionCode(key,"Send A-SMS message to mobile phone"),"");
                      sendSMS=true;
                    } 
                    if(instrument.chkProps("alert-sound-on")) {
@@ -561,8 +559,8 @@ CrInstrument instrument;
                            newActionTM.put(actions[i],"");
                          if(instrument.actionTM.get(actions[i])!=null){
                            String actInfo[]=ylib.csvlinetoarray((String)instrument.actionTM.get(actions[i]));
-                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send email message")) sendMail=true;
-                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send SMS message to cell phone")) sendSMS=true;
+                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send A-email message")) sendMail=true;
+                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send A-SMS message to mobile phone")) sendSMS=true;
 
                          }
                          }
@@ -578,11 +576,11 @@ CrInstrument instrument;
                  }
                  else if (dataValue > d5){
                    if(instrument.chkProps("up-alarm-email")) {
-                     newActionTM.put(getActionCode(key,"Send email message"),"");
+                     newActionTM.put(getActionCode(key,"Send A-email message"),"");
                      sendMail=true;
                    } 
                    if(instrument.chkProps("up-alarm-sms")) {
-                     newActionTM.put(getActionCode(key,"Send SMS message to cell phone"),"");
+                     newActionTM.put(getActionCode(key,"Send A-SMS message to mobile phone"),"");
                      sendSMS=true;
                    } 
                    if(instrument.chkProps("alert-sound-on")) {
@@ -599,8 +597,8 @@ CrInstrument instrument;
                            newActionTM.put(actions[i],"");
                          if(instrument.actionTM.get(actions[i])!=null){
                            String actInfo[]=ylib.csvlinetoarray((String)instrument.actionTM.get(actions[i]));
-                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send email message")) sendMail=true;
-                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send SMS message to cell phone")) sendSMS=true;
+                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send A-email message")) sendMail=true;
+                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send A-SMS message to mobile phone")) sendSMS=true;
 
                          }
                          }
@@ -616,11 +614,11 @@ CrInstrument instrument;
                  } 
                  else if(dataValue < d6){
                    if(instrument.chkProps("down-alarm-email")) {
-                     newActionTM.put(getActionCode(key,"Send email message"),"");
+                     newActionTM.put(getActionCode(key,"Send A-email message"),"");
                      sendMail=true;
                    } 
                    if(instrument.chkProps("down-alarm-sms")) {
-                     newActionTM.put(getActionCode(key,"Send SMS message to cell phone"),"");
+                     newActionTM.put(getActionCode(key,"Send A-SMS message to mobile phone"),"");
                      sendSMS=true;
                    }                    
 
@@ -638,8 +636,8 @@ CrInstrument instrument;
                            newActionTM.put(actions[i],"");
                          if(instrument.actionTM.get(actions[i])!=null){
                            String actInfo[]=ylib.csvlinetoarray((String)instrument.actionTM.get(actions[i]));
-                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send email message")) sendMail=true;
-                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send SMS message to cell phone")) sendSMS=true;
+                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send A-email message")) sendMail=true;
+                           if(actInfo.length>2 && actInfo[2].equalsIgnoreCase("Send A-SMS message to mobile phone")) sendSMS=true;
 
                          }
                          }
@@ -733,12 +731,12 @@ CrInstrument instrument;
                 instrument.textValue=textValue;
             }
 
-            else if(act[2].trim().equalsIgnoreCase("Send email message")){
+            else if(act[2].trim().equalsIgnoreCase("Send A-email message")){
               if(instrument.emailMsg.toString().length()>0){
               if(instrument.chkEmailTime()){
               instrument.waitThread.setWork(1, instrument.emailMsg.toString());
               } else {
-                  instrument.sysLog("email inform (not sent, for time interval reason): " + instrument.emailMsg.toString());
+                  instrument.sysLog("email failed (not sent, for time interval reason), interval: "+instrument.getPropsLong("email-time-h")+":"+instrument.getPropsLong("email-time-m")+":00, msg: " + instrument.emailMsg.toString());
               }
               instrument.emailMsg.delete(0,instrument.emailMsg.length());
               instrument.firstEmailMsg = true;
@@ -746,14 +744,39 @@ CrInstrument instrument;
                   instrument.waitThread.setWork(1, "Email empty data, using action function.");
               }
             }
-            else if(act[2].trim().equalsIgnoreCase("Send SMS message to cell phone")){
+            else if(act[2].trim().equalsIgnoreCase("Send email message")){
+              String msg=getTextValue(YB642D.decode(act[63]),""+dataValue,textValue);
+              if(msg.length()>0){
+              if(instrument.chkEmailTime()){
+              instrument.waitThread.setWork(1, msg);
+              } else {
+                  instrument.sysLog("email failed (not sent, for time interval reason), interval: "+instrument.getPropsLong("email-time-h")+":"+instrument.getPropsLong("email-time-m")+":00, msg: " + msg);
+              }
+              instrument.firstEmailMsg = true;
+              } else {
+                  instrument.waitThread.setWork(1, "Email empty data, using action function.");
+              }
+            }
+            else if(act[2].trim().equalsIgnoreCase("Send A-SMS message to mobile phone")){
               if(instrument.smsMsg.toString().length()>0){
               if(instrument.chkSmsTime()){
               instrument.waitThread.setWork(2, instrument.smsMsg.toString());
               } else {
-                  instrument.sysLog("sms inform (not sent, for time interval reason): " + instrument.smsMsg.toString());
+                  instrument.sysLog("sms failed (not sent, for time interval reason), interval: "+instrument.getPropsLong("sms-time-h")+":"+instrument.getPropsLong("sms-time-m")+":00, msg: " + instrument.smsMsg.toString());
               }
               instrument.smsMsg.delete(0,instrument.smsMsg.length());
+              instrument.firstSmsMsg = true;
+              } else {
+                  instrument.waitThread.setWork(2, "SMS empty data, using action function.");
+              }
+            }else if(act[2].trim().equalsIgnoreCase("Send SMS message to mobile phone")){
+              String msg=getTextValue(YB642D.decode(act[63]),""+dataValue,textValue);
+              if(msg.length()>0){
+              if(instrument.chkSmsTime()){
+              instrument.waitThread.setWork(2, msg);
+              } else {
+                  instrument.sysLog("sms failed (not sent, for time interval reason), interval: "+instrument.getPropsLong("sms-time-h")+":"+instrument.getPropsLong("sms-time-m")+":00, msg:" + msg);
+              }
               instrument.firstSmsMsg = true;
               } else {
                   instrument.waitThread.setWork(2, "SMS empty data, using action function.");
@@ -821,6 +844,18 @@ CrInstrument instrument;
             }
             else if(act[2].trim().equalsIgnoreCase("Java class")){
               instrument.miscThread.setData(4,act[0],actionDataClass.dataClass.data);
+            }else if(act[2].trim().equalsIgnoreCase("Log")){
+              instrument.log(getTextValue(act[63],""+dataValue,textValue));
+            }else if(act[2].trim().equalsIgnoreCase("Operating system command")){
+                act[72]=""+dataValue;
+                act[76]=textValue;
+                instrument.miscThread.setData(16,act[0],actionDataClass.dataClass.data);
+            }else if(act[2].trim().equalsIgnoreCase("FTP upload")){
+              instrument.miscThread.setData(13,act[0],actionDataClass.dataClass.data);
+            }else if(act[2].trim().equalsIgnoreCase("FTP download")){
+              instrument.miscThread.setData(14,act[0],actionDataClass.dataClass.data);
+            }else if(act[2].trim().equalsIgnoreCase("FTP delete")){
+              instrument.miscThread.setData(15,act[0],actionDataClass.dataClass.data);
             }
             else if(act[2].trim().equalsIgnoreCase("Open URL")){
               instrument.miscThread.setData(3,"dataSrc",act[70]);
@@ -828,6 +863,8 @@ CrInstrument instrument;
                 instrument.soundThread.setAction("2,"+instrument.getPropsString("alert-sound-times")+","+instrument.getPropsString("alert-sound-file")+","+instrument.getPropsString("alert-sound-interval")+",1");
             } else if(act[2].trim().equalsIgnoreCase("Action sound alarm")){
                 instrument.soundThread.setAction("2,"+instrument.getPropsString("action-sound-times")+","+instrument.getPropsString("action-sound-file")+","+instrument.getPropsString("action-sound-interval")+",1");
+            } else if(act[2].trim().equalsIgnoreCase("Play sound")){
+                instrument.soundThread.setAction("2,"+act[9]+","+act[8]+","+act[11]+",1");
             } else if(act[2].trim().equalsIgnoreCase("Pause")){
                 try{
                     long p=0;

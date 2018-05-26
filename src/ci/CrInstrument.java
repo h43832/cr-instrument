@@ -37,9 +37,9 @@ import javax.swing.text.StyleConstants;
  * @author Administrator
  */
 public class CrInstrument extends WSNApplication implements Runnable {
-  public static String version = "2.18.0005";
+  public static String version = "2.18.0009";
   public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-  String versionTime = "20180429-110000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
+  String versionTime = "20180526-170000 ", propFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_pro.txt", newversion = "",
           stationFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_stations.txt",
           sensorFile = "apps" + File.separator + "cr-wsn" + File.separator + "ci_sensors.txt",currentViewDSrc="",
           statusFile = System.getProperty("user.home") + File.separator + "ci_status.txt", 
@@ -68,7 +68,8 @@ public class CrInstrument extends WSNApplication implements Runnable {
 
   boolean firstEmailMsg = true, firstSmsMsg = true,allDevice_mode=false;
   public y.ylib.OpenURL openURL=new y.ylib.OpenURL();
-  CIAbout about;
+  CIAboutCI aboutCI;
+  CIAboutAp aboutAp;
   NumberFormat numberFormat = new DecimalFormat("############0.0################################################");
   MgntDialog mgntDialog;
   UserDialog userDialog;
@@ -105,7 +106,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
   boolean modifySensors = false, cycleOn = false, connected = false, updateHistoryRecord = false, adminLogin = false, userLogin = false,
           initStage = true,  updateLayoutAll=true,updateUILayoutAll=true,updateUIDALayoutAll=true,
           changeSensor = false, changeStation = false, isSleep = false, hasNewVersion = false,
-          skipUICBBChanged=false;
+          skipUICBBChanged=false,skipUITFChanged=false;
 
   GMailThread2 gm2 = new GMailThread2();
 
@@ -190,6 +191,15 @@ public class CrInstrument extends WSNApplication implements Runnable {
             }
     });
     initComponents();
+    setupTabTraversalKeys(jTabbedPane1);
+    setupTabTraversalKeys(jTabbedPane2);
+    setupTabTraversalKeys(jTabbedPane3);
+    jTabbedPane1.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("LEFT"), "none");
+    jTabbedPane1.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("RIGHT"), "none");
+    jTabbedPane2.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("LEFT"), "none");
+    jTabbedPane2.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("RIGHT"), "none");
+    jTabbedPane3.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("LEFT"), "none");
+    jTabbedPane3.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("RIGHT"), "none");
     dFrame=new DataViewFrame(this);
     eventSetupPanel=new CIEventSetupPanel(this);
     chartSetupPanel=new CIChartSetupPanel(this);
@@ -213,8 +223,7 @@ public class CrInstrument extends WSNApplication implements Runnable {
 
     setTitle("cr-Instrument " + version);
 
-    iconImage = new ImageIcon(getClass().getClassLoader().getResource("cr_instrument_t.gif")).getImage();
-    setIconImage(iconImage);
+    updateLogoUI();
 
     receiveList.setPrototypeCellValue("256.256.256.256:tcpclient@256.256.256.256:68999 -yyy");
     sendList.setPrototypeCellValue("256.256.256.256:tcpclient@256.256.256.256:68999 -yyy");
@@ -798,15 +807,15 @@ public class CrInstrument extends WSNApplication implements Runnable {
         }
       } catch (IOException e) {
 
-        sysLog("reading file (filename=" + uiFile + ") IOException, error message: " + e.getMessage() + "\r\n");
+        sysLog("Error: reading file (filename=" + uiFile + ") IOException, error message: " + e.getMessage() + "\r\n");
         e.printStackTrace();
       } catch (Exception e) {
 
-        sysLog("reading file (filename=" + uiFile + ") error, error message: " + e.getMessage() + "\n");
+        sysLog("Error: reading file (filename=" + uiFile + ") error, error message: " + e.getMessage() + "\n");
         e.printStackTrace();
       }
-      } else sysLog("ui file "+uiFile+" not found.");
-    } else sysLog("ui-file undefied.");
+      } else sysLog("Info: ui file "+uiFile+" not found.");
+    } else sysLog("Warning: ui-file undefied.");
     if(currentUI.size()<1) currentUI=(TreeMap)defaultUI.clone();
   }
   void readCurves() {
@@ -1474,7 +1483,8 @@ public void updateList(){
   sendListModel.clear();
   receiveListModel.addElement(allItemsName);
   sendListModel.addElement(allItemsName);
-  TreeMap nMapClone=(TreeMap)nameIdMap.clone();
+
+  TreeMap nMapClone=nameIdMap;
   Iterator it=nMapClone.keySet().iterator();
   for(;it.hasNext();){
     String key=(String)it.next();
@@ -1628,7 +1638,7 @@ public Config getConfig(String curveId){
       int cntA=(WSN.isNumeric(evt[2])? Integer.parseInt(evt[2]):0);
       for(int i=0;i<cntA;i++){
         String act[]=ylib.csvlinetoarray((String)actionTM.get(evt[3+cntD+i]));
-        if(act!=null && act.length>17 && act[1].equalsIgnoreCase(tmp[0]) && act[39].equalsIgnoreCase(tmp[1]) && act[16].equalsIgnoreCase(tmp[2]) && act[17].equalsIgnoreCase(tmp[4]) && act[2].equalsIgnoreCase("Set data value")){
+        if(act!=null && act.length>17 && tmp.length>4 && act[1].equalsIgnoreCase(tmp[0]) && act[39].equalsIgnoreCase(tmp[1]) && act[16].equalsIgnoreCase(tmp[2]) && act[17].equalsIgnoreCase(tmp[4]) && act[2].equalsIgnoreCase("Set data value")){
             confA[1]=(act[25].equalsIgnoreCase("Y")? wn.w.addOneVar(confA[1],13):confA[1]);
             confA[1]=(act[23].equalsIgnoreCase("Y")? wn.w.addOneVar(confA[1],57):confA[1]);
             confA[13]=act[24];
@@ -2434,11 +2444,66 @@ public void dataLog(CIDataClass dataClass){
                    e.printStackTrace();
                }
 }
+
+    String chkCopyrightNotices() {
+        String msg = "";
+        String title = "cr-Instrument";
+        if (currentUI.get("frame") != null) {
+            String[] info = ylib.csvlinetoarray((String) currentUI.get("frame"));
+            if(info.length>26){
+            if (info.length > 10 && info[10].equalsIgnoreCase("c") && info[1].trim().length() > 0) {
+                title = info[1].trim();
+            }
+            String logoFile=info[19].trim().toLowerCase();
+            String qrcodeFile=info[21].trim().toLowerCase();
+            String webaddress=info[25].trim().toLowerCase();
+            if (info[18].equalsIgnoreCase("s") && logoFile.length()>0 && !(logoFile.endsWith(".jpg") || logoFile.endsWith(".jpeg") || logoFile.endsWith(".gif"))) {
+                msg = bundle2.getString("CrInstrument.xy.msg171");
+            } else if (info[20].equalsIgnoreCase("s") && qrcodeFile.length()>0 && !(qrcodeFile.endsWith(".jpg") || qrcodeFile.endsWith(".jpeg") || qrcodeFile.endsWith(".gif"))) {
+                msg = bundle2.getString("CrInstrument.xy.msg172");
+            }  else if (info[24].equalsIgnoreCase("s") && webaddress.length()>0 && !(webaddress.startsWith("http"))){
+                msg = bundle2.getString("CrInstrument.xy.msg173");
+            } else if (title.equalsIgnoreCase("cr-Instrument")) {
+                msg = bundle2.getString("CrInstrument.xy.msg168");
+            } else if(!info[26].equalsIgnoreCase("y")) {
+                msg = bundle2.getString("CrInstrument.xy.msg170");
+            }
+            } else msg="Check Failed: No UI Definition.";
+        }
+        return msg;
+    }
+public void updateLogoUI(){
+  String msg=chkCopyrightNotices();
+  iconImage = new ImageIcon(getClass().getClassLoader().getResource("cr_instrument_t.gif")).getImage();
+  boolean showAboutAp=false;
+  if(msg.length()<1 && currentUI.get("frame")!=null){
+    String frameInfo=(String)currentUI.get("frame");
+
+    String info[]=ylib.csvlinetoarray(frameInfo);
+    if(info.length > 26){
+      String logoFile=info[19].trim();
+      if(info[18].equalsIgnoreCase("s") && (new File(logoFile)).exists()) {
+
+          iconImage =Toolkit.getDefaultToolkit().createImage(logoFile);
+          }
+         if(info[22].equalsIgnoreCase("s")){
+             showAboutAp=true;
+             jMenuItem4.setText(bundle2.getString("CrInstrument.xy.msg174")+" "+info[1]);
+         }
+
+    }
+  }
+  setIconImage(iconImage);
+  jMenuItem4.setVisible(showAboutAp);
+}
 public void makeDataDir(){
     String fTime=wn.formatter2.format(new Date());
     wn.dataDate=fTime.substring(0,8);
    usedDataDir=dataDir+File.separator+fTime.substring(0,4)+File.separator+fTime.substring(4,6)+File.separator+fTime.substring(6,8);
     if(!(new File(usedDataDir)).exists())  (new File(usedDataDir)).mkdirs();
+}
+public void log(String s){
+    log(s,true);
 }
   public void log(String s, boolean logToFile) {
     s = format9.format(new Date()) + " " + s + "\r\n";
@@ -3679,6 +3744,11 @@ String getFileHead(String station){
       }
     }
   }
+  public String getStackTrace(Exception e){
+    StringWriter errors = new StringWriter();
+    e.printStackTrace(new PrintWriter(errors));
+    return errors.toString();
+  }
   public boolean chkEmailTime(){
      boolean rtn=false;
       long emailSpan = 0;
@@ -4521,7 +4591,7 @@ String getFileHead(String station){
   }
   void saveStatus() {
     if(wn.w.chkValue(props.getProperty("ci-demo")) && wn.chkProps("run_my_ap_only")) return;
-      if(saveFileCB.isSelected()) statuses.put("savelog","Y"); else statuses.put("savelog","N");
+    if(saveFileCB.isSelected()) statuses.put("savelog","Y"); else statuses.put("savelog","N");
   if(showCB.isSelected()) statuses.put("show_received","Y"); else statuses.put("show_received","N");
   if(show16RB.isSelected()) statuses.put("show_hex","Y"); else statuses.put("show_hex","N");
   if(crnlCB.isSelected()) statuses.put("show_linebreak","Y"); else statuses.put("show_linebreak","N");
@@ -5075,13 +5145,15 @@ public void doLayout(){
    }
   void setMenuItem(String key,JMenuItem menuItem,int frameWidth,int frameHeight){
     String info[];
-    if(updateLayoutAll && currentUI.get(key)!=null){
+    if(updateLayoutAll){
+      if(currentUI.get(key)!=null){
       info=ylib.csvlinetoarray((String)currentUI.get(key));
       if(info.length>2 && info[2].equalsIgnoreCase("s")) {
         if(info[1].length()>0) menuItem.setText(info[1]);
         menuItem.setVisible(true);
       } else  menuItem.setVisible(false);
     }  else if(currentUI.size()>0) sysLog("Warning: menuitem key '"+key+"' not found.");
+    }
   }
   void setScrollPane(String key,JScrollPane scrollPane,int frameWidth,int frameHeight,String title){
       String info[];
@@ -5921,6 +5993,7 @@ public void doLayout(){
         helpMenuItem03 = new javax.swing.JMenuItem();
         helpMenuItem04 = new javax.swing.JMenuItem();
         helpMenuItem05 = new javax.swing.JMenuItem();
+        jMenuItem4 = new javax.swing.JMenuItem();
         jMenuItem7 = new javax.swing.JMenuItem();
 
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("ci/Bundle"); 
@@ -7789,6 +7862,14 @@ public void doLayout(){
         });
         jMenu3.add(helpMenuItem05);
 
+        jMenuItem4.setText(bundle.getString("CrInstrument.jMenuItem4.text")); 
+        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem4ActionPerformed(evt);
+            }
+        });
+        jMenu3.add(jMenuItem4);
+
         jMenuItem7.setFont(jMenuItem7.getFont());
         jMenuItem7.setText(bundle.getString("CrInstrument.jMenuItem7.text")); 
         jMenuItem7.addActionListener(new java.awt.event.ActionListener() {
@@ -8957,6 +9038,29 @@ void showEvent(){
     showEvent("","","","");
 }
 
+  public void setupTabTraversalKeys(JTabbedPane tabbedPane) {
+    KeyStroke ctrlTab = KeyStroke.getKeyStroke("ctrl TAB");
+    KeyStroke ctrlShiftTab = KeyStroke.getKeyStroke("ctrl shift TAB");
+
+    Set<AWTKeyStroke> forwardKeys = new HashSet<AWTKeyStroke>(tabbedPane.getFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS));
+    
+
+    forwardKeys.remove(ctrlTab);
+
+    tabbedPane.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, forwardKeys);
+
+    Set<AWTKeyStroke> backwardKeys = new HashSet<AWTKeyStroke>(tabbedPane.getFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS));
+    backwardKeys.remove(ctrlShiftTab);
+
+    tabbedPane.setFocusTraversalKeys(KeyboardFocusManager.BACKWARD_TRAVERSAL_KEYS, backwardKeys);
+
+    InputMap inputMap = tabbedPane.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+    inputMap.put(ctrlTab, "navigateNext");
+    inputMap.put(ctrlShiftTab, "navigatePrevious");
+    
+
+  }
+
 void showEvent(String setCond2,String setCond1,String setAct2,String setAct1){
   String selEvent="",selCond2="",selCond1="",selAct2="",selAct1="";
   if(eventSetupPanel.eventList.getSelectedIndex()==-1){
@@ -9068,7 +9172,7 @@ void updateConditionItem(){
      String sel=(String)eventSetupPanel.conditionList.getSelectedValue();
      if(conditionTM.get(sel)!=null){
        String oldData[]=ylib.csvlinetoarray((String)conditionTM.get(sel));
-       if(oldData.length>2){
+       if(oldData.length>2 && oldData[2].trim().length()>0){
           int an=JOptionPane.showConfirmDialog(this, "Confirm to replace '"+oldData[0]+"-"+oldData[2]+"' condition? ", "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
           if(an!=JOptionPane.YES_OPTION) return;
         }
@@ -9087,7 +9191,7 @@ void updateConditionItem(){
                data[5]="";
                data[6]="6";
               if(eventSetupPanel.jCheckBox16.isSelected()){
-               data[7]=eventSetupPanel.jTextField17.getText();
+               data[7]=eventSetupPanel.jTextField11.getText();
                data[8]=(String)eventSetupPanel.jComboBox12.getSelectedItem();
                data[9]="";
                data[10]=(String)eventSetupPanel.jComboBox13.getSelectedItem();
@@ -9228,7 +9332,7 @@ boolean updateActionItem(){
      String sel=(String)eventSetupPanel.actionList.getSelectedValue();
      if(actionTM.get(sel)!=null){
        String oldData[]=ylib.csvlinetoarray((String)actionTM.get(sel));
-       if(oldData.length>2){
+       if(oldData.length>2 && oldData[2].trim().length()>0){
           int an=JOptionPane.showConfirmDialog(this, "Confirm to replace '"+oldData[0]+"-"+oldData[2]+"' action? ", "Confirm", JOptionPane.YES_NO_CANCEL_OPTION);
           if(an!=JOptionPane.YES_OPTION) return false;
         }
@@ -9243,6 +9347,33 @@ boolean updateActionItem(){
        data[4]=(String)eventSetupPanel.jComboBox29.getSelectedItem();
        data[5]=eventSetupPanel.jTextField56.getText();
        data[6]=eventSetupPanel.jTextField15.getText();
+       if(data[2].equalsIgnoreCase("FTP upload") || data[2].equalsIgnoreCase("FTP download") || data[2].equalsIgnoreCase("FTP delete")){
+           data[1]=eventSetupPanel.jTextField20.getText().trim();
+           data[3]=YB642E.encode(new String(eventSetupPanel.jPasswordField6.getPassword()));
+           data[4]=eventSetupPanel.jTextField19.getText().trim();
+           data[5]="0";
+           if(!eventSetupPanel.jCheckBox20.isSelected()) data[5]=OneVar.add(data[5],0);
+           data[6]=eventSetupPanel.jTextField24.getText().trim();
+           data[7]=(data[2].equalsIgnoreCase("FTP download") || data[2].equalsIgnoreCase("FTP delete")? eventSetupPanel.jTextField25.getText().trim():"*");
+           data[8]=eventSetupPanel.jTextField22.getText().trim();
+           data[9]=(data[2].equalsIgnoreCase("FTP upload")? eventSetupPanel.jTextField25.getText().trim():"*");
+           data[10]="0";
+           data[11]="0";
+           data[12]="0";
+           data[13]="0";
+           data[14]=(eventSetupPanel.jCheckBox21.isSelected()? "includesubdir":"excludesubdir");
+           String option=(String)eventSetupPanel.jComboBox2.getSelectedItem();
+           data[15]=(option.equalsIgnoreCase("Overwrite")? "overwrite":(option.equalsIgnoreCase("Check Time")? "checkdate":"keeporiginal"));
+           data[16]="";
+           data[17]=(String)eventSetupPanel.jComboBox11.getSelectedItem();
+           data[18]=eventSetupPanel.jTextField18.getText().trim();
+       } else if(data[2].equalsIgnoreCase("play sound")){
+           data[8]=eventSetupPanel.jTextField26.getText().trim();
+           data[9]=eventSetupPanel.jTextField33.getText().trim();
+           data[11]=eventSetupPanel.jTextField34.getText().trim();
+       } else if(data[2].equalsIgnoreCase("Send email message") || data[2].equalsIgnoreCase("Send SMS message to mobile phone") || data[2].equalsIgnoreCase("Send LINE message")){
+           data[63]=YB642E.encode(eventSetupPanel.jTextArea1.getText().trim());
+       } else {
        if(eventSetupPanel.jCheckBox34.isSelected()) data[7]="Y" ;
            else  data[7]="N";
        data[8]=eventSetupPanel.jTextField16.getText();
@@ -9333,6 +9464,7 @@ boolean updateActionItem(){
        data[87]=eventSetupPanel.jTextField5.getText();
        data[88]=eventSetupPanel.jTextField7.getText();
        data[89]=eventSetupPanel.jTextField8.getText();
+       }
        actionTM.put(sel,ylib.arrayToCsvLine(data));
        chkAndAdjustEvents();
        rtn=true;
@@ -9609,10 +9741,10 @@ void eventSwapItem(String item1,String item2){
   }
 
   private void jMenuItem7ActionPerformed(java.awt.event.ActionEvent evt) {
-    if (about == null) {
-      about = new CIAbout(this, true);
+    if (aboutCI == null) {
+      aboutCI = new CIAboutCI(this, true);
     }
-    about.setVisible(true);
+    aboutCI.setVisible(true);
   }
 private void updateItem(){
 
@@ -9929,6 +10061,14 @@ private void updateItem(){
          }
        }
     }
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {
+    if (aboutAp == null) {
+      aboutAp = new CIAboutAp(this, true);
+    }
+    aboutAp.init();
+    aboutAp.setVisible(true);
+    }
  private void changeReceiveListItem(){
   String datasrc=(String)receiveList.getSelectedValue();
 
@@ -10139,11 +10279,30 @@ void showAction1(){
      if(actionTM.get(sel)!=null){
        String data[]=ylib.csvlinetoarray((String)actionTM.get(sel));
        if(data.length>1) eventSetupPanel.jComboBox19.setSelectedItem(data[1]);
-       if(data.length>39) eventSetupPanel.jComboBox49.setSelectedItem(data[39]);
-       if(data.length>16) eventSetupPanel.jComboBox44.setSelectedItem(data[16]);
-       if(data.length>17) eventSetupPanel.jComboBox45.setSelectedItem(data[17]);
        if(data.length>2) {
-         eventSetupPanel.jComboBox18.setSelectedItem(data[2]);
+       eventSetupPanel.jComboBox18.setSelectedItem(data[2]);
+         if(data.length>39) eventSetupPanel.jComboBox49.setSelectedItem(data[39]);
+         if(data.length>16) eventSetupPanel.jComboBox44.setSelectedItem(data[16]);
+         if(data.length>17) eventSetupPanel.jComboBox45.setSelectedItem(data[17]);
+         if(data[2].equalsIgnoreCase("FTP upload") || data[2].equalsIgnoreCase("FTP download") || data[2].equalsIgnoreCase("FTP delete")){
+           eventSetupPanel.jTextField20.setText(data[1]);
+           eventSetupPanel.jPasswordField6.setText(YB642D.decode(data[3]));
+           eventSetupPanel.jTextField19.setText(data[4]);
+           eventSetupPanel.jCheckBox20.setSelected(!OneVar.check(data[5],0));
+           eventSetupPanel.jTextField24.setText(data[6]);
+           eventSetupPanel.jTextField25.setText(data[2].equalsIgnoreCase("FTP upload")? data[9]:data[7]);
+           eventSetupPanel.jTextField22.setText(data[8]);
+           eventSetupPanel.jCheckBox21.setSelected(data[14].equalsIgnoreCase("includesubdir"));
+           eventSetupPanel.jComboBox2.setSelectedItem(data[15].equalsIgnoreCase("overwrite")? "Overwrite":(data[15].equalsIgnoreCase("checkdate")? "Check Time":"Keep Original"));
+           eventSetupPanel.jComboBox11.setSelectedItem(data[17]);
+           eventSetupPanel.jTextField18.setText(data[18]);
+       } else if(data[2].equalsIgnoreCase("play sound")){
+           eventSetupPanel.jTextField26.setText(data[8]);
+           eventSetupPanel.jTextField33.setText(data[9]);
+           eventSetupPanel.jTextField34.setText(data[11]);
+       } else if(data[2].equalsIgnoreCase("Send email message") || data[2].equalsIgnoreCase("Send SMS message to mobile phone") || data[2].equalsIgnoreCase("Send LINE message")){
+           eventSetupPanel.jTextArea1.setText(YB642D.decode(data[63]));
+       } else {
          if(data[2].equalsIgnoreCase("Set data value")) {
            eventSetupPanel.jPanel79.setVisible(true);
            if(data.length>3) eventSetupPanel.jComboBox28.setSelectedItem(data[3]);
@@ -10307,6 +10466,7 @@ void showAction1(){
 
          if(data[2].equalsIgnoreCase("Pause") && data.length>71) eventSetupPanel.jTextField23.setText(data[71]);
          eventSetupPanel.showActionItem(data[2]);
+       }
        }
       currentAction1=sel;
      } else sysLog("Action id '"+sel+"' not found in actionTM.");
@@ -10957,6 +11117,7 @@ class ShowStationChartThread extends Thread{
     private javax.swing.JMenuItem jMenuItem26;
     private javax.swing.JMenuItem jMenuItem27;
     private javax.swing.JMenuItem jMenuItem3;
+    public javax.swing.JMenuItem jMenuItem4;
     private javax.swing.JMenuItem jMenuItem6;
     private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JMenuItem jMenuItem8;

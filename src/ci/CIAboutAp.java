@@ -10,12 +10,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ResourceBundle;
 import javax.imageio.ImageIO;
+import y.base64.YB642D;
+import y.ylib.ylib;
 
-public class CIAbout extends javax.swing.JDialog {
+public class CIAboutAp extends javax.swing.JDialog {
 
     CrInstrument instrument;
     public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
-    public CIAbout(java.awt.Frame parent, boolean modal) {
+    public CIAboutAp(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         this.instrument=(CrInstrument) parent;
@@ -27,17 +29,11 @@ public class CIAbout extends javax.swing.JDialog {
 
         setSize(w2,h2);
 
-        setTitle(bundle2.getString("CrInstrument.xy.msg102"));
         getContentPane().setBackground(Color.white);
 
         jLabel4.setText(bundle2.getString("CrInstrument.xy.msg101")+instrument.version);
 
-        jTextArea1.setText("(c) Copyright Cloud-Rain Co., Ltd.,http://www.cloud-rain.com/,  2016-"+instrument.versionTime.substring(0,4)+".  All rights reserved. cr-Instrument and cr-Instrument logo " +
-          "are trademarks of the Cloud-Rain. The cr-Instrument logo cannot be altered " +
-          "without Cloud-Rain's permission. Oracle and Java are trademarks or registered trademarks of Oracle and/or its " +
-          "affiliates. Other names may be trademarks of their respective owners.\n\n" +
-          "This product includes software developed by other open source projects including " +
-          "Apache Software Foundation, RXTX for Java, mp3spi, jLayer, Tritonus and cr-WSN.");
+        jTextArea1.setText("");
         setLocation((width-w2)/2,(h-h2)/2);
 
         setIconImage(instrument.iconImage);
@@ -54,6 +50,44 @@ public class CIAbout extends javax.swing.JDialog {
         jLabel5.setIcon(icon);
     }
 
+public void init(){
+   String msg=instrument.chkCopyrightNotices();
+   boolean showNothing=true;
+   if(msg.length()<1 && instrument.currentUI.get("frame")!=null){
+     String info[]=ylib.csvlinetoarray((String)instrument.currentUI.get("frame"));
+     if(info.length>26){
+      setTitle(bundle2.getString("CrInstrument.xy.msg174")+" "+info[1]);
+      jLabel3.setText(info[1]);
+      jLabel4.setText(bundle2.getString("CrInstrument.xy.msg101")+info[9]);
+      jTextArea1.setText(YB642D.decode(info[23]));
+      jLabel6.setText(info[25]);
+      setIconImage(instrument.iconImage);
+
+      Image image=instrument.iconImage;
+      image = image.getScaledInstance(jLabel1.getWidth(), jLabel1.getHeight(),Image.SCALE_SMOOTH);
+      ImageIcon icon = new ImageIcon(image); 
+      jLabel1.setIcon(icon);
+      if(info[20].equalsIgnoreCase("s") && info[21].trim().length()>0 && new File(info[21]).exists()){
+
+       Image image2=Toolkit.getDefaultToolkit().createImage(info[21]);
+
+       image2 = image2.getScaledInstance(jLabel5.getWidth(), jLabel5.getHeight(),Image.SCALE_SMOOTH);
+       icon = new ImageIcon(image2);
+
+        jLabel5.setIcon(icon);
+        jLabel5.setVisible(true);
+      } else jLabel5.setVisible(false);
+       showNothing=false;
+     } 
+   }
+   if(showNothing){
+      jLabel3.setText("");
+      jLabel4.setText("");
+      jTextArea1.setText("");
+      jLabel6.setText("");
+      jLabel5.setVisible(false);
+   }
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -80,30 +114,30 @@ public class CIAbout extends javax.swing.JDialog {
         jLabel3.setFont(jLabel3.getFont().deriveFont(jLabel3.getFont().getStyle() | java.awt.Font.BOLD, jLabel3.getFont().getSize()+6));
         jLabel3.setForeground(new java.awt.Color(0, 0, 255));
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("ci/Bundle"); 
-        jLabel3.setText(bundle.getString("CIAbout.jLabel3.text")); 
+        jLabel3.setText(bundle.getString("CIAboutAp.jLabel3.text")); 
         getContentPane().add(jLabel3);
         jLabel3.setBounds(20, 10, 210, 20);
 
         jLabel4.setFont(jLabel4.getFont().deriveFont(jLabel4.getFont().getSize()+2f));
         jLabel4.setForeground(new java.awt.Color(0, 102, 153));
-        jLabel4.setText(bundle.getString("CIAbout.jLabel4.text")); 
+        jLabel4.setText(bundle.getString("CIAboutAp.jLabel4.text")); 
         getContentPane().add(jLabel4);
-        jLabel4.setBounds(30, 30, 210, 18);
+        jLabel4.setBounds(30, 30, 300, 18);
 
-        jLabel5.setText(bundle.getString("CIAbout.jLabel5.text")); 
+        jLabel5.setText(bundle.getString("CIAboutAp.jLabel5.text")); 
         getContentPane().add(jLabel5);
         jLabel5.setBounds(420, 120, 90, 90);
 
         jLabel6.setFont(jLabel6.getFont());
         jLabel6.setForeground(new java.awt.Color(0, 0, 255));
-        jLabel6.setText(bundle.getString("CIAbout.jLabel6.text")); 
+        jLabel6.setText(bundle.getString("CIAboutAp.jLabel6.text")); 
         jLabel6.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel6MouseClicked(evt);
             }
         });
         getContentPane().add(jLabel6);
-        jLabel6.setBounds(20, 280, 240, 15);
+        jLabel6.setBounds(20, 280, 460, 15);
 
         jScrollPane1.setFont(jScrollPane1.getFont());
 
@@ -121,7 +155,7 @@ public class CIAbout extends javax.swing.JDialog {
     }
 
   private void jLabel6MouseClicked(java.awt.event.MouseEvent evt) {
-    instrument.openURL.open("http://www.cloud-rain.com");
+    instrument.openURL.open(jLabel6.getText());
   }
 
     /**

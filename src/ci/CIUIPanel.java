@@ -11,9 +11,16 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;
 import java.util.ResourceBundle;
+import javax.swing.ImageIcon;
 import javax.swing.JColorChooser;
 import javax.swing.JFrame;
+import javax.swing.KeyStroke;
+import y.base64.YB642E;
 import y.ylib.ylib;
+import java.io.*;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import y.base64.YB642D;
 
 /**
  *
@@ -22,10 +29,16 @@ import y.ylib.ylib;
 public class CIUIPanel extends javax.swing.JPanel {
 
    CrInstrument instrument;
-       KeyboardFocusManager kfm;
+   KeyboardFocusManager kfm;
    public ResourceBundle bundle2 = java.util.ResourceBundle.getBundle("ci/Bundle");
     public CIUIPanel(CrInstrument instrument) {
         initComponents();
+        instrument.setupTabTraversalKeys(jTabbedPane1);
+        instrument.setupTabTraversalKeys(jTabbedPane4);
+        jTabbedPane1.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("LEFT"), "none");
+        jTabbedPane1.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("RIGHT"), "none");
+        jTabbedPane4.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("LEFT"), "none");
+        jTabbedPane4.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke("RIGHT"), "none");
         this.instrument=instrument;
         init();
         kfm= KeyboardFocusManager.getCurrentKeyboardFocusManager();
@@ -59,7 +72,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                       int frameWidth=size[0],frameHeight=size[1],x=0,y=0;
                       switch(evt.getKeyCode()){
                           case 38:
-                              y=(instrument.isNumeric(jTextField9.getText())? ((int)Math.round(Double.parseDouble(jTextField9.getText())*((double)frameHeight)/100.0))-1:0);
+                              y=(instrument.isNumeric(jTextField9.getText())? ((int)Math.round(Double.parseDouble(jTextField9.getText())*((double)frameHeight)/100.0))-20:0);
                               if(y<0) y=0;
                               jTextField9.setText(""+(((double)((int)(((double)y)/((double)frameHeight)*10000.0*100.0)))/10000.0));
                                if(instrument.editUI.get(instrument.selectedUIAreaItem)!=null){
@@ -70,7 +83,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                }
                               break;
                           case 40:
-                              y=(instrument.isNumeric(jTextField9.getText())? ((int)Math.round(Double.parseDouble(jTextField9.getText())*((double)frameHeight)/100.0))+1:0);
+                              y=(instrument.isNumeric(jTextField9.getText())? ((int)Math.round(Double.parseDouble(jTextField9.getText())*((double)frameHeight)/100.0))+20:0);
                               if(y>frameHeight) y=frameHeight;
                               jTextField9.setText(""+(((double)((int)(((double)y)/((double)frameHeight)*1000000.0*100.0)))/1000000.0));
                                if(instrument.editUI.get(instrument.selectedUIAreaItem)!=null){
@@ -81,7 +94,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                }
                               break;
                           case 37:
-                              x=(instrument.isNumeric(jTextField5.getText())? ((int)Math.round(Double.parseDouble(jTextField5.getText())*((double)frameWidth)/100.0))-1:0);
+                              x=(instrument.isNumeric(jTextField5.getText())? ((int)Math.round(Double.parseDouble(jTextField5.getText())*((double)frameWidth)/100.0))-20:0);
                               if(x<0) x=0;
                               jTextField5.setText(""+(((double)((int)(((double)x)/((double)frameWidth)*10000.0*100.0)))/10000.0));
                                if(instrument.editUI.get(instrument.selectedUIAreaItem)!=null){
@@ -92,7 +105,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                }
                               break;
                           case 39:
-                              x=(instrument.isNumeric(jTextField5.getText())? ((int)Math.round(Double.parseDouble(jTextField5.getText())*((double)frameWidth)/100.0))+1:0);
+                              x=(instrument.isNumeric(jTextField5.getText())? ((int)Math.round(Double.parseDouble(jTextField5.getText())*((double)frameWidth)/100.0))+20:0);
                               if(x>frameWidth) x=frameWidth;
                               jTextField5.setText(""+(((double)((int)(((double)x)/((double)frameWidth)*10000.0*100.0)))/10000.0));
                                if(instrument.editUI.get(instrument.selectedUIAreaItem)!=null){
@@ -112,7 +125,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                       int frameWidth=size[0],frameHeight=size[1],x=0,y=0;
                       switch(evt.getKeyCode()){
                           case 38:
-                              y=(instrument.isNumeric(jTextField85.getText())? ((int)Math.round(Double.parseDouble(jTextField85.getText())*((double)frameHeight)/100.0))-1:0);
+                              y=(instrument.isNumeric(jTextField85.getText())? ((int)Math.round(Double.parseDouble(jTextField85.getText())*((double)frameHeight)/100.0))-20:0);
                               if(y<0) y=0;
                               jTextField85.setText(""+(((double)((int)(((double)y)/((double)frameHeight)*10000.0*100.0)))/10000.0));
                                if(instrument.editUI.get(instrument.selectedDataItem)!=null){
@@ -124,7 +137,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                }
                               break;
                           case 40:
-                              y=(instrument.isNumeric(jTextField85.getText())? ((int)Math.round(Double.parseDouble(jTextField85.getText())*((double)frameHeight)/100.0))+1:0);
+                              y=(instrument.isNumeric(jTextField85.getText())? ((int)Math.round(Double.parseDouble(jTextField85.getText())*((double)frameHeight)/100.0))+20:0);
                               if(y>frameHeight) y=frameHeight;
                               jTextField85.setText(""+(((double)((int)(((double)y)/((double)frameHeight)*1000000.0*100.0)))/1000000.0));
                                if(instrument.editUI.get(instrument.selectedDataItem)!=null){
@@ -135,7 +148,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                }
                               break;
                           case 37:
-                              x=(instrument.isNumeric(jTextField84.getText())? ((int)Math.round(Double.parseDouble(jTextField84.getText())*((double)frameWidth)/100.0))-1:0);
+                              x=(instrument.isNumeric(jTextField84.getText())? ((int)Math.round(Double.parseDouble(jTextField84.getText())*((double)frameWidth)/100.0))-20:0);
                               if(x<0) x=0;
                               jTextField84.setText(""+(((double)((int)(((double)x)/((double)frameWidth)*10000.0*100.0)))/10000.0));
                                if(instrument.editUI.get(instrument.selectedDataItem)!=null){
@@ -146,7 +159,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
                                }
                               break;
                           case 39:
-                              x=(instrument.isNumeric(jTextField84.getText())? ((int)Math.round(Double.parseDouble(jTextField84.getText())*((double)frameWidth)/100.0))+1:0);
+                              x=(instrument.isNumeric(jTextField84.getText())? ((int)Math.round(Double.parseDouble(jTextField84.getText())*((double)frameWidth)/100.0))+20:0);
                               if(x>frameWidth) x=frameWidth;
                               jTextField84.setText(""+(((double)((int)(((double)x)/((double)frameWidth)*10000.0*100.0)))/10000.0));
                                if(instrument.editUI.get(instrument.selectedDataItem)!=null){
@@ -273,9 +286,7 @@ private void keyPress(java.awt.event.KeyEvent evt){
           }
       }
   }
-  else if(evt.getKeyCode()==27){
-      instrument.soundThread.setStop(2);
-  } else if(evt.getKeyCode()==18){
+  else if(evt.getKeyCode()==18){
       boolean showMenu=true;
       if(instrument.editUI.get("frame")!=null){
         String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("frame"));
@@ -289,7 +300,200 @@ private void keyPress(java.awt.event.KeyEvent evt){
           if(!instrument.jMenuBar1.isVisible()) instrument.jMenuBar1.setVisible(true);
           else instrument.jMenuBar1.setVisible(false);
       }
+  } else if(evt.getKeyCode()==27){
+      instrument.soundThread.setStop(2);
+  } else if(evt.getKeyCode()==38){
+      if(instrument.jTabbedPane1.getSelectedComponent().equals(instrument.jPanel3)){
+          if(instrument.jTabbedPane3.getSelectedComponent().equals(instrument.uiPanel)){
+              if(this.jTabbedPane4.getSelectedComponent().equals(this.mainPanel)){
+                  if(instrument.selectedUIAreaItem.length()>0){
+                      int size[]=getFrameSizeFromEditUI();
+                      String info[]=null;
+                      int frameWidth=size[0],frameHeight=size[1],x=0,y=0;
+
+                              y=(instrument.isNumeric(jTextField9.getText())? ((int)Math.round(Double.parseDouble(jTextField9.getText())*((double)frameHeight)/100.0))-1:0);
+                              if(y<0) y=0;
+                              jTextField9.setText(""+(((double)((int)(((double)y)/((double)frameHeight)*10000.0*100.0)))/10000.0));
+                               if(instrument.editUI.get(instrument.selectedUIAreaItem)!=null){
+                                 info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedUIAreaItem));
+                                 info[4]=String.valueOf(Double.parseDouble(jTextField9.getText())/100.0);
+                                 instrument.editUI.put(instrument.selectedUIAreaItem, ylib.arrayToCsvLine(info));
+                                 instrument.uiFramePanel.invalidate();
+                               }
+
+                  }
+              }
+              else if(this.jTabbedPane4.getSelectedComponent().equals(this.dataPanel)){
+                  if(instrument.selectedDataItem.length()>0){
+                      int size[]=getFrameSizeFromEditUI();
+                      String info[]=null;
+                      int frameWidth=size[0],frameHeight=size[1],x=0,y=0;
+
+                              y=(instrument.isNumeric(jTextField85.getText())? ((int)Math.round(Double.parseDouble(jTextField85.getText())*((double)frameHeight)/100.0))-1:0);
+                              if(y<0) y=0;
+                              jTextField85.setText(""+(((double)((int)(((double)y)/((double)frameHeight)*10000.0*100.0)))/10000.0));
+                               if(instrument.editUI.get(instrument.selectedDataItem)!=null){
+                                 info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedDataItem));
+                                 info[4]=String.valueOf(Double.parseDouble(jTextField85.getText())/100.0);
+                                 instrument.editUI.put(instrument.selectedDataItem, ylib.arrayToCsvLine(info));
+
+                                 instrument.uiDataPanel.invalidate();
+                               }
+
+                  }
+              }
+          }
+      }
+  } else if(evt.getKeyCode()==40){
+      if(instrument.jTabbedPane1.getSelectedComponent().equals(instrument.jPanel3)){
+          if(instrument.jTabbedPane3.getSelectedComponent().equals(instrument.uiPanel)){
+              if(this.jTabbedPane4.getSelectedComponent().equals(this.mainPanel)){
+                  if(instrument.selectedUIAreaItem.length()>0){
+                      int size[]=getFrameSizeFromEditUI();
+                      String info[]=null;
+                      int frameWidth=size[0],frameHeight=size[1],x=0,y=0;
+
+                              y=(instrument.isNumeric(jTextField9.getText())? ((int)Math.round(Double.parseDouble(jTextField9.getText())*((double)frameHeight)/100.0))+1:0);
+                              if(y>frameHeight) y=frameHeight;
+                              jTextField9.setText(""+(((double)((int)(((double)y)/((double)frameHeight)*1000000.0*100.0)))/1000000.0));
+                               if(instrument.editUI.get(instrument.selectedUIAreaItem)!=null){
+                                 info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedUIAreaItem));
+                                 info[4]=String.valueOf(Double.parseDouble(jTextField9.getText())/100.0);
+                                 instrument.editUI.put(instrument.selectedUIAreaItem, ylib.arrayToCsvLine(info));
+                                 instrument.uiFramePanel.invalidate();
+                               }
+
+                  }
+              }
+              else if(this.jTabbedPane4.getSelectedComponent().equals(this.dataPanel)){
+                  if(instrument.selectedDataItem.length()>0){
+                      int size[]=getFrameSizeFromEditUI();
+                      String info[]=null;
+                      int frameWidth=size[0],frameHeight=size[1],x=0,y=0;
+
+                              y=(instrument.isNumeric(jTextField85.getText())? ((int)Math.round(Double.parseDouble(jTextField85.getText())*((double)frameHeight)/100.0))+1:0);
+                              if(y>frameHeight) y=frameHeight;
+                              jTextField85.setText(""+(((double)((int)(((double)y)/((double)frameHeight)*1000000.0*100.0)))/1000000.0));
+                               if(instrument.editUI.get(instrument.selectedDataItem)!=null){
+                                 info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedDataItem));
+                                 info[4]=String.valueOf(Double.parseDouble(jTextField85.getText())/100.0);
+                                 instrument.editUI.put(instrument.selectedDataItem, ylib.arrayToCsvLine(info));
+                                 instrument.uiDataPanel.invalidate();
+                               }
+
+                  }
+              }
+          }
+      }
+  } else if(evt.getKeyCode()==37){
+      if(instrument.jTabbedPane1.getSelectedComponent().equals(instrument.jPanel3)){
+          if(instrument.jTabbedPane3.getSelectedComponent().equals(instrument.uiPanel)){
+              if(this.jTabbedPane4.getSelectedComponent().equals(this.mainPanel)){
+                  if(instrument.selectedUIAreaItem.length()>0){
+                      int size[]=getFrameSizeFromEditUI();
+                      String info[]=null;
+                      int frameWidth=size[0],frameHeight=size[1],x=0,y=0;
+
+                              x=(instrument.isNumeric(jTextField5.getText())? ((int)Math.round(Double.parseDouble(jTextField5.getText())*((double)frameWidth)/100.0))-1:0);
+                              if(x<0) x=0;
+                              jTextField5.setText(""+(((double)((int)(((double)x)/((double)frameWidth)*10000.0*100.0)))/10000.0));
+                               if(instrument.editUI.get(instrument.selectedUIAreaItem)!=null){
+                                 info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedUIAreaItem));
+                                 info[3]=String.valueOf(Double.parseDouble(jTextField5.getText())/100.0);
+                                 instrument.editUI.put(instrument.selectedUIAreaItem, ylib.arrayToCsvLine(info));
+                                 instrument.uiFramePanel.invalidate();
+                               }
+
+                  }
+              }
+              else if(this.jTabbedPane4.getSelectedComponent().equals(this.dataPanel)){
+                  if(instrument.selectedDataItem.length()>0){
+                      int size[]=getFrameSizeFromEditUI();
+                      String info[]=null;
+                      int frameWidth=size[0],frameHeight=size[1],x=0,y=0;
+
+                              x=(instrument.isNumeric(jTextField84.getText())? ((int)Math.round(Double.parseDouble(jTextField84.getText())*((double)frameWidth)/100.0))-1:0);
+                              if(x<0) x=0;
+                              jTextField84.setText(""+(((double)((int)(((double)x)/((double)frameWidth)*10000.0*100.0)))/10000.0));
+                               if(instrument.editUI.get(instrument.selectedDataItem)!=null){
+                                 info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedDataItem));
+                                 info[3]=String.valueOf(Double.parseDouble(jTextField84.getText())/100.0);
+                                 instrument.editUI.put(instrument.selectedDataItem, ylib.arrayToCsvLine(info));
+                                 instrument.uiDataPanel.invalidate();
+                               }
+
+                  }
+              }
+          }
+      }
+  } else if(evt.getKeyCode()==39){
+      if(instrument.jTabbedPane1.getSelectedComponent().equals(instrument.jPanel3)){
+          if(instrument.jTabbedPane3.getSelectedComponent().equals(instrument.uiPanel)){
+              if(this.jTabbedPane4.getSelectedComponent().equals(this.mainPanel)){
+                  if(instrument.selectedUIAreaItem.length()>0){
+                      int size[]=getFrameSizeFromEditUI();
+                      String info[]=null;
+                      int frameWidth=size[0],frameHeight=size[1],x=0,y=0;
+
+                              x=(instrument.isNumeric(jTextField5.getText())? ((int)Math.round(Double.parseDouble(jTextField5.getText())*((double)frameWidth)/100.0))+1:0);
+                              if(x>frameWidth) x=frameWidth;
+                              jTextField5.setText(""+(((double)((int)(((double)x)/((double)frameWidth)*10000.0*100.0)))/10000.0));
+                               if(instrument.editUI.get(instrument.selectedUIAreaItem)!=null){
+                                 info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedUIAreaItem));
+                                 info[3]=String.valueOf(Double.parseDouble(jTextField5.getText())/100.0);
+                                 instrument.editUI.put(instrument.selectedUIAreaItem, ylib.arrayToCsvLine(info));
+                                 instrument.uiFramePanel.invalidate();
+                               }
+
+                  }
+              }
+              else if(this.jTabbedPane4.getSelectedComponent().equals(this.dataPanel)){
+                  if(instrument.selectedDataItem.length()>0){
+                      int size[]=getFrameSizeFromEditUI();
+                      String info[]=null;
+                      int frameWidth=size[0],frameHeight=size[1],x=0,y=0;
+
+                              x=(instrument.isNumeric(jTextField84.getText())? ((int)Math.round(Double.parseDouble(jTextField84.getText())*((double)frameWidth)/100.0))+1:0);
+                              if(x>frameWidth) x=frameWidth;
+                              jTextField84.setText(""+(((double)((int)(((double)x)/((double)frameWidth)*10000.0*100.0)))/10000.0));
+                               if(instrument.editUI.get(instrument.selectedDataItem)!=null){
+                                 info=ylib.csvlinetoarray((String)instrument.editUI.get(instrument.selectedDataItem));
+                                 info[3]=String.valueOf(Double.parseDouble(jTextField84.getText())/100.0);
+                                 instrument.editUI.put(instrument.selectedDataItem, ylib.arrayToCsvLine(info));
+                                 instrument.uiDataPanel.invalidate();
+                               }
+
+                  }
+              }
+          }
+      }
+  } else if(evt.getKeyCode()==127){
+      if(instrument.jTabbedPane1.getSelectedComponent().equals(instrument.jPanel3)){
+          if(instrument.jTabbedPane3.getSelectedComponent().equals(instrument.uiPanel)){
+              if(this.jTabbedPane4.getSelectedComponent().equals(this.mainPanel)){
+                  if(instrument.selectedUIAreaItem.length()>0){
+
+                        if(cbShowFrameItem.isSelected()){
+                          cbShowFrameItem.setSelected(false);
+                          instrument.uiFramePanel.updateAreaItem();
+                        }
+
+                  }
+              }
+              else if(this.jTabbedPane4.getSelectedComponent().equals(this.dataPanel)){
+                  if(instrument.selectedDataItem.length()>0){
+
+                        if(jCheckBox64.isSelected()){
+                            jCheckBox64.setSelected(false);
+                            instrument.uiDataPanel.updateDataItem();
+                        }
+
+                  }
+              }
+          }
+      }
   }
+
 }
 private void keyRelease(java.awt.event.KeyEvent evt){
 
@@ -306,7 +510,7 @@ void setFromUITM(){
      Iterator it=instrument.editUI.keySet().iterator();
      for(;it.hasNext();){
          String id=(String)it.next();
-         if(id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1 || id.toLowerCase().indexOf("textlabel")!=-1 || id.toLowerCase().indexOf("textfield")!=-1 || id.toLowerCase().indexOf("combobox")!=-1 || id.toLowerCase().indexOf("checkbox")!=-1 || id.toLowerCase().indexOf("panel")!=-1){
+         if(id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1 || id.toLowerCase().indexOf("textlabel")!=-1 || id.toLowerCase().indexOf("textfield")!=-1  || id.toLowerCase().indexOf("combobox")!=-1 || id.toLowerCase().indexOf("checkbox")!=-1 || id.toLowerCase().indexOf("panel")!=-1){
             jComboBox36.addItem(id);
          }
          if(id.trim().toLowerCase().indexOf("da_")==0){
@@ -336,6 +540,7 @@ void setFromUITM(){
     instrument.skipUICBBChanged=false;
 
     setFrameItem();
+    setLogoItem();
     setDataAreaItem();
 
     if(instrument.editUI.get("misc")!=null){
@@ -384,6 +589,23 @@ void setFrameItem(){
         if(info[15].toLowerCase().trim().equals("s")) jCheckBox10.setSelected(true); else jCheckBox10.setSelected(false);
         if(info.length>16 && info[16].toLowerCase().trim().equals("s")) jCheckBox11.setSelected(true); else jCheckBox11.setSelected(false);
         if(info.length>17 && info[17].toLowerCase().trim().equals("s")) jCheckBox12.setSelected(true); else jCheckBox12.setSelected(false);
+
+    }
+}
+
+void setLogoItem(){
+   if(instrument.editUI.get("frame")!=null){
+        String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("frame"));
+
+        if(info.length>18) jCheckBox13.setSelected(info[18].equalsIgnoreCase("s"));
+        if(info.length>19) jTextField14.setText(info[19]);
+        if(info.length>20) jCheckBox14.setSelected(info[20].equalsIgnoreCase("s"));
+        if(info.length>21) jTextField13.setText(info[21]);
+        if(info.length>22) jCheckBox16.setSelected(info[22].equalsIgnoreCase("s"));
+        if(info.length>23) jTextArea1.setText(YB642D.decode(info[23]));
+        if(info.length>24) jCheckBox17.setSelected(info[24].equalsIgnoreCase("s"));
+        if(info.length>25) jTextField15.setText(info[25]);
+        if(info.length>26) jCheckBox15.setSelected(info[26].equalsIgnoreCase("y"));
     }
 }
 void setDataAreaItem(){
@@ -556,6 +778,30 @@ void setDataAreaItem(){
         jLabel10 = new javax.swing.JLabel();
         jCheckBox2 = new javax.swing.JCheckBox();
         jCheckBox4 = new javax.swing.JCheckBox();
+        jPanel9 = new javax.swing.JPanel();
+        jLabel23 = new javax.swing.JLabel();
+        jPanel10 = new javax.swing.JPanel();
+        jCheckBox13 = new javax.swing.JCheckBox();
+        jTextField14 = new javax.swing.JTextField();
+        jButton1 = new javax.swing.JButton();
+        jPanel11 = new javax.swing.JPanel();
+        jCheckBox14 = new javax.swing.JCheckBox();
+        jTextField13 = new javax.swing.JTextField();
+        jButton2 = new javax.swing.JButton();
+        jPanel12 = new javax.swing.JPanel();
+        jCheckBox15 = new javax.swing.JCheckBox();
+        jPanel13 = new javax.swing.JPanel();
+        jCheckBox16 = new javax.swing.JCheckBox();
+        jLabel25 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
+        jLabel24 = new javax.swing.JLabel();
+        jPanel14 = new javax.swing.JPanel();
+        jCheckBox17 = new javax.swing.JCheckBox();
+        jTextField15 = new javax.swing.JTextField();
         miscPanel = new javax.swing.JPanel();
         jPanel123 = new javax.swing.JPanel();
         jLabel137 = new javax.swing.JLabel();
@@ -1633,6 +1879,142 @@ void setDataAreaItem(){
 
         jTabbedPane4.addTab(bundle.getString("CIUIPanel.dataPanel.TabConstraints.tabTitle"), dataPanel); 
 
+        jPanel9.setLayout(null);
+
+        jLabel23.setFont(new java.awt.Font("新細明體", 0, 18)); 
+        jLabel23.setForeground(new java.awt.Color(0, 102, 255));
+        jLabel23.setText(bundle.getString("CIUIPanel.jLabel23.text")); 
+        jPanel9.add(jLabel23);
+        jLabel23.setBounds(30, 10, 880, 40);
+
+        jPanel10.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox13.setFont(jCheckBox13.getFont().deriveFont(jCheckBox13.getFont().getSize()+6f));
+        jCheckBox13.setText(bundle.getString("CIUIPanel.jCheckBox13.text")); 
+        jPanel10.add(jCheckBox13);
+
+        jTextField14.setFont(jTextField14.getFont().deriveFont(jTextField14.getFont().getSize()+6f));
+        jTextField14.setText(bundle.getString("CIUIPanel.jTextField14.text")); 
+        jTextField14.setPreferredSize(new java.awt.Dimension(365, 29));
+        jPanel10.add(jTextField14);
+
+        jButton1.setFont(jButton1.getFont().deriveFont(jButton1.getFont().getSize()+6f));
+        jButton1.setText(bundle.getString("CIUIPanel.jButton1.text")); 
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jPanel10.add(jButton1);
+
+        jPanel9.add(jPanel10);
+        jPanel10.setBounds(30, 60, 900, 40);
+
+        jPanel11.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox14.setFont(jCheckBox14.getFont().deriveFont(jCheckBox14.getFont().getSize()+6f));
+        jCheckBox14.setText(bundle.getString("CIUIPanel.jCheckBox14.text")); 
+        jPanel11.add(jCheckBox14);
+
+        jTextField13.setFont(jTextField13.getFont().deriveFont(jTextField13.getFont().getSize()+6f));
+        jTextField13.setText(bundle.getString("CIUIPanel.jTextField13.text")); 
+        jTextField13.setPreferredSize(new java.awt.Dimension(365, 29));
+        jPanel11.add(jTextField13);
+
+        jButton2.setFont(jButton2.getFont().deriveFont(jButton2.getFont().getSize()+6f));
+        jButton2.setText(bundle.getString("CIUIPanel.jButton2.text")); 
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
+        jPanel11.add(jButton2);
+
+        jPanel9.add(jPanel11);
+        jPanel11.setBounds(30, 100, 900, 40);
+
+        jPanel12.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox15.setFont(jCheckBox15.getFont().deriveFont(jCheckBox15.getFont().getSize()+6f));
+        jCheckBox15.setForeground(new java.awt.Color(0, 51, 255));
+        jCheckBox15.setText(bundle.getString("CIUIPanel.jCheckBox15.text")); 
+        jPanel12.add(jCheckBox15);
+
+        jPanel9.add(jPanel12);
+        jPanel12.setBounds(30, 350, 940, 40);
+
+        jPanel13.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox16.setFont(jCheckBox16.getFont().deriveFont(jCheckBox16.getFont().getSize()+6f));
+        jCheckBox16.setText(bundle.getString("CIUIPanel.jCheckBox16.text")); 
+        jPanel13.add(jCheckBox16);
+
+        jLabel25.setFont(jLabel25.getFont().deriveFont(jLabel25.getFont().getSize()+6f));
+        jLabel25.setText(bundle.getString("CIUIPanel.jLabel25.text")); 
+        jPanel13.add(jLabel25);
+
+        jPanel9.add(jPanel13);
+        jPanel13.setBounds(30, 140, 770, 40);
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane1.setViewportView(jTextArea1);
+
+        jPanel9.add(jScrollPane1);
+        jScrollPane1.setBounds(50, 181, 730, 120);
+
+        jButton3.setFont(jButton3.getFont().deriveFont(jButton3.getFont().getSize()+12f));
+        jButton3.setText(bundle.getString("CIUIPanel.jButton3.text")); 
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+        jPanel9.add(jButton3);
+        jButton3.setBounds(60, 450, 260, 60);
+
+        jButton4.setFont(jButton4.getFont().deriveFont(jButton4.getFont().getSize()+12f));
+        jButton4.setText(bundle.getString("CIUIPanel.jButton4.text")); 
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+        jPanel9.add(jButton4);
+        jButton4.setBounds(360, 450, 140, 60);
+
+        jButton5.setFont(jButton5.getFont().deriveFont(jButton5.getFont().getSize()+12f));
+        jButton5.setText(bundle.getString("CIUIPanel.jButton5.text")); 
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
+        jPanel9.add(jButton5);
+        jButton5.setBounds(540, 450, 240, 60);
+
+        jLabel24.setFont(jLabel24.getFont().deriveFont(jLabel24.getFont().getSize()+2f));
+        jLabel24.setForeground(new java.awt.Color(204, 0, 0));
+        jLabel24.setText(bundle.getString("CIUIPanel.jLabel24.text")); 
+        jPanel9.add(jLabel24);
+        jLabel24.setBounds(60, 410, 920, 20);
+
+        jPanel14.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+
+        jCheckBox17.setFont(jCheckBox17.getFont().deriveFont(jCheckBox17.getFont().getSize()+6f));
+        jCheckBox17.setText(bundle.getString("CIUIPanel.jCheckBox17.text")); 
+        jPanel14.add(jCheckBox17);
+
+        jTextField15.setFont(jTextField15.getFont().deriveFont(jTextField15.getFont().getSize()+6f));
+        jTextField15.setText(bundle.getString("CIUIPanel.jTextField15.text")); 
+        jTextField15.setPreferredSize(new java.awt.Dimension(365, 29));
+        jPanel14.add(jTextField15);
+
+        jPanel9.add(jPanel14);
+        jPanel14.setBounds(30, 310, 900, 40);
+
+        jTabbedPane4.addTab(bundle.getString("CIUIPanel.jPanel9.TabConstraints.tabTitle"), jPanel9); 
+
         miscPanel.setFont(miscPanel.getFont());
         miscPanel.setLayout(null);
 
@@ -1863,8 +2245,17 @@ void setDataAreaItem(){
         instrument.updateLayoutAll=true;
         Iterator it=instrument.defaultUI.keySet().iterator();
         for(;it.hasNext();){
-            String id=(String)it.next();
-            if(id.equalsIgnoreCase("frame") || id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1  || id.toLowerCase().indexOf("textlabel")!=-1 || id.toLowerCase().indexOf("textfield")!=-1 || id.toLowerCase().indexOf("combobox")!=-1 || id.toLowerCase().indexOf("checkbox")!=-1 || id.toLowerCase().indexOf("panel")!=-1){
+          String id=(String)it.next();
+          if(id.equalsIgnoreCase("frame") && instrument.defaultUI.get(id)!=null){
+            String info[]=ylib.csvlinetoarray((String)instrument.defaultUI.get(id));
+            String info2[]=info;
+            if(instrument.currentUI.get(id)!=null) info2=ylib.csvlinetoarray((String)instrument.currentUI.get(id));
+            for(int i=0;i<18;i++) info2[i]=info[i];
+            instrument.currentUI.put(id, ylib.arrayToCsvLine(info2));
+            if(instrument.editUI.get(id)!=null) info2=ylib.csvlinetoarray((String)instrument.editUI.get(id));
+            for(int i=0;i<18;i++) info2[i]=info[i];
+            instrument.editUI.put(id, ylib.arrayToCsvLine(info2));
+          } else if(id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1  || id.toLowerCase().indexOf("textlabel")!=-1 || id.toLowerCase().indexOf("textfield")!=-1 || id.toLowerCase().indexOf("combobox")!=-1 || id.toLowerCase().indexOf("checkbox")!=-1 || id.toLowerCase().indexOf("panel")!=-1){
                 instrument.currentUI.put(id, (String)instrument.defaultUI.get(id));
                 instrument.editUI.put(id, (String)instrument.defaultUI.get(id));
             }
@@ -1937,7 +2328,13 @@ void setDataAreaItem(){
         Iterator it=instrument.currentUI.keySet().iterator();
         for(;it.hasNext();){
             String id=(String)it.next();
-            if(id.equalsIgnoreCase("frame") || id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1  || id.toLowerCase().indexOf("textlabel")!=-1 || id.toLowerCase().indexOf("textfield")!=-1 || id.toLowerCase().indexOf("combobox")!=-1 || id.toLowerCase().indexOf("checkbox")!=-1 || id.toLowerCase().indexOf("panel")!=-1){
+            if(id.equalsIgnoreCase("frame") && instrument.currentUI.get(id)!=null){
+            String info[]=ylib.csvlinetoarray((String)instrument.currentUI.get(id));
+            String info2[]=info;
+            if(instrument.editUI.get(id)!=null) info2=ylib.csvlinetoarray((String)instrument.editUI.get(id));
+            for(int i=0;i<18;i++) info2[i]=info[i];
+            instrument.editUI.put(id, ylib.arrayToCsvLine(info2));
+            } else if(id.toLowerCase().indexOf("area")!=-1 || id.toLowerCase().indexOf("button")!=-1  || id.toLowerCase().indexOf("textlabel")!=-1 || id.toLowerCase().indexOf("textfield")!=-1 || id.toLowerCase().indexOf("combobox")!=-1 || id.toLowerCase().indexOf("checkbox")!=-1 || id.toLowerCase().indexOf("panel")!=-1){
                 instrument.editUI.put(id, (String)instrument.currentUI.get(id));
             }
         }
@@ -2056,6 +2453,7 @@ void showAreaItem(String sel){
     jTextField9.setText((instrument.isNumeric(info[4])? String.valueOf(Double.parseDouble(info[4])*100.0):"0.0"));
     jTextField10.setText((instrument.isNumeric(info[5])? String.valueOf(Double.parseDouble(info[5])*100.0):"0.0"));
     jTextField61.setText((instrument.isNumeric(info[6])? String.valueOf(Double.parseDouble(info[6])*100.0):"0.0"));
+
     instrument.skipUICBBChanged=true;
     jComboBox53.setSelectedItem(info[8]);
     instrument.skipUICBBChanged=false;
@@ -2773,6 +3171,81 @@ void updateButtonName(){
     private void jCheckBox12ActionPerformed(java.awt.event.ActionEvent evt) {
       updateFrameItem();
     }
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {
+
+          if(instrument.editUI.get("frame")!=null){
+            String info[]=ylib.csvlinetoarray((String)instrument.editUI.get("frame"));
+            if(info.length>18) info[18]=(jCheckBox13.isSelected()? "s":"e");
+            if(info.length>19) info[19]=jTextField14.getText().trim();
+            if(info.length>20) info[20]=(jCheckBox14.isSelected()? "s":"e");
+            if(info.length>21) info[21]=jTextField13.getText().trim();
+            if(info.length>22) info[22]=(jCheckBox16.isSelected()? "s":"e");
+            if(info.length>23) info[23]=YB642E.encode(jTextArea1.getText().trim());
+            if(info.length>24) info[24]=(jCheckBox17.isSelected()? "s":"e");
+            if(info.length>25) info[25]=jTextField15.getText().trim();
+            if(info.length>26) info[26]=(jCheckBox15.isSelected()? "y":"n");
+            instrument.editUI.put("frame", ylib.arrayToCsvLine(info));
+            instrument.currentUI.put("frame", ylib.arrayToCsvLine(info));
+        }
+        String msg=instrument.chkCopyrightNotices();
+        jLabel24.setText((msg.length()>0? msg:(instrument.bundle2.getString("CIUIPanel.jLabel24.text")+": OK")));
+        instrument.updateLogoUI();
+    }
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
+        String file=jTextField14.getText();
+        JFileChooser chooser = new JFileChooser(file);
+        chooser.setDialogTitle("選擇檔案");
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        int returnVal = chooser.showDialog(this,"OK");
+        if(returnVal == JFileChooser.APPROVE_OPTION) {
+            file=chooser.getSelectedFile().getAbsolutePath();
+            jTextField14.setText(file);
+        }
+    }
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {
+        String file=jTextField13.getText();
+        JFileChooser chooser = new JFileChooser(file);
+        chooser.setDialogTitle("選擇檔案");
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        int returnVal = chooser.showDialog(this,"OK");
+        if(returnVal == JFileChooser.APPROVE_OPTION) {
+            file=chooser.getSelectedFile().getAbsolutePath();
+            jTextField13.setText(file);
+        }
+    }
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {
+       String id="frame";
+        if(instrument.defaultUI.get(id)!=null){
+            String info[]=ylib.csvlinetoarray((String)instrument.defaultUI.get(id));
+            String info2[]=info;
+            if(instrument.currentUI.get(id)!=null) info2=ylib.csvlinetoarray((String)instrument.currentUI.get(id));
+            for(int i=18;i<27;i++) info2[i]=info[i];
+            instrument.currentUI.put(id, ylib.arrayToCsvLine(info2));
+            if(instrument.editUI.get(id)!=null) info2=ylib.csvlinetoarray((String)instrument.editUI.get(id));
+            for(int i=18;i<27;i++) info2[i]=info[i];
+            instrument.editUI.put(id, ylib.arrayToCsvLine(info2));
+            setLogoItem();
+          instrument.updateLogoUI();
+        }
+    }
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {
+       String id="frame";
+       if(instrument.currentUI.get(id)!=null){
+            String info[]=ylib.csvlinetoarray((String)instrument.currentUI.get(id));
+            String info2[]=info;
+            if(instrument.editUI.get(id)!=null) info2=ylib.csvlinetoarray((String)instrument.editUI.get(id));
+            for(int i=18;i<27;i++) info2[i]=info[i];
+            instrument.editUI.put(id, ylib.arrayToCsvLine(info2));
+          setLogoItem();
+        }
+    }
 void showMenuItem(String sel){
     if(instrument.editUI.get(sel)==null) return;
     String info[]=ylib.csvlinetoarray((String)instrument.editUI.get(sel));
@@ -2964,18 +3437,28 @@ void updateDataAreaType(){
     javax.swing.JComboBox chartGroupCB;
     javax.swing.JPanel dataPanel;
     javax.swing.JCheckBox inPercent;
+    private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton17;
     private javax.swing.JButton jButton18;
+    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton23;
     private javax.swing.JButton jButton24;
     private javax.swing.JButton jButton25;
     private javax.swing.JButton jButton28;
     private javax.swing.JButton jButton29;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton57;
     javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JCheckBox jCheckBox10;
     private javax.swing.JCheckBox jCheckBox11;
     private javax.swing.JCheckBox jCheckBox12;
+    private javax.swing.JCheckBox jCheckBox13;
+    private javax.swing.JCheckBox jCheckBox14;
+    public javax.swing.JCheckBox jCheckBox15;
+    private javax.swing.JCheckBox jCheckBox16;
+    private javax.swing.JCheckBox jCheckBox17;
     javax.swing.JCheckBox jCheckBox2;
     javax.swing.JCheckBox jCheckBox3;
     javax.swing.JCheckBox jCheckBox4;
@@ -3024,6 +3507,9 @@ void updateDataAreaType(){
     private javax.swing.JLabel jLabel20;
     private javax.swing.JLabel jLabel21;
     javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    public javax.swing.JLabel jLabel24;
+    private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel30;
     private javax.swing.JLabel jLabel31;
@@ -3059,8 +3545,13 @@ void updateDataAreaType(){
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabel97;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel10;
+    private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel110;
+    private javax.swing.JPanel jPanel12;
     private javax.swing.JPanel jPanel123;
+    private javax.swing.JPanel jPanel13;
+    private javax.swing.JPanel jPanel14;
     javax.swing.JPanel jPanel140;
     private javax.swing.JPanel jPanel141;
     private javax.swing.JPanel jPanel143;
@@ -3082,12 +3573,18 @@ void updateDataAreaType(){
     private javax.swing.JPanel jPanel6;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
+    private javax.swing.JPanel jPanel9;
+    private javax.swing.JScrollPane jScrollPane1;
     public javax.swing.JTabbedPane jTabbedPane1;
     javax.swing.JTabbedPane jTabbedPane4;
+    private javax.swing.JTextArea jTextArea1;
     javax.swing.JTextField jTextField1;
     javax.swing.JTextField jTextField10;
     javax.swing.JTextField jTextField11;
     public javax.swing.JTextField jTextField12;
+    private javax.swing.JTextField jTextField13;
+    private javax.swing.JTextField jTextField14;
+    private javax.swing.JTextField jTextField15;
     javax.swing.JTextField jTextField2;
     javax.swing.JTextField jTextField22;
     javax.swing.JTextField jTextField3;

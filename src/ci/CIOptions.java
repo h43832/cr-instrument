@@ -104,7 +104,8 @@ public class CIOptions extends javax.swing.JDialog {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {
         instrument.props.setProperty("auto-upddate", (jCheckBox2.isSelected()? "Y":"N"));
-        instrument.wn.w.setHVar("run_config",(jCheckBox1.isSelected()? "false":"true"),instrument.wn.getPid(instrument,instrument.format3.format(new Date())+"wsn"));
+        instrument.wn.w.setHVar("run_config",(jCheckBox1.isSelected()? "true":"false"),instrument.wn.getPid(instrument,instrument.format3.format(new Date())+"wsn"));
+
         setVisible(false);
         if(instrument.wn.w.chkValue(instrument.props.getProperty("auto-upddate")) && instrument.wn.w.upd==null) {
           if (instrument.wn.chkProps("run_my_ap_only")) {
