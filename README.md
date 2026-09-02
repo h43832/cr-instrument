@@ -12,7 +12,7 @@ cr_Instrument is an automated system without coding..
 
 # Download cr-Instrument
   Linux OS: <a href="https://drive.google.com/drive/folders/0B__KtdLXDfLKMDNHazdydlFZTnM?usp=sharing" targer="_blank">click here to download</a><br>
-  Windows OS: <a href="https://drive.google.com/drive/folders/0B__KtdLXDfLKMDNHazdydlFZTnM?usp=sharing" targer="_blank">click here to download</a><br>
+  Windows OS: <a href="https://drive.google.com/file/d/1FoArr2rpE7cBXeCIocUa1jK_H_2XDXu9/view?usp=sharing" targer="_blank">click here to download</a><br>
   
 # Groups
   Under Construction.
