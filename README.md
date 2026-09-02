@@ -1,5 +1,5 @@
 # ![](http://cloud-rain.com/web/cr_instrument2_t.gif)cr-Instrument
-cr_Instrument is an automated system without coding.. 
+cr_Instrument is an automated system without coding.
 
 1.Users can establish an automatic system without coding.<br>
 2.Users can use AI technology without coding.<br>
