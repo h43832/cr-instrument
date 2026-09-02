@@ -3,7 +3,7 @@ cr_Instrument is an automated system without coding.
 
 1.Users can establish an automatic system without coding.<br>
 2.Users can use AI technology without coding.<br>
-3.Users can create their own user interface without coding.<br>
+3.Users can create their own GUI (Graphical user interface) without coding.<br>
 4.Users can draw trend chart and control chart without coding.<br>
 5.Users can build distributed networks without coding.<br>
 6.Warning functions including Email, SMS and voice.<br>
