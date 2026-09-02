@@ -17,5 +17,5 @@ cr_Instrument is an automated system without coding..
 # Groups
   Under Construction.
   
-# For Developers
+# For Java Developers
 Please see <a href="https://www.cloud-rain.com/web/ci/doc/ci_javaguide.htm" targer="_blank">The java developers guide</a>.<br>
