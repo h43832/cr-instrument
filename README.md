@@ -1,7 +1,7 @@
 # ![](http://cloud-rain.com/web/cr_instrument2_t.gif)cr-Instrument
 cr_Instrument is an automated system without coding.. 
 
-1.Users can establish an automatic instrument monitoring and controlling system without coding.<br>
+1.Users can establish an automatic system without coding.<br>
 2.Users can use AI technology without coding.<br>
 3.Users can create their own user interface without coding.<br>
 4.Users can draw trend chart and control chart without coding.<br>
