@@ -18,4 +18,4 @@ cr_Instrument is an automated system without coding..
   Under Construction.
   
 # For Developers
-Please see the java developers guide at https://www.cloud-rain.com/web/ci/doc/ci_javaguide.htm
+Please see <a href="https://www.cloud-rain.com/web/ci/doc/ci_javaguide.htm" targer="_blank">The java developers guide</a>.<br>
